@@ -4,7 +4,7 @@ name: 一般任務 (Task)
 about: 非功能性工作（設定、文件、重構等）
 title: "[Task] 建立資料庫 schema"
 labels: task
-------------
+---
 
 ## 📌 任務內容
 

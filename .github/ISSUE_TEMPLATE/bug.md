@@ -4,7 +4,7 @@ name: 錯誤回報 (Bug)
 about: 回報系統錯誤
 title: "[Bug] API 回傳錯誤"
 labels: bug
------------
+---
 
 ## 🐞 問題描述
 

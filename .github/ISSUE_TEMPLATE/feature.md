@@ -5,7 +5,7 @@ about: 新增一個系統功能（對應 F1–F16）
 title: "[Feature] F3 畢業資格審核"
 labels: feature
 assignees: ""
--------------
+---
 
 ## 🎯 功能說明
 
