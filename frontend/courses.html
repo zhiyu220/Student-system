@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課程選課 — 校園智慧系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中...</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <h2>課程選課</h2>
+      <p>查詢課程並進行選課操作</p>
+    </div>
+    <div class="mock-notice" id="mock-notice">⚠ 目前使用展示資料（後端 API 未連線）</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">可選課程</div>
+        <input class="form-input" id="search" placeholder="搜尋課程名稱或代碼..." oninput="filterCourses()" style="width:220px;padding:6px 10px">
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead><tr><th>課程代碼</th><th>課程名稱</th><th>學分</th><th>教授</th><th>學期</th><th>操作</th></tr></thead>
+          <tbody id="courses-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/courses.js"></script>
+</body>
+</html>

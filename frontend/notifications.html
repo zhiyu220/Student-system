@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通知中心 — 校園智慧系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中...</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <h2>通知中心</h2>
+      <p>系統自動發送的通知</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">所有通知</div>
+        <div class="card-action" onclick="markAllRead()">全部標為已讀</div>
+      </div>
+      <div class="card-body" id="notif-list"></div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/notifications.js"></script>
+</body>
+</html>
