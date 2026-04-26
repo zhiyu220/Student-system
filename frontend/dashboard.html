@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>儀表板 — 校園智慧系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中...</span>
+    </div>
+  </header>
+  <div class="content">
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">已選課程</div>
+        <div class="stat-value">3<span class="stat-unit">門</span></div>
+        <div class="stat-sub">本學期 9 學分</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">已修學分</div>
+        <div class="stat-value">87<span class="stat-unit">學分</span></div>
+        <div class="stat-sub">畢業需 128 學分</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-label">未讀通知</div>
+        <div class="stat-value">2<span class="stat-unit">則</span></div>
+        <div class="stat-sub">有新通知待確認</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">活動報名</div>
+        <div class="stat-value">1<span class="stat-unit">個</span></div>
+        <div class="stat-sub">即將到來的活動</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">本學期課程</div>
+          <a class="card-action" href="courses.html">查看全部</a>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead><tr><th>課程名稱</th><th>學分</th><th>教授</th><th>狀態</th></tr></thead>
+            <tbody id="dash-courses"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">最新通知</div>
+          <a class="card-action" href="notifications.html">查看全部</a>
+        </div>
+        <div class="card-body" id="dash-notifs">
+          <div class="notif-item">
+            <div class="notif-dot"></div>
+            <div><div class="notif-title">選課成功確認</div><div class="notif-body">資料結構 CS201 已完成選課</div></div>
+            <div class="notif-time">10分鐘前</div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot"></div>
+            <div><div class="notif-title">活動報名開放</div><div class="notif-body">2025 校園徵才博覽會開放報名</div></div>
+            <div class="notif-time">1小時前</div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-dot read"></div>
+            <div><div class="notif-title">工讀職缺通知</div><div class="notif-body">圖書館助理職缺已開放申請</div></div>
+            <div class="notif-time">昨天</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

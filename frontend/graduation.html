@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>畢業審核 — 校園智慧系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中...</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <h2>畢業審核</h2>
+      <p>確認各類學分是否符合系所畢業門檻</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">學分類別進度</div></div>
+        <div class="card-body">
+          <table class="table">
+            <thead><tr><th>類別</th><th>已修</th><th>需求</th><th>進度</th><th>狀態</th></tr></thead>
+            <tbody id="grad-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">畢業狀態總覽</div></div>
+        <div class="card-body" style="padding:20px">
+          <div style="margin-bottom:20px">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">總學分進度</div>
+            <div style="font-size:28px;font-weight:700;margin-bottom:8px">
+              87 <span style="font-size:14px;color:var(--text-muted);font-weight:400">/ 128 學分</span>
+            </div>
+            <div class="progress-wrap"><div class="progress-bar" style="width:68%"></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span>預計畢業學期</span><span class="badge badge-blue">2026-1</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span>審核狀態</span><span class="badge badge-amber">審核中</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+              <span>缺少學分</span><span style="font-weight:600;color:var(--red)">必修 12 學分</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/graduation.js"></script>
+</body>
+</html>
