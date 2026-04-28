@@ -15,15 +15,12 @@ class Settings(BaseSettings):
         "postgresql://user:password@localhost:5432/smart_campus"
     )
 
-    CORS_ORIGINS: List[str] = (
-        # 優先讀環境變數設定的完整清單
-        eval(os.getenv("CORS_ORIGINS", "[]")) if os.getenv("CORS_ORIGINS") else [
-            "http://localhost:3000",
-            "http://localhost:8000",
-            # Zeabur 部署後的前端 URL
-            *([url.strip() for url in os.getenv("FRONTEND_URL", "").split(",") if url.strip()]),
-        ]
-    )
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://student-system-frontend.zeabur.app",
+        "https://student-system.zeabur.app",
+    ]
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "change-this-in-production")
 
