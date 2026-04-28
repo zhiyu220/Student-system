@@ -17,8 +17,9 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
-        # Zeabur 部署後的前端 URL，從環境變數注入
-        *([os.getenv("FRONTEND_URL")] if os.getenv("FRONTEND_URL") else []),
+        "http://localhost:8000",
+        "https://student-system-frontend.zeabur.app",
+        "https://student-system.zeabur.app",
     ]
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "change-this-in-production")
