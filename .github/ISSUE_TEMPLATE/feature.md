@@ -15,10 +15,6 @@ assignees: ""
 
 （例如：Academic Management）
 
-## 👤 使用者故事 (User Story)
-
-身為一個學生，我希望可以查看畢業條件，這樣我才能知道自己還缺什麼學分。
-
 ## ✅ 驗收條件 (Acceptance Criteria)
 
 * [ ] 顯示應修學分
