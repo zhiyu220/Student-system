@@ -1,5 +1,7 @@
 // ── API client（所有頁面共用，請勿修改）──
-const API_BASE = 'https://student-system.zeabur.app';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000' 
+  : 'https://student-system.zeabur.app';
 
 const api = {
   async get(path) {
