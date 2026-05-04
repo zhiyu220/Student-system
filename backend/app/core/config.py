@@ -6,6 +6,7 @@ import os
 
 class Settings(BaseSettings):
     APP_NAME: str = "Smart Campus System"
+    APP_VERSION: str = "0.1.1"
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
 
     # Zeabur 自動注入 PostgreSQL 連線資訊

@@ -15,7 +15,7 @@ from app.core.config import settings
 
 app = FastAPI(
     title="Smart Campus System API",
-    version="0.1.0",
+    version=settings.APP_VERSION,
     description="校園智慧系統 API",
 )
 
