@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import health, academic, notification, ai
+from app.api.routes import health, academic, notification, ai, events
 from app.core.config import settings
 
 app = FastAPI(
     title="Smart Campus System API",
-    version="0.1.0",
+    version= settings.App_VERSION,
     description="校園智慧系統 API",
 )
 
@@ -21,6 +21,7 @@ app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(academic.router, prefix="/api/academic", tags=["academic"])
 app.include_router(notification.router, prefix="/api/notification", tags=["notification"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+app.include_router(events.router, prefix="/api", tags=["events"])
 
 if __name__ == "__main__":
     import uvicorn
