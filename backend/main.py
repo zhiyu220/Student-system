@@ -12,6 +12,7 @@ from app.api.routes import (
     ai,
 )
 from app.core.config import settings
+from routers import course_history
 
 app = FastAPI(
     title="Smart Campus System API",
@@ -19,13 +20,17 @@ app = FastAPI(
     description="校園智慧系統 API",
 )
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+#課程歷史追蹤(sy)
+app.include_router(course_history.router)
 
 # 健康檢查
 app.include_router(health.router, prefix="/api", tags=["health"])
