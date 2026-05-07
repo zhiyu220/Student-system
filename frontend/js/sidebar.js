@@ -3,6 +3,7 @@ function initLayout(activeId, title) {
   const nav = [
     { id: 'dashboard',     label: '儀表板',   icon: '⊞', href: 'dashboard.html',     section: '主選單' },
     { id: 'courses',       label: '課程選課', icon: '📚', href: 'courses.html' },
+    { id: 'history',       label: '修課紀錄', icon: '📜', href: 'course_history02.html'},
     { id: 'graduation',    label: '畢業審核', icon: '🎓', href: 'graduation.html' },
     { id: 'events',        label: '活動資訊', icon: '📅', href: 'events.html',         section: '校園生活' },
     { id: 'jobs',          label: '工讀資訊', icon: '💼', href: 'jobs.html' },
