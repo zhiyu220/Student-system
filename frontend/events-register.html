@@ -6,6 +6,7 @@
 <title>活動報名 | Smart Campus System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="css/shared.css">
 <style>
   .register-shell { max-width: 860px; margin: 0 auto; }
@@ -87,9 +88,13 @@
 </style>
 </head>
 <body>
+<div class="layout">
 <aside class="sidebar"></aside>
 <div class="main">
   <header class="topbar">
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+      ☰
+    </button>
     <div class="topbar-title"></div>
     <div class="api-status">
       <div class="status-dot" id="status-dot"></div>

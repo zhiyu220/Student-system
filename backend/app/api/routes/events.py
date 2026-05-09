@@ -78,17 +78,31 @@ async def _get_current_user(
     users_table,
     student_id: str | None = None,
 ):
-    stmt = select(users_table)
     if student_id:
-        stmt = stmt.where(users_table.c.student_id == student_id)
-    else:
-        stmt = stmt.where(users_table.c.role == "student").order_by(users_table.c.student_id.asc()).limit(1)
+        by_student_id_stmt = select(users_table).where(users_table.c.student_id == student_id).limit(1)
+        by_student_id_result = await session.execute(by_student_id_stmt)
+        by_student_id_user = by_student_id_result.mappings().first()
+        if by_student_id_user:
+            return by_student_id_user
 
-    result = await session.execute(stmt)
-    user = result.mappings().first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Student user not found")
-    return user
+    student_stmt = (
+        select(users_table)
+        .where(users_table.c.role == "student")
+        .order_by(users_table.c.student_id.asc())
+        .limit(1)
+    )
+    student_result = await session.execute(student_stmt)
+    student_user = student_result.mappings().first()
+    if student_user:
+        return student_user
+
+    fallback_stmt = select(users_table).order_by(users_table.c.created_at.asc()).limit(1)
+    fallback_result = await session.execute(fallback_stmt)
+    fallback_user = fallback_result.mappings().first()
+    if fallback_user:
+        return fallback_user
+
+    raise HTTPException(status_code=404, detail="User not found")
 
 
 def _build_class_info(user: Any) -> str:
