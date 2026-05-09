@@ -6,6 +6,7 @@
 <title>活動心得 | Smart Campus System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="css/shared.css">
 <style>
   .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
@@ -132,9 +133,13 @@
 </style>
 </head>
 <body>
+<div class="layout">
 <aside class="sidebar"></aside>
 <div class="main">
   <header class="topbar">
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+      ☰
+    </button>
     <div class="topbar-title"></div>
     <div class="api-status">
       <div class="status-dot" id="status-dot"></div>
@@ -259,6 +264,7 @@
       <div id="logs-container"></div>
     </section>
   </div>
+</div>
 </div>
 <script src="js/api.js"></script>
 <script src="js/sidebar.js"></script>
