@@ -27,17 +27,135 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; transition: all 0.15s; font-size: 13.5px; font-weight: 400; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
 .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
 .nav-item.active { background: rgba(79,110,247,0.18); color: #fff; font-weight: 500; }
-.nav-item .icon { width: 18px; text-align: center; font-size: 15px; flex-shrink: 0; }
+.nav-item .icon,
+.group-toggle .icon {
+  font-size: 15px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
 .user-info { display: flex; align-items: center; gap: 10px; }
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
 .user-name { font-size: 13px; color: #fff; font-weight: 500; }
 .user-role { font-size: 11px; color: var(--sidebar-text); }
 
+/* 群組 toggle 按鈕（樣式與 nav-item 一致） */
+.group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13.5px;
+  font-weight: 400;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.group-toggle:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.group-toggle.open { color: #fff; }
+
+/* 展開箭頭 */
+.group-toggle .toggle-icon {
+  margin-left: auto;
+  font-size: 13px;
+  transition: transform 0.2s;
+  opacity: 0.5;
+}
+.group-toggle.open .toggle-icon { transform: rotate(180deg); opacity: 1; }
+
+/* 子項目容器 */
+.sub-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 4px;
+}
+
+/* 子項目：縮排 + 左側細線 */
+.nav-item.sub-item {
+  padding-left: 28px;
+  font-size: 13px;
+  position: relative;
+}
+.nav-item.sub-item::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(168,168,192,0.4);
+}
+.nav-item.sub-item.active::before { background: #4f6ef7; }
+
+/* 通知 badge */
+.nav-badge {
+  margin-left: auto;
+  background: rgba(79,110,247,0.25);
+  color: #8fa4fb;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 99px;
+  line-height: 18px;
+}
+
+/* sidebar 收合效果 */
+/* 主體 layout */
+.layout {
+  display: contents;
+}
+.layout.sidebar-collapsed {
+  display: contents;
+}
+
+/* sidebar 收合時隱藏內容但保留動畫 */
+.sidebar {
+  width: 220px;
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+.layout.sidebar-collapsed .sidebar {
+  width: 0;
+}
+
+/* 收合時調整 main 的 margin */
+.layout.sidebar-collapsed .main {
+  margin-left: 0;
+}
+
+/* topbar 漢堡按鈕 */
+.topbar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.topbar-toggle:hover { background: rgba(255,255,255,0.06); color: #000000; }
+
 /* Layout */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
-.topbar { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 5; }
-.topbar-title { font-size: 16px; font-weight: 700; }
+.topbar { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 0 32px; height: 56px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 5; }
+.topbar-title { font-size: 16px; font-weight: 700; flex: 1; }
 .api-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: var(--mono); }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
 .status-dot.ok { background: var(--green); }
