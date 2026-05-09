@@ -10,6 +10,12 @@ const NAV_SECTIONS = [
         files: ["dashboard.html"],
         title: "儀表板",
       },
+    ],
+  },
+
+  {
+    section: "學業管理",
+    items: [
       {
         id: "courses",
         label: "課程選課",
@@ -17,6 +23,14 @@ const NAV_SECTIONS = [
         href: "courses.html",
         files: ["courses.html"],
         title: "課程選課",
+      },
+      {
+        id: "course-history",
+        label: "修課紀錄",
+        icon: "📜",
+        href: "course_history02.html",
+        files: ["course_history02.html"],
+        title: "修課紀錄",
       },
       {
         id: "graduation",
@@ -28,10 +42,10 @@ const NAV_SECTIONS = [
       },
     ],
   },
+
   {
     section: "校園生活",
     items: [
-      // 活動管理：母分類，底下有子頁
       {
         id: "events",
         label: "活動管理",
@@ -73,6 +87,7 @@ const NAV_SECTIONS = [
       },
     ],
   },
+
   {
     section: "系統",
     items: [
@@ -83,7 +98,7 @@ const NAV_SECTIONS = [
         href: "notifications.html",
         files: ["notifications.html"],
         title: "通知中心",
-        badge: null, // 可動態設定數字，如 3
+        badge: null,
       },
     ],
   },
