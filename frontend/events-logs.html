@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活動心得 | Smart Campus System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab {
+    padding: 12px 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .hero {
+    background: linear-gradient(135deg, #102542 0%, #1d4f7c 55%, #f59e0b 155%);
+    border-radius: 18px;
+    color: #fff;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .hero h2 { font-size: 28px; margin-bottom: 8px; }
+  .hero p { color: rgba(255,255,255,0.82); line-height: 1.7; max-width: 760px; }
+  .stats-card, .panel-card, .log-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+  .stats-header {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+  }
+  .stats-body { padding: 20px; display: none; }
+  .stats-body.expanded { display: block; }
+  .toggle-arrow { transition: transform 0.18s ease; }
+  .toggle-arrow.expanded { transform: rotate(180deg); }
+  .progress-item { margin-bottom: 18px; }
+  .progress-label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+  .progress-track { height: 10px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .progress-fill.complete { background: var(--green); }
+  .progress-fill.warning { background: var(--amber); }
+  .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+  .stat-box {
+    border: 1px solid var(--border);
+    background: #fafaf8;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .stat-box-value { font-size: 28px; font-weight: 700; color: #102542; margin-bottom: 4px; }
+  .rating-box { margin-top: 16px; border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: #fff8eb; display: none; }
+  .events-list { display: flex; flex-direction: column; gap: 12px; }
+  .event-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    cursor: pointer;
+    transition: border-color 0.16s ease, transform 0.16s ease;
+  }
+  .event-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .event-item-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #102542; }
+  .event-item-meta { color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+  .status-badge { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .status-done { background: #dcfce7; color: #166534; }
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .form-card { padding: 22px; margin-top: 18px; }
+  .form-header { margin-bottom: 20px; }
+  .form-header h3 { font-size: 20px; margin-bottom: 6px; }
+  .form-header p { color: var(--text-muted); line-height: 1.7; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: var(--font);
+  }
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  .form-textarea { min-height: 140px; resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .rating-group { display: flex; gap: 8px; }
+  .star { font-size: 26px; cursor: pointer; color: #cbd5e1; }
+  .star.active { color: #f59e0b; }
+  .messages { margin-bottom: 16px; }
+  .message {
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: none;
+  }
+  .message.success { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+  .message.error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+  .log-card { padding: 18px; margin-bottom: 14px; }
+  .log-card-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #102542; }
+  .log-entry {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .log-entry:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .empty-state, .loading-state, .error-state {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .empty-state p, .loading-state p, .error-state p { color: var(--text-muted); line-height: 1.7; }
+  @media (max-width: 760px) {
+    .main { margin-left: 0; }
+    .content { padding: 18px; }
+    .form-row, .stat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中</span>
+    </div>
+  </header>
+  <div class="content">
+    <section class="hero">
+      <h2>活動心得與時數登錄</h2>
+      <p>活動結束後，在這裡提交心得內容、填寫認列時數，並查看你過去已送出的紀錄與評分。</p>
+    </section>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="fill-log">填寫心得</div>
+      <div class="tab" data-tab="view-logs">已送出紀錄</div>
+    </div>
+
+    <section id="fill-log" class="tab-content active">
+      <div class="stats-card">
+        <div class="stats-header" onclick="toggleStats()">
+          <div>
+            <div style="font-size:18px; font-weight:700;">服務時數統計</div>
+            <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">活動與課程時數各需累積 18 小時</div>
+          </div>
+          <div class="toggle-arrow expanded" id="stats-toggle">⌃</div>
+        </div>
+        <div class="stats-body expanded" id="stats-content">
+          <div class="progress-item">
+            <div class="progress-label">
+              <span>活動時數</span>
+              <span><span id="event-hours">0.0</span> / 18 小時</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="event-progress" style="width:0%;"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label">
+              <span>課程時數</span>
+              <span><span id="course-hours">0.0</span> / 18 小時</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="course-progress" style="width:0%;"></div></div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-box" id="event-stat-box">
+              <div class="stat-box-value" id="event-total">0.0</div>
+              <div>活動累積時數</div>
+              <div class="stat-box-sub">尚未達成</div>
+            </div>
+            <div class="stat-box" id="course-stat-box">
+              <div class="stat-box-value" id="course-total">0.0</div>
+              <div>課程累積時數</div>
+              <div class="stat-box-sub">尚未達成</div>
+            </div>
+          </div>
+          <div class="rating-box" id="rating-stats-container">
+            <div style="font-size:13px; font-weight:700; margin-bottom:8px;">平均活動評分</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="font-size:34px; font-weight:700; color:#f59e0b;" id="avg-rating">-</div>
+              <div>
+                <div id="avg-rating-count">尚無評分資料</div>
+                <div id="avg-rating-stars" style="margin-top:4px; color:#f59e0b;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="loading-fill" class="loading-state" style="display:none; margin-top:18px;">
+        <p>正在載入可填寫的活動...</p>
+      </div>
+      <div id="fill-empty" class="empty-state" style="display:none; margin-top:18px;">
+        <p>目前沒有已結束且可填寫心得的活動。</p>
+      </div>
+      <div id="events-fill-list" class="events-list" style="margin-top:18px;"></div>
+
+      <div id="form-section" style="display:none;">
+        <div class="panel-card form-card">
+          <div class="form-header">
+            <h3 id="form-event-title"></h3>
+            <p id="form-event-meta"></p>
+          </div>
+          <div class="messages">
+            <div id="success-message" class="message success"></div>
+            <div id="error-message" class="message error"></div>
+          </div>
+          <form id="log-form">
+            <div class="form-group">
+              <label class="form-label" for="content">心得內容</label>
+              <textarea id="content" class="form-textarea" placeholder="請描述你的參與收穫、學習內容或觀察。" required></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="service-hours">認列時數</label>
+                <input id="service-hours" class="form-input" type="number" min="0" step="0.5" value="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">活動評分</label>
+                <div class="rating-group" id="rating-group">
+                  <span class="star" data-score="1">★</span>
+                  <span class="star" data-score="2">★</span>
+                  <span class="star" data-score="3">★</span>
+                  <span class="star" data-score="4">★</span>
+                  <span class="star" data-score="5">★</span>
+                </div>
+              </div>
+            </div>
+            <div class="actions" style="display:flex; gap:12px;">
+              <button type="submit" class="btn btn-primary">送出心得</button>
+              <button type="button" class="btn btn-ghost" onclick="closeForm()">取消</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-logs" class="tab-content">
+      <div id="loading-logs" class="loading-state" style="display:none;">
+        <p>正在載入已送出紀錄...</p>
+      </div>
+      <div id="logs-empty" class="empty-state" style="display:none;">
+        <p>目前尚未送出任何心得。</p>
+      </div>
+      <div id="logs-container"></div>
+    </section>
+  </div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/events-logs.js"></script>
+</body>
+</html>
