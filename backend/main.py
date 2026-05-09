@@ -36,6 +36,9 @@ app.include_router(course_history.router)
 # 健康檢查
 app.include_router(health.router, prefix="/api", tags=["health"])
 
+# 學術課程相關
+app.include_router(academic.router, prefix="/api/academic", tags=["academic"])
+
 # 修課紀錄
 app.include_router(course_records.router, prefix="/api/course-records", tags=["course_records"])
 

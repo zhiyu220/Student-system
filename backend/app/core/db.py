@@ -64,6 +64,9 @@ def _reflect_required_tables(sync_connection) -> dict[str, Table]:
             "event_reflections",
             "departments",
             "users",
+            "courses",
+            "course_instructors",
+            "enrollments",
         ],
     )
 
@@ -73,6 +76,9 @@ def _reflect_required_tables(sync_connection) -> dict[str, Table]:
         "event_reflections": _find_table_by_name("event_reflections"),
         "departments": _find_table_by_name("departments"),
         "users": _find_table_by_name("users"),
+        "courses": _find_table_by_name("courses"),
+        "course_instructors": _find_table_by_name("course_instructors"),
+        "enrollments": _find_table_by_name("enrollments"),
     }
 
 
