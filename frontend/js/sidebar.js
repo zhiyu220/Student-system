@@ -267,10 +267,10 @@ function buildSidebarHTML(activeId, activeGroupId, appVersionLabel) {
     </nav>
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar">王</div>
+        <div class="user-avatar" id="user-avatar">王</div>
         <div>
-          <div class="user-name">王小明</div>
-          <div class="user-role">學號 S001 · 資工系</div>
+          <div class="user-name" id="user-name">王小明</div>
+          <div class="user-role" id="user-role">學號 S001 · 資工系</div>
         </div>
       </div>
     </div>`;
@@ -313,6 +313,20 @@ function initLayout(activeIdOrTitle, maybeTitle) {
 
   checkApiStatus();
   initSidebarToggle();
+}
+
+// ── 更新用戶資訊 ────────────────────────────────────────────────────────
+function updateUserInfo() {
+  const user = auth.getUser();
+  if (user) {
+    const avatar = document.getElementById('user-avatar');
+    const name = document.getElementById('user-name');
+    const role = document.getElementById('user-role');
+    
+    if (avatar) avatar.textContent = user.name.charAt(0);
+    if (name) name.textContent = user.name;
+    if (role) role.textContent = `學號 ${user.student_id} · ${user.department}`;
+  }
 }
 
 // ── API 狀態檢查 ───────────────────────────────────────────────────────

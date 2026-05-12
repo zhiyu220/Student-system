@@ -36,6 +36,9 @@ app.include_router(course_history.router)
 # 健康檢查
 app.include_router(health.router, prefix="/api", tags=["health"])
 
+# 登入登出（需要在其他路由之前）
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+
 # 修課紀錄
 app.include_router(course_records.router, prefix="/api/course-records", tags=["course_records"])
 
@@ -44,9 +47,6 @@ app.include_router(course_selection.router, prefix="/api/course-selection", tags
 
 # 畢業追蹤
 app.include_router(graduation.router, prefix="/api/graduation", tags=["graduation"])
-
-# 登入登出
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 
 # 通知系統
 app.include_router(notification.router, prefix="/api/notification", tags=["notification"])
@@ -59,7 +59,6 @@ app.include_router(events.router, prefix="/api/events", tags=["events"])
 
 # AI 相關 API
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
-app.include_router(events.router, prefix="/api", tags=["events"])
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入 — 校園智慧系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/shared.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input {
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: var(--font);
+      background: var(--card-bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper .form-input {
+      flex: 1;
+      padding-right: 40px;
+    }
+
+    .btn-show-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 6px;
+      transition: opacity 0.15s;
+      opacity: 0.6;
+    }
+
+    .btn-show-password:hover {
+      opacity: 1;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-login:hover {
+      background: #3d5ce6;
+      transform: translateY(-1px);
+    }
+
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .demo-hint {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #92400e;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #ccc;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <div class="login-title">校園智慧系統</div>
+        <div class="login-subtitle">Student Portal</div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">學號</label>
+          <input 
+            type="text" 
+            id="student-id-input" 
+            class="form-input" 
+            placeholder="S001"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">密碼</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="password-input" 
+              class="form-input" 
+              placeholder="••••••••"
+              required
+            >
+            <svg class="btn-show-password" id="toggle-password" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor: pointer; width: 24px; height: 24px; position: absolute; right: 12px; opacity: 0.6; transition: opacity 0.15s;" title="顯示密碼">
+              <path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle class="eye-pupil" cx="12" cy="12" r="3"></circle>
+            </svg>
+          </div>
+        </div>
+
+        <div class="error-message" id="error-msg"></div>
+
+        <button type="submit" class="btn-login" id="login-btn">登入</button>
+        <div class="loading" id="loading">
+          <span class="spinner"></span>登入中...
+        </div>
+      </form>
+
+      <div class="demo-hint">
+        💡 測試帳號<br>
+        學號: S001, 密碼: password123 (正常使用)<br>
+        學號: S002, 密碼: newuser123 (需改密碼)
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // 顯示/隱藏密碼
+    document.getElementById('toggle-password').addEventListener('click', (e) => {
+      e.preventDefault();
+      const passwordInput = document.getElementById('password-input');
+      const toggleBtn = document.getElementById('toggle-password');
+      const eyePath = toggleBtn.querySelector('.eye-open');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyePath.style.display = 'none';
+        // 顯示眼睛被劃掉的icon
+        const closedEye = `<path class="eye-closed" d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line>`;
+        toggleBtn.innerHTML = closedEye;
+      } else {
+        passwordInput.type = 'password';
+        const openEye = `<path class="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle class="eye-pupil" cx="12" cy="12" r="3"></circle>`;
+        toggleBtn.innerHTML = openEye;
+      }
+    });
+
+    // 登入表單處理
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const studentId = document.getElementById('student-id-input').value;
+      const password = document.getElementById('password-input').value;
+      const errorMsg = document.getElementById('error-msg');
+      const loadingEl = document.getElementById('loading');
+      const loginBtn = document.getElementById('login-btn');
+
+      // 清除錯誤訊息
+      errorMsg.classList.remove('show');
+      errorMsg.textContent = '';
+
+      // 禁用按鈕並顯示載入狀態
+      loginBtn.disabled = true;
+      loadingEl.classList.add('show');
+
+      try {
+        const success = await auth.login(studentId, password);
+        if (success) {
+          // 登入成功，檢查是否需要修改密碼
+          if (auth.mustChangePassword) {
+            // 需要修改密碼，重定向到修改密碼頁
+            window.location.href = 'change-password.html';
+          } else {
+            // 正常登入，重定向到儀表板
+            window.location.href = 'dashboard.html';
+          }
+        } else {
+          throw new Error('登入失敗，請檢查學號和密碼');
+        }
+      } catch (error) {
+        // 顯示錯誤訊息
+        errorMsg.textContent = error.message || '登入失敗，請稍後重試';
+        errorMsg.classList.add('show');
+        loginBtn.disabled = false;
+        loadingEl.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

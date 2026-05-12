@@ -42,6 +42,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
 .user-name { font-size: 13px; color: #fff; font-weight: 500; }
 .user-role { font-size: 11px; color: var(--sidebar-text); }
+.btn-logout { background: transparent; border: none; color: var(--sidebar-text); font-size: 18px; cursor: pointer; padding: 6px; transition: all 0.15s; }
 
 /* 群組 toggle 按鈕（樣式與 nav-item 一致） */
 .group-toggle {
