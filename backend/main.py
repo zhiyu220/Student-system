@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import health, academic, notification, ai
+from app.api.routes import health, academic, notification, ai, auth
 from app.core.config import settings
 
 app = FastAPI(
@@ -21,6 +21,7 @@ app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(academic.router, prefix="/api/academic", tags=["academic"])
 app.include_router(notification.router, prefix="/api/notification", tags=["notification"])
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+app.include_router(auth.router, prefix="/api", tags=["auth"])
 
 if __name__ == "__main__":
     import uvicorn

@@ -24,20 +24,45 @@ function initLayout(activeId, title) {
     </nav>
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar">王</div>
+        <div class="user-avatar" id="user-avatar">王</div>
         <div>
-          <div class="user-name">王小明</div>
-          <div class="user-role">學號 S001 · 資工系</div>
+          <div class="user-name" id="user-name">王小明</div>
+          <div class="user-role" id="user-role">學號 S001 · 資工系</div>
         </div>
       </div>
+      <button class="btn-logout" id="logout-btn" title="登出">🚪</button>
     </div>
   `;
 
   document.querySelector('.sidebar').innerHTML = sidebarHTML;
   document.querySelector('.topbar-title').textContent = title;
 
+  // 更新用戶資訊
+  updateUserInfo();
+
+  // 登出按鈕事件
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    if (confirm('確定要登出嗎？')) {
+      auth.logout();
+      window.location.href = 'login.html';
+    }
+  });
+
   // API 狀態燈
   checkApiStatus();
+}
+
+function updateUserInfo() {
+  const user = auth.getUser();
+  if (user) {
+    const avatar = document.getElementById('user-avatar');
+    const name = document.getElementById('user-name');
+    const role = document.getElementById('user-role');
+    
+    avatar.textContent = user.name.charAt(0);
+    name.textContent = user.name;
+    role.textContent = `學號 ${user.student_id} · ${user.department}`;
+  }
 }
 
 async function checkApiStatus() {

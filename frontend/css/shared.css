@@ -28,11 +28,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
 .nav-item.active { background: rgba(79,110,247,0.18); color: #fff; font-weight: 500; }
 .nav-item .icon { width: 18px; text-align: center; font-size: 15px; flex-shrink: 0; }
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
-.user-info { display: flex; align-items: center; gap: 10px; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; }
+.user-info { display: flex; align-items: center; gap: 10px; flex: 1; }
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
 .user-name { font-size: 13px; color: #fff; font-weight: 500; }
 .user-role { font-size: 11px; color: var(--sidebar-text); }
+.btn-logout { background: transparent; border: none; color: var(--sidebar-text); font-size: 18px; cursor: pointer; padding: 6px; transition: all 0.15s; }
 
 /* Layout */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
