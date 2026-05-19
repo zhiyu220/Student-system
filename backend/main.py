@@ -1,26 +1,68 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import health, academic, notification, ai
+from app.api.routes import (
+    health,
+    academic,
+    course_records,
+    course_selection,
+    graduation,
+    auth,
+    notification,
+    job_registration,
+    events,
+    ai,
+)
 from app.core.config import settings
+from routers import course_history
 
 app = FastAPI(
     title="Smart Campus System API",
-    version="0.1.0",
+    version= settings.App_VERSION,
     description="校園智慧系統 API",
 )
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+#課程歷史追蹤(sy)
+app.include_router(course_history.router)
+
+# 健康檢查
 app.include_router(health.router, prefix="/api", tags=["health"])
+
+# 學術課程相關
 app.include_router(academic.router, prefix="/api/academic", tags=["academic"])
+
+# 修課紀錄
+app.include_router(course_records.router, prefix="/api/course-records", tags=["course_records"])
+
+# 選課系統
+app.include_router(course_selection.router, prefix="/api/course-selection", tags=["course_selection"])
+
+# 畢業追蹤
+app.include_router(graduation.router, prefix="/api/graduation", tags=["graduation"])
+
+# 登入登出
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+
+# 通知系統
 app.include_router(notification.router, prefix="/api/notification", tags=["notification"])
+
+# 工作報名
+app.include_router(job_registration.router, prefix="/api/jobs", tags=["jobs"])
+
+# 活動報名
+app.include_router(events.router, prefix="/api/events", tags=["events"])
+
+# AI 相關 API
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+app.include_router(events.router, prefix="/api", tags=["events"])
 
 if __name__ == "__main__":
     import uvicorn

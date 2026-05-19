@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>報名紀錄 | Smart Campus System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .page-shell { display: flex; flex-direction: column; gap: 18px; }
+  .summary-card {
+    background: linear-gradient(135deg, #102542 0%, #21486f 55%, #22c55e 180%);
+    color: #fff;
+    border-radius: 18px;
+    padding: 24px;
+  }
+  .summary-card h2 { font-size: 28px; margin-bottom: 8px; }
+  .summary-card p { color: rgba(255,255,255,0.82); line-height: 1.7; max-width: 720px; }
+  .records-container { display: flex; flex-direction: column; gap: 14px; }
+  .record-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: start;
+  }
+  .record-title { font-size: 21px; font-weight: 700; color: #102542; }
+  .record-meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .record-meta-item {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+    color: #475569;
+  }
+  .record-detail { margin-top: 14px; color: #475569; line-height: 1.8; }
+  .record-side { min-width: 220px; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+  .status-badge { display: inline-flex; justify-content: center; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .status-registered { background: #dbeafe; color: #1d4ed8; }
+  .status-waitlist { background: #fef3c7; color: #92400e; }
+  .status-cancelled { background: #e5e7eb; color: #4b5563; }
+  .record-note {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    background: #fafaf8;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .empty-state, .loading-state, .error-state {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .empty-state h3, .error-state h3 { font-size: 18px; margin-bottom: 8px; }
+  .empty-state p, .loading-state p, .error-state p { color: var(--text-muted); line-height: 1.7; }
+  @media (max-width: 760px) {
+    .main { margin-left: 0; }
+    .content { padding: 18px; }
+    .record-card { grid-template-columns: 1fr; }
+    .record-side { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+      ☰
+    </button>
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">連線中</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-shell">
+      <section class="summary-card">
+        <h2>報名紀錄</h2>
+        <p>查看你已報名、候補中的活動與提交時間。活動結束後，可直接前往心得填寫頁面補登服務時數與活動回饋。</p>
+      </section>
+
+      <div id="loading-indicator" class="loading-state">
+        <p>正在載入報名紀錄...</p>
+      </div>
+      <div id="error-state" class="error-state" style="display:none;">
+        <h3>無法載入報名紀錄</h3>
+        <p id="error-text"></p>
+      </div>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <h3>目前沒有報名紀錄</h3>
+        <p>你還沒有報名任何活動，先到活動列表看看可參加的項目。</p>
+        <a href="events.html" class="btn btn-primary" style="margin-top:16px; display:inline-flex;">前往活動列表</a>
+      </div>
+      <div id="records-container" class="records-container" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+</div>
+<script src="js/api.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/events-records.js"></script>
+</body>
+</html>
