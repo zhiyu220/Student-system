@@ -11,7 +11,7 @@ ROOT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
 class Settings(BaseSettings):
     APP_NAME: str = "Smart Campus System"
-    App_VERSION: str = "0.1.1"
+    App_VERSION: str = "0.1.2"
     DEBUG: bool = False
     DATABASE_URL: str = "postgresql://user:password@localhost:5432/smart_campus"
     CORS_ORIGINS: List[str] = [
