@@ -148,6 +148,9 @@
 
 <div class="main">
     <header class="topbar">
+        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+      ☰
+    </button>
         <div class="topbar-title"></div>
         <div class="api-status">
         <div class="status-dot" id="status-dot"></div>
@@ -205,7 +208,10 @@
     let allCourses = [];
     const periods = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-    // 1. 初始化資料抓取
+    // 初始化 sidebar 和頁面標題
+    initLayout('course-history', '修課紀錄');
+
+    // 抓取課程資料
     fetch('http://127.0.0.1:8000/course_records/1111708')
         .then(res => res.json())
         .then(data => {
