@@ -59,6 +59,7 @@ app.include_router(events.router, prefix="/api/events", tags=["events"])
 
 # AI 相關 API
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+app.include_router(auth.router, prefix="/api", tags=["auth"])
 
 if __name__ == "__main__":
     import uvicorn

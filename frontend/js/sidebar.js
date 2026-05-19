@@ -323,9 +323,22 @@ function updateUserInfo() {
     const name = document.getElementById('user-name');
     const role = document.getElementById('user-role');
     
-    if (avatar) avatar.textContent = user.name.charAt(0);
-    if (name) name.textContent = user.name;
-    if (role) role.textContent = `學號 ${user.student_id} · ${user.department}`;
+    avatar.textContent = user.name.charAt(0);
+    name.textContent = user.name;
+    role.textContent = `學號 ${user.student_id} · ${user.department}`;
+  }
+}
+
+async function checkApiStatus() {
+  const dot   = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  try {
+    await api.health();
+    dot.className = 'status-dot ok';
+    label.textContent = 'API 正常';
+  } catch {
+    dot.className = 'status-dot err';
+    label.textContent = 'API 未連線';
   }
 }
 
