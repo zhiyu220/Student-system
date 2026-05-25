@@ -2,129 +2,30 @@ const NAV_SECTIONS = [
   {
     section: "主選單",
     items: [
-      {
-        id: "dashboard",
-        label: "儀表板",
-        icon: "📊",
-        href: "dashboard.html",
-        files: ["dashboard.html"],
-        title: "儀表板",
-      },
+      { id: "dashboard",      label: "儀表板",  icon: "📊", href: "dashboard.html",      files: ["dashboard.html"],      title: "儀表板" },
+      { id: "course-history", label: "修課紀錄", icon: "📜", href: "course_history02.html", files: ["course_history02.html"], title: "修課紀錄" },
+      { id: "graduation",     label: "畢業審核", icon: "🎓", href: "graduation.html",     files: ["graduation.html"],     title: "畢業審核" },
+      { id: "notifications",  label: "通知中心", icon: "🔔", href: "notifications.html",  files: ["notifications.html"],  title: "通知中心" },
     ],
   },
 
   {
-    section: "學業管理",
+    section: "StuPilot",
     items: [
-      {
-        id: "courses",
-        label: "課程選課",
-        icon: "📚",
-        href: "courses.html",
-        files: ["courses.html"],
-        title: "課程選課",
-      },
-      {
-        id: "course-history",
-        label: "修課紀錄",
-        icon: "📜",
-        href: "course_history02.html",
-        files: ["course_history02.html"],
-        title: "修課紀錄",
-      },
-      {
-        id: "graduation",
-        label: "畢業審核",
-        icon: "🎓",
-        href: "graduation.html",
-        files: ["graduation.html"],
-        title: "畢業審核",
-      },
-    ],
-  },
-
-  {
-    section: "校園生活",
-    items: [
-      {
-        id: "events",
-        label: "活動管理",
-        icon: "📅",
-        children: [
-          {
-            id: "events-browse",
-            label: "活動列表",
-            icon: "📋",
-            href: "events.html",
-            files: ["events.html", "events-browse.html"],
-            title: "活動列表",
-          },
-          {
-            id: "events-records",
-            label: "報名紀錄",
-            icon: "✅",
-            href: "events-records.html",
-            files: ["events-records.html"],
-            title: "報名紀錄",
-          },
-          {
-            id: "events-logs",
-            label: "活動心得",
-            icon: "✏️",
-            href: "events-logs.html",
-            files: ["events-logs.html"],
-            title: "活動心得",
-          },
-        ],
-      },
-      {
-        id: "jobs",
-        label: "工讀資訊",
-        icon: "💼",
-        href: "jobs.html",
-        files: ["jobs.html"],
-        title: "工讀資訊",
-      },
-    ],
-  },
-
-  {
-    section: "系統",
-    items: [
-      {
-        id: "notifications",
-        label: "通知中心",
-        icon: "🔔",
-        href: "notifications.html",
-        files: ["notifications.html"],
-        title: "通知中心",
-        badge: null,
-      },
+      { id: "academic-progress", label: "Academic Progress",     icon: "📖", href: "academic-progress.html", files: ["academic-progress.html"], title: "Academic Progress" },
+      { id: "performance",       label: "Performance Analytics", icon: "📈", href: "performance.html",        files: ["performance.html"],        title: "Performance Analytics" },
+      { id: "course-map",        label: "Course Map",            icon: "🗺",  href: "course-map.html",         files: ["course-map.html"],         title: "Course Map" },
+      { id: "course-planning",   label: "Course Planning",       icon: "📆", href: "course-planning.html",    files: ["course-planning.html"],    title: "Course Planning" },
+      { id: "grade-inquiry",     label: "Grade Inquiry",         icon: "🔍", href: "grade-inquiry.html",      files: ["grade-inquiry.html"],      title: "Grade Inquiry" },
+      { id: "settings",          label: "Settings",              icon: "⚙️", href: "settings.html",           files: ["settings.html"],           title: "Settings" },
+      { id: "help",              label: "Help Center",           icon: "❓", href: "help-center.html",        files: ["help-center.html"],        title: "Help Center" },
     ],
   },
 ];
 
-// 次頁面：不顯示在 sidebar，但需要能正確解析 activeId / title
-// 從活動列表進入的 detail / register 頁面
-const SECONDARY_ROUTES = [
-  {
-    id: "events-detail",
-    files: ["events-detail.html"],
-    title: "活動詳細",
-    parentId: "events-browse",
-  },
-  {
-    id: "events-register",
-    files: ["events-register.html"],
-    title: "活動報名",
-    parentId: "events-browse",
-  },
-];
+const SECONDARY_ROUTES = [];
 
-// 舊路由別名（向下相容）
-const LEGACY_ROUTE_ALIASES = {
-  events: "events-browse",
-};
+const LEGACY_ROUTE_ALIASES = {};
 
 // ── 路由查找表（檔名 → routeId）────────────────────────────────────────
 const PAGE_TO_ROUTE = (() => {
@@ -211,68 +112,67 @@ function resolveActiveGroupId(activeId) {
 }
 
 function getAppVersionLabel() {
-  return "Smart Campus"; 
+  return "AI Smart Student Platform";
 }
 
 // ── Sidebar HTML 產生器 ────────────────────────────────────────────────
 function buildSidebarHTML(activeId, activeGroupId, appVersionLabel) {
-  const sectionBlocks = NAV_SECTIONS.map(({ section, items }) => {
-    const itemsHTML = items.map((item) => {
-      if (item.children) {
-        // 母分類（可展開群組）
-        const isOpen = item.id === activeGroupId;
-        const childrenHTML = item.children.map((child) => {
-          const isActive = child.id === activeId;
-          return `
-            <a class="nav-item sub-item${isActive ? " active" : ""}" href="${child.href}">
-              <span class="icon" aria-hidden="true">${child.icon}</span>
-              ${child.label}
-            </a>`;
-        }).join("");
+  const NAV_ITEMS = [
+    { id: "dashboard",         label: "Dashboard",             icon: "ti-layout-dashboard", href: "dashboard.html" },
+    { id: "academic-progress", label: "Academic Progress",     icon: "ti-books",             href: "academic-progress.html" },
+    { id: "graduation",        label: "Graduation Audit",      icon: "ti-certificate",       href: "graduation.html" },
+    { id: "course-history",    label: "Course History",        icon: "ti-list-details",      href: "course_history02.html" },
+    { id: "performance",       label: "Performance Analytics", icon: "ti-chart-line",        href: "performance.html" },
+    { id: "course-map",        label: "Course Map",            icon: "ti-map-2",             href: "course-map.html" },
+    { id: "course-planning",   label: "Course Planning",       icon: "ti-calendar-plus",     href: "course-planning.html" },
+    { id: "grade-inquiry",     label: "Grade Inquiry",         icon: "ti-clipboard-text",    href: "grade-inquiry.html" },
+    { id: "notifications",     label: "Smart Notifications",   icon: "ti-bell",              href: "notifications.html", badge: 3 },
+    { id: "settings",          label: "Settings",              icon: "ti-settings",          href: "settings.html" },
+    { id: "help",              label: "Help Center",           icon: "ti-help-circle",       href: "help-center.html" },
+  ];
 
-        return `
-          <button class="group-toggle${isOpen ? " open" : ""}" aria-expanded="${isOpen}" data-group="${item.id}">
-            <span class="icon" aria-hidden="true">${item.icon}</span>
-            <span>${item.label}</span>
-            <span class="toggle-icon" aria-hidden="true">▼</span>
-          </button>
-          <div class="sub-group" id="group-${item.id}" style="display:${isOpen ? "block" : "none"}">
-            ${childrenHTML}
-          </div>`;
-      }
-
-      // 一般項目
-      const isActive = item.id === activeId;
-      const badgeHTML = item.badge ? `<span class="nav-badge">${item.badge}</span>` : "";
-      return `
-        <a class="nav-item${isActive ? " active" : ""}" href="${item.href}">
-          <span class="icon" aria-hidden="true">${item.icon}</span>
-          ${item.label}
-          ${badgeHTML}
-        </a>`;
-    }).join("");
-
+  const navHTML = NAV_ITEMS.map(({ id, label, icon, href, badge }) => {
+    const isActive = id === activeId;
+    const badgeHTML = badge ? `<span class="nav-badge-red">${badge}</span>` : "";
     return `
-      <div class="nav-section">${section}</div>
-      ${itemsHTML}`;
+      <a class="nav-item${isActive ? " active" : ""}" href="${href}">
+        <i class="ti ${icon}" style="font-size:16px;width:18px;text-align:center;flex-shrink:0;" aria-hidden="true"></i>
+        ${label}
+        ${badgeHTML}
+      </a>`;
   }).join("");
 
   return `
     <div class="sidebar-logo">
-      <div class="logo-text">校園智慧系統</div>
-      <div class="logo-sub">${appVersionLabel}</div>
+      <div class="logo-brand">
+        <div class="logo-icon"><i class="ti ti-school" style="font-size:18px;" aria-hidden="true"></i></div>
+        <div class="logo-text-group">
+          <div class="logo-text">StuPilot</div>
+          <div class="logo-sub">${appVersionLabel}</div>
+        </div>
+      </div>
     </div>
     <nav class="sidebar-nav" aria-label="主選單">
-      ${sectionBlocks}
+      ${navHTML}
     </nav>
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar">王</div>
-        <div>
-          <div class="user-name">王小明</div>
-          <div class="user-role">學號 S001 · 資工系</div>
+        <div class="user-avatar-outline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <div class="user-details">
+          <div class="user-name">${(typeof getUser === 'function' && getUser()?.name) || 'Student'}</div>
+          <div class="user-id">ID: ${(typeof getUser === 'function' && getUser()?.student_id) || '—'}</div>
+          <div class="user-dept">${(typeof getUser === 'function' && getUser()?.role) || ''}</div>
         </div>
       </div>
+      <button class="sidebar-logout" onclick="if(typeof logout==='function')logout()">
+        <i class="ti ti-logout" style="font-size:16px;" aria-hidden="true"></i>
+        Log Out
+      </button>
     </div>`;
 }
 
@@ -329,7 +229,7 @@ async function checkApiStatus() {
     // 用後端版本號更新 sidebar logo
     const logoSub = document.querySelector(".logo-sub");
     if (logoSub && data.version) {
-      logoSub.textContent = `${data.app_name || "Smart Campus"} v${data.version}`;
+      logoSub.textContent = `${data.app_name || "StuPilot"} v${data.version}`;
     }
   } catch {
     dot.className = "status-dot err";

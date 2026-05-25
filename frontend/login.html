@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登入 — StuPilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Noto Sans TC', sans-serif;
+        background: #F0F4FF;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(78, 108, 240, 0.12);
+        display: flex;
+        width: 860px;
+        max-width: 96vw;
+        overflow: hidden;
+      }
+
+      /* Left panel */
+      .login-left {
+        background: #1A1D2E;
+        width: 340px;
+        flex-shrink: 0;
+        padding: 48px 36px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+      .brand-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #4E6CF0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+      }
+      .brand-name { font-size: 22px; font-weight: 700; color: #fff; }
+      .brand-tag  { font-size: 11px; color: rgba(168,168,192,0.7); margin-top: 2px; }
+      .login-left h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+      .login-left p  { font-size: 13px; color: rgba(168,168,192,0.7); line-height: 1.7; }
+      .feature-list  { margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+      .feature-item  { display: flex; align-items: center; gap: 10px; color: rgba(168,168,192,0.85); font-size: 13px; }
+      .feature-item i { color: #4E6CF0; font-size: 16px; flex-shrink: 0; }
+
+      /* Right panel */
+      .login-right {
+        flex: 1;
+        padding: 52px 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .login-right h1 { font-size: 24px; font-weight: 700; color: #1A1D2E; margin-bottom: 6px; }
+      .login-right .sub { font-size: 13px; color: #888898; margin-bottom: 32px; }
+
+      .form-group       { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+      .form-label       { font-size: 12px; font-weight: 500; color: #555; }
+      .input-wrap       { position: relative; }
+      .form-input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #e8e8e4;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        color: #1A1D2E;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .form-input:focus { border-color: #4E6CF0; }
+      .form-input.error { border-color: #ef4444; }
+
+      .pw-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #888;
+        font-size: 17px;
+        padding: 0;
+        line-height: 1;
+      }
+      .pw-toggle:hover { color: #4E6CF0; }
+
+      .error-msg {
+        display: none;
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      .error-msg.show { display: block; }
+
+      .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: #4E6CF0;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-top: 4px;
+      }
+      .btn-login:hover:not(:disabled)  { background: #3d5ce6; }
+      .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+      @media (max-width: 680px) {
+        .login-left { display: none; }
+        .login-right { padding: 36px 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <!-- Left brand panel -->
+      <div class="login-left">
+        <div class="brand-row">
+          <div class="brand-icon"><i class="ti ti-school"></i></div>
+          <div>
+            <div class="brand-name">StuPilot</div>
+            <div class="brand-tag">AI Smart Student Platform</div>
+          </div>
+        </div>
+        <h2>智慧校園，一站式管理</h2>
+        <p>整合課程、成績、活動與通知，讓你的學生生活更有條理。</p>
+        <div class="feature-list">
+          <div class="feature-item"><i class="ti ti-chart-line"></i>學業進度即時追蹤</div>
+          <div class="feature-item"><i class="ti ti-bell"></i>智慧通知與提醒</div>
+          <div class="feature-item"><i class="ti ti-calendar-plus"></i>課程規劃與選課</div>
+          <div class="feature-item"><i class="ti ti-certificate"></i>畢業審核一鍵查詢</div>
+        </div>
+        
+      </div>
+
+      <!-- Right form panel -->
+      <div class="login-right">
+        <h1>歡迎回來</h1>
+        <p class="sub">請輸入你的學號與密碼登入系統</p>
+        <p class="sub">先用這組測試 帳號:1111708 密碼:Yzu@1111708</p>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="student_id">學號</label>
+            <input
+              class="form-input"
+              id="student_id"
+              type="text"
+              placeholder="例：1111708"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">密碼</label>
+            <div class="input-wrap">
+              <input
+                class="form-input"
+                id="password"
+                type="password"
+                placeholder="輸入密碼"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="pw-toggle" id="pw-toggle" tabindex="-1" aria-label="顯示/隱藏密碼">
+                <i class="ti ti-eye" id="pw-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <button class="btn-login" type="submit" id="btn-login">登入</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+      // 密碼顯示切換
+      document.getElementById('pw-toggle').addEventListener('click', () => {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('pw-icon');
+        const show  = input.type === 'password';
+        input.type  = show ? 'text' : 'password';
+        icon.className = show ? 'ti ti-eye-off' : 'ti ti-eye';
+      });
+
+      function showError(msg) {
+        const el = document.getElementById('error-msg');
+        el.textContent = msg;
+        el.classList.add('show');
+      }
+      function hideError() {
+        document.getElementById('error-msg').classList.remove('show');
+      }
+
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const student_id = document.getElementById('student_id').value.trim();
+        const password   = document.getElementById('password').value;
+        const btn        = document.getElementById('btn-login');
+
+        if (!student_id || !password) {
+          showError('請輸入學號與密碼');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '登入中…';
+
+        try {
+          const data = await api.login(student_id, password);
+          saveToken(data.access_token);
+          saveUser(data.user);
+
+          if (data.must_change_password) {
+            window.location.href = 'change-password.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        } catch (err) {
+          const status = err.message.match(/\d+/)?.[0];
+          if (status === '401') showError('帳號或密碼錯誤，請重新輸入');
+          else if (status === '403') showError('此帳號已被停用，請聯絡管理員');
+          else showError('登入失敗，請稍後再試');
+
+          btn.disabled = false;
+          btn.textContent = '登入';
+        }
+      });
+
+      // 已登入者直接跳轉
+      if (getToken()) window.location.href = 'dashboard.html';
+    </script>
+  </body>
+</html>

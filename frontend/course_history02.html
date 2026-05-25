@@ -202,14 +202,17 @@
 </div>
 
 <script src="js/api.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
 <script>
     let allCourses = [];
     const periods = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-    // 初始化 sidebar 和頁面標題
-    initLayout('course-history', '修課紀錄');
+    (async () => {
+      await checkAuth();
+      // 初始化 sidebar 和頁面標題
+      initLayout('course-history', '修課紀錄');
 
     // 抓取課程資料
     fetch('http://127.0.0.1:8000/course_records/1111708')
@@ -306,6 +309,7 @@
 
     function closeModal() { document.getElementById('courseModal').style.display = "none"; }
     window.onclick = (event) => { if(event.target == document.getElementById('courseModal')) closeModal(); }
+    })(); // end async IIFE
 </script>
 </body>
 </html>
