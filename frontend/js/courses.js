@@ -57,7 +57,8 @@ function enroll(courseId, courseName) {
   alert(`已送出選課申請：${courseName}`);
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  await checkAuth();
   initLayout('courses', '課程選課');
   loadCourses();
 });

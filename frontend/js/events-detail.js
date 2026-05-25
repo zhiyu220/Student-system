@@ -133,7 +133,8 @@ function registerFromDetail() {
   window.location.href = "events-register.html";
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await checkAuth();
   initLayout("events-detail", "活動詳細");
   loadEventDetail();
 });

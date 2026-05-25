@@ -174,7 +174,8 @@ function goBack() {
   window.location.href = "events.html";
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await checkAuth();
   initLayout("events-browse", "活動報名");
   loadEventDetails();
 

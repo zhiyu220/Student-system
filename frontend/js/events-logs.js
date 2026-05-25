@@ -317,7 +317,8 @@ function toggleStats() {
   document.getElementById("stats-toggle").classList.toggle("expanded");
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await checkAuth();
   initLayout("events-logs", "活動心得");
   loadRegisteredEvents();
 

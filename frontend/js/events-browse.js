@@ -213,7 +213,8 @@ function escapeAttribute(text) {
   return String(text).replace(/'/g, "\\'");
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await checkAuth();
   initLayout("events-browse", "活動列表");
 
   document.getElementById("apply-button").addEventListener("click", applyFilters);

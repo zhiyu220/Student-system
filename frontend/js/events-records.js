@@ -107,7 +107,8 @@ function viewEventDetail(eventId) {
   window.location.href = "events.html";
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  await checkAuth();
   initLayout("events-records", "報名紀錄");
   loadRegistrations();
 });

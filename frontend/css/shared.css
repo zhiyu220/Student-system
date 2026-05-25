@@ -1,6 +1,6 @@
 :root {
   --bg: #f5f4f0;
-  --sidebar-bg: #1a1a2e;
+  --sidebar-bg: #1A1D2E;
   --sidebar-text: #a8a8c0;
   --card-bg: #ffffff;
   --text: #1a1a2e;
@@ -19,14 +19,17 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 
 /* Sidebar */
 .sidebar { width: 220px; min-height: 100vh; background: var(--sidebar-bg); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; }
-.sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.sidebar-logo { padding: 20px 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.logo-brand { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 34px; height: 34px; border-radius: 8px; background: #4E6CF0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px; flex-shrink: 0; }
+.logo-text-group { display: flex; flex-direction: column; }
 .sidebar-logo .logo-text { font-size: 15px; font-weight: 700; color: #fff; }
-.sidebar-logo .logo-sub { font-size: 11px; color: var(--sidebar-text); margin-top: 2px; font-family: var(--mono); }
+.sidebar-logo .logo-sub { font-size: 10px; color: var(--sidebar-text); margin-top: 1px; }
 .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
 .nav-section { font-size: 10px; font-weight: 500; color: rgba(168,168,192,0.5); letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 8px 6px; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; transition: all 0.15s; font-size: 13.5px; font-weight: 400; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
 .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.nav-item.active { background: rgba(79,110,247,0.18); color: #fff; font-weight: 500; }
+.nav-item.active { background: #4E6CF0; color: #fff; font-weight: 500; }
 .nav-item .icon,
 .group-toggle .icon {
   font-size: 15px;
@@ -37,11 +40,16 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
   align-items: center;
   justify-content: center;
 }
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+.sidebar-footer { padding: 14px 16px 16px; border-top: 1px solid rgba(255,255,255,0.06); }
 .user-info { display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.user-avatar-outline { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.user-details { min-width: 0; }
 .user-name { font-size: 13px; color: #fff; font-weight: 500; }
-.user-role { font-size: 11px; color: var(--sidebar-text); }
+.user-id { font-size: 11px; color: rgba(168,168,192,0.7); margin-top: 1px; }
+.user-dept { font-size: 10px; color: rgba(168,168,192,0.45); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-logout { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 4px; width: 100%; background: none; border: none; color: rgba(168,168,192,0.55); font-size: 12.5px; font-family: var(--font); cursor: pointer; border-radius: 6px; transition: color 0.15s; }
+.sidebar-logout:hover { color: #fff; }
+.sidebar-logout .ti { font-size: 15px; }
 
 /* 群組 toggle 按鈕（樣式與 nav-item 一致） */
 .group-toggle {
@@ -109,6 +117,21 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
   padding: 1px 7px;
   border-radius: 99px;
   line-height: 18px;
+}
+.nav-badge-red {
+  margin-left: auto;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* sidebar 收合效果 */

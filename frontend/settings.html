@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — StuPilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css" />
+    <link rel="stylesheet" href="css/shared.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar"></aside>
+      <div class="main">
+        <header class="topbar">
+          <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">☰</button>
+          <div class="topbar-title"></div>
+          <div class="api-status">
+            <div class="status-dot" id="status-dot"></div>
+            <span class="status-label" id="status-label">連線中...</span>
+          </div>
+        </header>
+        <div class="content">
+          <div class="page-header">
+            <h2>Settings</h2>
+            <p>此頁面開發中，功能即將上線</p>
+          </div>
+          <div class="card">
+            <div class="card-body" style="height: 300px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script>
+      window.addEventListener('load', async () => {
+        await checkAuth();
+        initLayout('settings', 'Settings');
+      });
+    </script>
+  </body>
+</html>

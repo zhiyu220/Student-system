@@ -41,7 +41,8 @@ function apply(id, title) {
   alert(`已送出申請：${title}`);
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  await checkAuth();
   initLayout('jobs', '工讀資訊');
   // TODO: 串接 GET /api/jobs
   render(MOCK_JOBS);

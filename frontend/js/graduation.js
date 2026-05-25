@@ -28,7 +28,8 @@ function render(reqs) {
   }).join('');
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  await checkAuth();
   initLayout('graduation', '畢業審核');
   // TODO: 串接 GET /api/academic/students/{id}/graduation
   render(MOCK_REQS);
