@@ -2,104 +2,10 @@ const NAV_SECTIONS = [
   {
     section: "主選單",
     items: [
-      {
-        id: "dashboard",
-        label: "儀表板",
-        icon: "📊",
-        href: "dashboard.html",
-        files: ["dashboard.html"],
-        title: "儀表板",
-      },
-    ],
-  },
-
-  {
-    section: "學業管理",
-    items: [
-      {
-        id: "courses",
-        label: "課程選課",
-        icon: "📚",
-        href: "courses.html",
-        files: ["courses.html"],
-        title: "課程選課",
-      },
-      {
-        id: "course-history",
-        label: "修課紀錄",
-        icon: "📜",
-        href: "course_history02.html",
-        files: ["course_history02.html"],
-        title: "修課紀錄",
-      },
-      {
-        id: "graduation",
-        label: "畢業審核",
-        icon: "🎓",
-        href: "graduation.html",
-        files: ["graduation.html"],
-        title: "畢業審核",
-      },
-    ],
-  },
-
-  {
-    section: "校園生活",
-    items: [
-      {
-        id: "events",
-        label: "活動管理",
-        icon: "📅",
-        children: [
-          {
-            id: "events-browse",
-            label: "活動列表",
-            icon: "📋",
-            href: "events.html",
-            files: ["events.html", "events-browse.html"],
-            title: "活動列表",
-          },
-          {
-            id: "events-records",
-            label: "報名紀錄",
-            icon: "✅",
-            href: "events-records.html",
-            files: ["events-records.html"],
-            title: "報名紀錄",
-          },
-          {
-            id: "events-logs",
-            label: "活動心得",
-            icon: "✏️",
-            href: "events-logs.html",
-            files: ["events-logs.html"],
-            title: "活動心得",
-          },
-        ],
-      },
-      {
-        id: "jobs",
-        label: "工讀資訊",
-        icon: "💼",
-        href: "jobs.html",
-        files: ["jobs.html"],
-        title: "工讀資訊",
-      },
-    ],
-  },
-
-  {
-    section: "系統",
-    items: [
-      {
-        id: "notifications",
-        label: "通知中心",
-        icon: "🔔",
-        href: "notifications.html",
-        files: ["notifications.html"],
-        title: "通知中心",
-        badge: null,
-      },
+      { id: "dashboard",      label: "儀表板",  icon: "📊", href: "dashboard.html",      files: ["dashboard.html"],      title: "儀表板" },
+      { id: "course-history", label: "修課紀錄", icon: "📜", href: "course_history02.html", files: ["course_history02.html"], title: "修課紀錄" },
+      { id: "graduation",     label: "畢業審核", icon: "🎓", href: "graduation.html",     files: ["graduation.html"],     title: "畢業審核" },
+      { id: "notifications",  label: "通知中心", icon: "🔔", href: "notifications.html",  files: ["notifications.html"],  title: "通知中心" },
     ],
   },
 
@@ -117,27 +23,9 @@ const NAV_SECTIONS = [
   },
 ];
 
-// 次頁面：不顯示在 sidebar，但需要能正確解析 activeId / title
-// 從活動列表進入的 detail / register 頁面
-const SECONDARY_ROUTES = [
-  {
-    id: "events-detail",
-    files: ["events-detail.html"],
-    title: "活動詳細",
-    parentId: "events-browse",
-  },
-  {
-    id: "events-register",
-    files: ["events-register.html"],
-    title: "活動報名",
-    parentId: "events-browse",
-  },
-];
+const SECONDARY_ROUTES = [];
 
-// 舊路由別名（向下相容）
-const LEGACY_ROUTE_ALIASES = {
-  events: "events-browse",
-};
+const LEGACY_ROUTE_ALIASES = {};
 
 // ── 路由查找表（檔名 → routeId）────────────────────────────────────────
 const PAGE_TO_ROUTE = (() => {
