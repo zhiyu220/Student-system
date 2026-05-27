@@ -1,70 +1,196 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>畢業審核 — 校園智慧系統</title>
+<title>Graduation Audit — StuPilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="css/shared.css">
+<style>
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .ring-card {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 24px;
+  }
+  .ring-wrap { position: relative; flex-shrink: 0; }
+  .ring-svg { transform: rotate(-90deg); }
+  .ring-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .ring-pct   { font-size: 26px; font-weight: 700; color: var(--text); }
+  .ring-label { font-size: 11px; color: var(--text-muted); }
+  .ring-stats { display: flex; flex-direction: column; gap: 10px; }
+  .ring-stat-row { font-size: 13px; display: flex; justify-content: space-between; gap: 24px; }
+  .ring-stat-row strong { font-weight: 600; }
+
+  .status-card { padding: 24px; }
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f5;
+  }
+  .status-row:last-child { border-bottom: none; }
+  .status-label-text { color: var(--text-muted); }
+
+  .blocking-list { margin: 0; padding: 0; list-style: none; }
+  .blocking-list li {
+    padding: 6px 10px;
+    margin-top: 6px;
+    background: #FEF2F2;
+    border-left: 3px solid #EF4444;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #991B1B;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .bucket-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .bucket-table th {
+    background: #f5f7ff;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1.5px solid #e8e8f0;
+  }
+  .bucket-table td { padding: 14px 16px; border-bottom: 1px solid #f0f0f5; vertical-align: top; }
+  .bucket-table tr:last-child td { border-bottom: none; }
+
+  .missing-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #FEF2F2;
+    color: #991B1B;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    margin: 2px 3px 2px 0;
+  }
+  .missing-chip.enrolled { background: #FFF7ED; color: #C2410C; }
+
+  .mini-progress { height: 6px; background: #f0f0f5; border-radius: 3px; width: 120px; margin-top: 4px; }
+  .mini-bar { height: 100%; border-radius: 3px; transition: width .4s; }
+  .mini-bar.green  { background: #22C55E; }
+  .mini-bar.amber  { background: #F59E0B; }
+  .mini-bar.red    { background: #EF4444; }
+</style>
 </head>
 <body>
 <div class="layout">
 <aside class="sidebar"></aside>
 <div class="main">
   <header class="topbar">
-    <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
-      ☰
-    </button>
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">☰</button>
     <div class="topbar-title"></div>
     <div class="api-status">
       <div class="status-dot" id="status-dot"></div>
-      <span class="status-label" id="status-label">連線中...</span>
+      <span class="status-label" id="status-label">Connecting...</span>
     </div>
   </header>
+
   <div class="content">
     <div class="page-header">
-      <h2>畢業審核</h2>
-      <p>確認各類學分是否符合系所畢業門檻</p>
+      <h2>Graduation Audit</h2>
+      <p>Check credit requirements and graduation eligibility</p>
     </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><div class="card-title">學分類別進度</div></div>
-        <div class="card-body">
-          <table class="table">
-            <thead><tr><th>類別</th><th>已修</th><th>需求</th><th>進度</th><th>狀態</th></tr></thead>
-            <tbody id="grad-table"></tbody>
-          </table>
+
+    <!-- Overview row -->
+    <div class="overview-grid">
+      <!-- Ring progress card -->
+      <div class="card ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="#f0f0f5" stroke-width="10"/>
+            <circle id="ring-arc" cx="55" cy="55" r="46" fill="none"
+                    stroke="#4E6CF0" stroke-width="10"
+                    stroke-linecap="round"
+                    stroke-dasharray="289 289"
+                    stroke-dashoffset="289"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ring-pct">—%</div>
+            <div class="ring-label">Complete</div>
+          </div>
+        </div>
+        <div class="ring-stats">
+          <div class="ring-stat-row"><span>Credits Earned</span><strong id="credits-earned">—</strong></div>
+          <div class="ring-stat-row"><span>Required</span><strong id="credits-required">128</strong></div>
+          <div class="ring-stat-row"><span>In Progress</span><strong id="credits-progress">—</strong></div>
+          <div class="ring-stat-row"><span>Capstone Track</span><strong id="capstone-track">—</strong></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">畢業狀態總覽</div></div>
-        <div class="card-body" style="padding:20px">
-          <div style="margin-bottom:20px">
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">總學分進度</div>
-            <div style="font-size:28px;font-weight:700;margin-bottom:8px">
-              87 <span style="font-size:14px;color:var(--text-muted);font-weight:400">/ 128 學分</span>
-            </div>
-            <div class="progress-wrap"><div class="progress-bar" style="width:68%"></div></div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-              <span>預計畢業學期</span><span class="badge badge-blue">2026-1</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-              <span>審核狀態</span><span class="badge badge-amber">審核中</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-              <span>缺少學分</span><span style="font-weight:600;color:var(--red)">必修 12 學分</span>
-            </div>
-          </div>
+
+      <!-- Status card -->
+      <div class="card status-card">
+        <div class="card-header" style="padding:0 0 14px 0;border-bottom:1px solid #f0f0f5;margin-bottom:14px">
+          <div class="card-title">Status Overview</div>
         </div>
+        <div class="status-row">
+          <span class="status-label-text">Graduation Eligibility</span>
+          <span id="grad-badge" class="badge badge-amber">Checking...</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label-text">Student</span>
+          <span id="student-name" style="font-weight:600">—</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label-text">Department</span>
+          <span id="student-dept" style="color:var(--text-muted)">—</span>
+        </div>
+        <div class="status-row" id="blocking-row" style="display:none;flex-direction:column;align-items:flex-start;gap:6px">
+          <span class="status-label-text">Blocking Items</span>
+          <ul class="blocking-list" id="blocking-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buckets table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Credit Requirements by Category</div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="bucket-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Earned</th>
+              <th>Required</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Missing Courses</th>
+            </tr>
+          </thead>
+          <tbody id="grad-table"></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 </div>
+
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>

@@ -68,4 +68,9 @@ const api = {
   me:             ()                     => api.get('/api/auth/me'),
   changePassword: (old_password, new_password) =>
     api.post('/api/auth/change-password', { old_password, new_password }),
+
+  // ── Academic endpoints ─────────────────────────────────────────────
+  courseRecords: (id) => api.get(`/api/course-records/${id}`),
+  graduation:    (id) => api.get(`/api/graduation/${id}`),
+  performance:   (id) => api.get(`/api/academic/students/${id}/performance`),
 };

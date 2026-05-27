@@ -1,315 +1,344 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>修課紀錄 — 校園智慧系統</title>
+<title>Course History — StuPilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="stylesheet" href="css/shared.css">
 <style>
-    :root { 
-        --yzu-blue: #6f7c7e; 
-        --white: #e8e8e8; 
-        --border: #dee2e6; 
-        --text: #2d3748; 
-    }
-    
-    header { 
-        border-bottom: 3px solid var(--yzu-blue); 
-        padding-bottom: 15px; margin-bottom: 25px; 
-        display: flex; justify-content: space-between; 
-        align-items: baseline; 
-    }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); }
+  .stat-unit  { font-size: 12px; color: var(--text-muted); font-weight: 400; }
 
-    .filter-bar { 
-        border-radius: 8px; 
-        margin-bottom: 25px; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        font-size: 18px;
-    }
-    select { 
-        padding: 8px 12px; 
-        border-radius: 5px; 
-        border: 1px solid #cbd5e0; 
-        cursor: pointer; 
-        font-size: 15px; }
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-bar label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+  .filter-bar select {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+  }
+  .filter-bar select:focus { border-color: #4E6CF0; }
 
-    .timetable-box { 
-        margin-top: 30px;
-    }
-    .timetable { 
-        margin-top: 10px;
-        width: 100%; 
-        border-collapse: collapse; 
-        table-layout: fixed; 
-    }
-    .timetable th { 
-        background: var(--yzu-blue); 
-        border: 1px solid var(--border); 
-        padding: 10px; font-size: 14px; 
-        color: #ffffff; 
-    }
-    .timetable td { 
-        background-color: #ffffff;
-        border: 1px solid var(--border); 
-        height: 60px; 
-        text-align: center; 
-        vertical-align: middle; 
-        position: relative; 
-    }
-    .timetable .period-header { 
-        background: #cbd1d2; 
-        font-weight: bold; 
-        width: 80px; 
-    }
-    .course-chip { 
-        color: rgb(0, 0, 0); 
-        border-radius: 4px; 
-        padding: 5px; 
-        font-size: 11px; 
-        font-weight: bold; 
-        cursor: pointer; 
-        height: 90%; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-    }
+  .record-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .record-table th {
+    background: #f5f7ff;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1.5px solid #e8e8f0;
+  }
+  .record-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #f0f0f5;
+    vertical-align: middle;
+  }
+  .record-table tr:last-child td { border-bottom: none; }
+  .record-table tr:hover td { background: #f9f9ff; }
 
-    .course-chip:hover{
-        color: var(--yzu-blue);
-        text-decoration: underline;
-    }
+  .badge-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-required    { background: #EEF2FF; color: #4E6CF0; }
+  .badge-elective    { background: #F0FDF4; color: #16a34a; }
+  .badge-univ        { background: #FFF7ED; color: #ea580c; }
+  .badge-general     { background: #FEF3C7; color: #d97706; }
 
-    .record-table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-top: 10px; 
-    }
-    .record-table th { 
-        background: var(--yzu-blue); 
-        color: rgb(255, 255, 255); 
-        padding: 12px; 
-        text-align: left; 
-    }
-    .record-table td { 
-        border-bottom: 1px solid var(--border); 
-        padding: 12px; 
-        font-size: 14px; 
-        background: white; 
-    }
-    .btn-detail { 
-        color: black; 
-        font-weight: bold; 
-        cursor: pointer; 
-        text-decoration: none; 
-    }
+  .grade-high  { color: #16a34a; font-weight: 700; }
+  .grade-mid   { color: #d97706; font-weight: 700; }
+  .grade-low   { color: #dc2626; font-weight: 700; }
+  .grade-fail  { color: #9ca3af; font-weight: 700; }
 
-    .btn-detail:hover{
-        color: var(--yzu-blue);
-        text-decoration: underline;
-    }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .page-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #e0e0e0;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .page-btn:hover:not(:disabled) { border-color: #4E6CF0; color: #4E6CF0; }
+  .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .page-info { font-size: 13px; color: var(--text-muted); }
+  .page-btn.active { background: #4E6CF0; color: #fff; border-color: #4E6CF0; }
 
-    .modal { 
-        display: none; 
-        position: fixed; 
-        z-index: 1000; 
-        left: 0; top: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: rgba(0,0,0,0.6); 
-    }
-    .modal-content { 
-        background: white; 
-        margin: 10% auto; 
-        padding: 30px; 
-        border-radius: 12px; 
-        width: 500px; 
-        position: relative; 
-    }
-    .modal-content p{
-        margin-top: 5px;
-    }
-
-    .close { 
-        position: absolute; 
-        right: 20px; 
-        top: 15px; 
-        font-size: 28px; 
-        cursor: pointer; 
-    }
+  .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .card-body { padding: 20px; }
 </style>
 </head>
 <body>
 
+<div class="layout">
 <aside class="sidebar"></aside>
-
 <div class="main">
-    <header class="topbar">
-        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
-      ☰
-    </button>
-        <div class="topbar-title"></div>
-        <div class="api-status">
-        <div class="status-dot" id="status-dot"></div>
-        <span class="status-label" id="status-label">連線中...</span>
-        </div>
-    </header>
+  <header class="topbar">
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">☰</button>
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">Connecting...</span>
+    </div>
+  </header>
 
-    <div class="content">
-        <div class="filter-bar">
-            <label><strong>選擇學期：</strong></label>
-            <select id="semFilter" onchange="renderUI()"></select>
-        </div>
+  <div class="content">
+    <div class="page-header">
+      <h2>Course History</h2>
+      <p>Complete record of all enrolled courses and grades</p>
+    </div>
 
-        <!--修課清單-->
-        <h3>🗒️修課清單</h3>
+    <!-- Summary stats -->
+    <div class="summary-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Credits Earned</div>
+        <div class="stat-value" id="stat-credits">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cumulative GPA</div>
+        <div class="stat-value" id="stat-gpa">—<span class="stat-unit"> / 4.0</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Courses</div>
+        <div class="stat-value" id="stat-courses">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Degree Completion</div>
+        <div class="stat-value" id="stat-completion">—<span class="stat-unit">%</span></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <label>Semester</label>
+      <select id="semFilter" onchange="applyFilters()">
+        <option value="all">All Semesters</option>
+      </select>
+      <label>Type</label>
+      <select id="typeFilter" onchange="applyFilters()">
+        <option value="all">All Types</option>
+        <option value="required">Required</option>
+        <option value="elective">Elective</option>
+        <option value="university_required">University Required</option>
+        <option value="general_education">General Education</option>
+      </select>
+    </div>
+
+    <!-- Course table -->
+    <div class="card">
+      <div class="card-body" style="padding:0">
         <table class="record-table">
-            <thead>
-                <tr><th>學期</th><th>課號</th><th>課程名稱</th><th>類別</th><th>學分</th><th>成績</th></tr>
-            </thead>
-            <tbody id="listBody"></tbody>
+          <thead>
+            <tr>
+              <th>Semester</th>
+              <th>Code</th>
+              <th>Course Name</th>
+              <th>Type</th>
+              <th>Credits</th>
+              <th>Grade</th>
+              <th>GPA Points</th>
+              <th>Instructor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="listBody"></tbody>
         </table>
-
-        <!--顯示課表-->
-        <div class="timetable-box" id="timetableArea">
-            <h3 id="tt-title">📅 當前學期課表</h3>
-            <table class="timetable">
-                <thead>
-                    <tr><th>節次</th><th>週一</th><th>週二</th><th>週三</th><th>週四</th><th>週五</th></tr>
-                </thead>
-                <tbody id="ttBody"></tbody>
-            </table>
-        </div>
+      </div>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+  </div>
 </div>
-
-<div id="courseModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="m-name"></h2>
-        <hr style="margin-bottom: 10px; margin-top:10px">
-        <p><strong>授課老師：</strong> <span id="m-instructor"></span></p>
-        <p><strong>上課地點：</strong> <span id="m-location"></span></p>
-        <p><strong>設課時間：</strong> <span id="m-time"</p>
-        <p><strong>選別：</strong> <span id="m-type"></span></p>
-        <p><strong>狀態：</strong> <span id="m-status"></span></p>
-        <p><strong>內容大綱：</strong></p>
-        <p id="m-desc" style="background:#f8f9fa; border-radius:5px; font-size:14px; line-height:1.6;"></p>
-    </div>
 </div>
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
-
 <script>
-    let allCourses = [];
-    const periods = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const PAGE_SIZE = 10;
+  let allRecords = [];
+  let filtered   = [];
+  let currentPage = 1;
 
-    (async () => {
-      await checkAuth();
-      // 初始化 sidebar 和頁面標題
-      initLayout('course-history', '修課紀錄');
+  const TYPE_LABELS = {
+    required:            'Required',
+    elective:            'Elective',
+    university_required: 'Univ. Required',
+    general_education:   'Gen. Education',
+  };
+  const TYPE_BADGE = {
+    required:            'badge-required',
+    elective:            'badge-elective',
+    university_required: 'badge-univ',
+    general_education:   'badge-general',
+  };
 
-    // 抓取課程資料
-    fetch('http://127.0.0.1:8000/course_records/1111708')
-        .then(res => res.json())
-        .then(data => {
-            allCourses = data;
-            initFilter(data); // 建立下拉選單
-            renderUI(); // 立即渲染，這會根據「所有課程」預設顯示資料並隱藏課表
-            
-            document.getElementById('status-dot').style.background = '#28a745';
-            document.getElementById('status-label').innerText = '已連線';
-        })
-        .catch(err => {
-            console.error("API 連線失敗:", err);
-            document.getElementById('status-dot').style.background = '#ff4d4d';
-            document.getElementById('status-label').innerText = '連線失敗';
-        });
+  function gradeClass(g) {
+    if (g === null || g === undefined) return 'grade-fail';
+    if (g >= 80) return 'grade-high';
+    if (g >= 60) return 'grade-mid';
+    return 'grade-low';
+  }
 
-    function initFilter(data) {
-        const select = document.getElementById('semFilter');
-        select.innerHTML = '<option value="all">所有課程</option>'; // 設定預設選項
-        
-        // 解析所有存在的學期
-        const semesters = [...new Set(data.map(i => `${i.academic_year}-${i.semester}`))].sort();
-        semesters.forEach(s => {
-            select.innerHTML += `<option value="${s}">${s} 學年度</option>`;
-        });
-        select.value = "all"; // 確保初始值是 all
+  function initFilters(records) {
+    const sems = [...new Set(records.map(r => `${r.academic_year}-${r.semester}`))].sort();
+    const sel = document.getElementById('semFilter');
+    sel.innerHTML = '<option value="all">All Semesters</option>';
+    sems.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      sel.appendChild(opt);
+    });
+  }
+
+  function applyFilters() {
+    const sem  = document.getElementById('semFilter').value;
+    const type = document.getElementById('typeFilter').value;
+    filtered = allRecords.filter(r => {
+      const semMatch  = sem  === 'all' || `${r.academic_year}-${r.semester}` === sem;
+      const typeMatch = type === 'all' || r.type === type;
+      return semMatch && typeMatch;
+    });
+    currentPage = 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page  = filtered.slice(start, start + PAGE_SIZE);
+    const tbody = document.getElementById('listBody');
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">No records found</td></tr>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
     }
 
-    function renderUI() {
-        const selectedSem = document.getElementById('semFilter').value;
-        const ttArea = document.getElementById('timetableArea');
-        
-        if (selectedSem === "all") {
-            // 如果選「所有課程」，隱藏課表並顯示全部清單
-            ttArea.style.display = "none";
-            renderList(allCourses);
-        } else {
-            // 如果選特定學期，顯示課表並過濾清單
-            ttArea.style.display = "block";
-            const [year, sem] = selectedSem.split('-');
-            const filtered = allCourses.filter(c => c.academic_year === year && c.semester === sem);
-            
-            document.getElementById('tt-title').innerText = `📅 ${selectedSem} 學年度 課表預覽`;
-            renderTimetable(filtered);
-            renderList(filtered);
-        }
+    tbody.innerHTML = page.map(r => {
+      const gradeDisp = r.grade !== null ? r.grade.toFixed(0) : '—';
+      const typeBadge = TYPE_BADGE[r.type] || 'badge-elective';
+      const typeLabel = TYPE_LABELS[r.type] || r.type;
+      const statusBadge = r.status === 'completed'
+        ? '<span class="badge badge-green">Completed</span>'
+        : r.status === 'enrolled'
+          ? '<span class="badge badge-blue">In Progress</span>'
+          : `<span class="badge badge-amber">${r.status}</span>`;
+      return `
+        <tr>
+          <td style="font-family:'DM Mono',monospace;font-size:13px">${r.academic_year}-${r.semester}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600">${r.code}</td>
+          <td style="max-width:240px">${r.name_en}</td>
+          <td><span class="badge-type ${typeBadge}">${typeLabel}</span></td>
+          <td style="text-align:center">${r.credits}</td>
+          <td style="text-align:center"><span class="${gradeClass(r.grade)}">${gradeDisp}</span></td>
+          <td style="text-align:center">${r.gpa_points.toFixed(1)}</td>
+          <td style="color:var(--text-muted);font-size:13px">${r.instructor || '—'}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+    }).join('');
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const pg = document.getElementById('pagination');
+    if (totalPages <= 1) { pg.innerHTML = ''; return; }
+
+    let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ Prev</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+      } else if (Math.abs(i - currentPage) === 2) {
+        html += `<span class="page-info">…</span>`;
+      }
     }
+    html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next ›</button>`;
+    html += `<span class="page-info">${filtered.length} records</span>`;
+    pg.innerHTML = html;
+  }
 
-    function renderTimetable(courses) {
-        const tbody = document.getElementById('ttBody');
-        tbody.innerHTML = "";
+  function goPage(n) {
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    if (n < 1 || n > totalPages) return;
+    currentPage = n;
+    renderPage();
+  }
 
-        periods.forEach(p => {
-            let row = `<tr><td class="period-header">第 ${p} 節</td>`;
-            for (let d = 1; d <= 5; d++) {
-                const targetCode = `${d}0${p}`;
-                // 檢查課程時間字串是否包含該節次
-                const course = courses.find(c => c.time && c.time.split(',').includes(targetCode));
-                row += `<td>${course ? `<div class="course-chip" onclick="showInfo('${course.code}')">${course.name}</div>` : ''}</td>`;
-            }
-            tbody.innerHTML += row + "</tr>";
-        });
+  (async () => {
+    await checkAuth();
+    initLayout('course-history', 'Course History');
+
+    const user = getUser();
+    const studentId = user?.student_id || '1111708';
+
+    try {
+      const data = await api.courseRecords(studentId);
+
+      // Fill summary
+      document.getElementById('stat-credits').textContent    = data.summary.total_credits;
+      document.getElementById('stat-gpa').innerHTML          = `${data.summary.cumulative_gpa}<span class="stat-unit"> / 4.0</span>`;
+      document.getElementById('stat-courses').textContent    = data.summary.total_courses;
+      document.getElementById('stat-completion').innerHTML   = `${data.summary.degree_completion}<span class="stat-unit">%</span>`;
+
+      allRecords = data.records;
+      filtered   = allRecords;
+      initFilters(allRecords);
+      renderPage();
+
+      document.getElementById('status-dot').className   = 'status-dot ok';
+      document.getElementById('status-label').textContent = 'API Connected';
+    } catch (err) {
+      console.error('Failed to load course records:', err);
+      document.getElementById('status-dot').className   = 'status-dot err';
+      document.getElementById('status-label').textContent = 'API Error';
+      document.getElementById('listBody').innerHTML =
+        '<tr><td colspan="9" style="text-align:center;padding:32px;color:#dc2626">Failed to load data. Please try again.</td></tr>';
     }
-
-    function renderList(courses) {
-        const tbody = document.getElementById('listBody');
-        tbody.innerHTML = courses.map(c => `
-            <tr>
-                <td>${c.academic_year}-${c.semester}</td>
-                <td>${c.code}</td>
-                <td><span class="btn-detail" onclick="showInfo('${c.code}')"><strong>${c.name}</strong></span></td>
-                <td>${c.type === 'required' ? '必修' : '選修'}</td>
-                <td>${c.credits}</td>
-                <td style="font-weight:bold;">${c.grade}</td>
-            </tr>
-        `).join('');
-    }
-
-    // 彈窗邏輯
-    function showInfo(code) {
-        const c = allCourses.find(i => i.code === code);
-        if (!c) return;
-        document.getElementById('m-name').innerText = c.name;
-        document.getElementById('m-instructor').innerText = c.instructor;
-        document.getElementById('m-location').innerText = c.location;
-        document.getElementById('m-time').innerText = c.time;
-        document.getElementById('m-type').innerText = c.type === 'required' ? '專業必修' : '選修';
-        document.getElementById('m-status').innerText = c.status;
-        document.getElementById('m-desc').innerText = c.desc || "暫無課程描述";
-        document.getElementById('courseModal').style.display = "block";
-    }
-
-    function closeModal() { document.getElementById('courseModal').style.display = "none"; }
-    window.onclick = (event) => { if(event.target == document.getElementById('courseModal')) closeModal(); }
-    })(); // end async IIFE
+  })();
 </script>
 </body>
 </html>
