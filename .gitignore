@@ -28,3 +28,4 @@ Thumbs.db
 .idea/
 claude.md
 .claude/settings.local.json
+backend/requirements.txt
