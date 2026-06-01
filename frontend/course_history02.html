@@ -3,143 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>修課紀錄 — 校園智慧系統</title>
+<title>歷史修課紀錄 — 校園智慧系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/shared.css">
 <style>
     :root { 
-        --yzu-blue: #6f7c7e; 
-        --white: #e8e8e8; 
-        --border: #dee2e6; 
-        --text: #2d3748; 
+        --primary-blue: #4f6ef7;
+        --bg-light: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #d8dee6;
     }
     
-    header { 
-        border-bottom: 3px solid var(--yzu-blue); 
-        padding-bottom: 15px; margin-bottom: 25px; 
-        display: flex; justify-content: space-between; 
-        align-items: baseline; 
+
+    .content {
+        padding: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
-    .filter-bar { 
-        border-radius: 8px; 
-        margin-bottom: 25px; 
-        display: flex; 
-        align-items: center; 
-        gap: 10px; 
-        font-size: 18px;
+    /* 頂部標題與工具列 */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
     }
-    select { 
-        padding: 8px 12px; 
-        border-radius: 5px; 
-        border: 1px solid #cbd5e0; 
-        cursor: pointer; 
-        font-size: 15px; }
+    .page-title-area h2 {
+        margin: 0 0 5px 0;
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .page-title-area p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
 
-    .timetable-box { 
-        margin-top: 30px;
+    /* 匯出下拉選單樣式 */
+    .dropdown {
+        position: relative;
+        display: inline-block;
     }
-    .timetable { 
-        margin-top: 10px;
-        width: 100%; 
-        border-collapse: collapse; 
-        table-layout: fixed; 
-    }
-    .timetable th { 
-        background: var(--yzu-blue); 
-        border: 1px solid var(--border); 
-        padding: 10px; font-size: 14px; 
-        color: #ffffff; 
-    }
-    .timetable td { 
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
         background-color: #ffffff;
-        border: 1px solid var(--border); 
-        height: 60px; 
-        text-align: center; 
-        vertical-align: middle; 
-        position: relative; 
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.08);
+        z-index: 100;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-top: 6px;
+        overflow: hidden;
     }
-    .timetable .period-header { 
-        background: #cbd1d2; 
-        font-weight: bold; 
-        width: 80px; 
+    .dropdown-content a {
+        color: var(--text-main);
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 14px;
+        transition: background 0.2s;
     }
-    .course-chip { 
-        color: rgb(0, 0, 0); 
-        border-radius: 4px; 
-        padding: 5px; 
-        font-size: 11px; 
-        font-weight: bold; 
-        cursor: pointer; 
-        height: 90%; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
+    .dropdown-content a:hover {
+        background-color: #f1f5f9;
+        color: var(--primary-blue);
+    }
+    .show { 
+        display: block; 
     }
 
-    .course-chip:hover{
-        color: var(--yzu-blue);
+    /* 數據卡片區 */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        border: 1px solid var(--border-color);
+    }
+    .stat-card-title {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+    }
+    .stat-card-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .stat-card-value span {
+        font-size: 14px;
+        font-weight: normal;
+        color: var(--text-muted);
+        margin-left: 4px;
+    }
+    .stat-card-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* 篩選控制面板 */
+    .filter-panel {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) auto;
+        gap: 15px;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .filter-group label {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .filter-group select, .filter-group input {
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        font-size: 14px;
+        background-color: #fff;
+        outline: none;
+    }
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+    }
+    .btn-primary { background: var(--primary-blue); color: white; }
+    .btn-light { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-export { background: var(--primary-blue); color: white; display: flex; align-items: center; gap: 8px; }
+
+    /* 修課紀錄清單區 */
+    .record-container {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+    }
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+    }
+    .record-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .record-table th {
+        text-align: center;
+        background: #f8fafc;
+        padding: 14px 16px;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .record-table td {
+        text-align: center;
+        padding: 16px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* 課程類別標籤 */
+    .badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+    }
+    .badge-required { background-color: #e0f2fe; color: #0369a1; }
+    .badge-elective { background-color: #f3e8ff; color: #6b21a8; }
+    .badge-general { background-color: #ffedd5; color: #c2410c; }
+
+    .btn-detail {
+        color: var(--text-main);
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .btn-detail:hover {
+        color: var(--primary-blue);
         text-decoration: underline;
     }
 
-    .record-table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-top: 10px; 
+    /* 底部分頁 */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--text-muted);
     }
-    .record-table th { 
-        background: var(--yzu-blue); 
-        color: rgb(255, 255, 255); 
-        padding: 12px; 
-        text-align: left; 
+    .pagination {
+        display: flex;
+        gap: 5px;
     }
-    .record-table td { 
-        border-bottom: 1px solid var(--border); 
-        padding: 12px; 
-        font-size: 14px; 
-        background: white; 
+    .page-link {
+        padding: 6px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--text-main);
+        background: #fff;
     }
-    .btn-detail { 
-        color: black; 
-        font-weight: bold; 
-        cursor: pointer; 
-        text-decoration: none; 
-    }
-
-    .btn-detail:hover{
-        color: var(--yzu-blue);
-        text-decoration: underline;
+    .page-link.active {
+        background: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue);
     }
 
-    .modal { 
-        display: none; 
-        position: fixed; 
-        z-index: 1000; 
-        left: 0; top: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: rgba(0,0,0,0.6); 
-    }
-    .modal-content { 
-        background: white; 
-        margin: 10% auto; 
-        padding: 30px; 
-        border-radius: 12px; 
-        width: 500px; 
-        position: relative; 
-    }
-    .modal-content p{
-        margin-top: 5px;
+    /* 課表區 */
+    .timetable-box { margin-top: 30px; background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
+    .timetable { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .timetable th { background: #e9ebec; color: var(--text-muted); padding: 12px; border: 1px solid var(--border-color); font-weight: 500; }
+    .timetable td { border: 1px solid var(--border-color); height: 55px; text-align: center; background: #fff; }
+    .timetable .period-header { background: #f8fafc; font-weight: bold; width: 90px; color: var(--text-main); }
+    .course-chip {  color: black; border-radius: 6px; padding: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin: 2px; }
+    .course-chip:hover{color: var(--primary-blue);
+        text-decoration: underline;}
+
+    /* 提示訊息列 */
+    .info-banner {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .close { 
-        position: absolute; 
-        right: 20px; 
-        top: 15px; 
-        font-size: 28px; 
-        cursor: pointer; 
-    }
+    /* 彈窗樣式 */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+    .modal-content { background: white; margin: 12% auto; padding: 30px; border-radius: 12px; width: 480px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .modal-content p{margin-top: 5px;}
+    .close { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; color:black; }
 </style>
 </head>
 <body>
@@ -148,40 +283,137 @@
 
 <div class="main">
     <header class="topbar">
-        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
-      ☰
-    </button>
+        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">☰</button>
         <div class="topbar-title"></div>
         <div class="api-status">
-        <div class="status-dot" id="status-dot"></div>
-        <span class="status-label" id="status-label">連線中...</span>
+            <div class="status-dot" id="status-dot"></div>
+            <span class="status-label" id="status-label">連線中...</span>
         </div>
     </header>
 
     <div class="content">
-        <div class="filter-bar">
-            <label><strong>選擇學期：</strong></label>
-            <select id="semFilter" onchange="renderUI()"></select>
+        <div class="page-header">
+            <div class="page-title-area">
+                <h2>歷史修課紀錄</h2>
+                <p>瀏覽您已完成的課程與成績，並可匯出正式成績單。</p>
+            </div>
+            
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-export" onclick="toggleDropdown(event)">一鍵匯出成績單 ▾</button>
+                    <div id="exportDropdown" class="dropdown-content">
+                        <a href="#" onclick="handleExport('PDF')">📄 匯出 PDF 檔</a>
+                        <a href="#" onclick="handleExport('Excel')">📊 匯出 Excel 檔</a>
+                        <a href="#" onclick="handleExport('CSV')">📝 匯出 CSV 檔</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!--修課清單-->
-        <h3>🗒️修課清單</h3>
-        <table class="record-table">
-            <thead>
-                <tr><th>學期</th><th>課號</th><th>課程名稱</th><th>類別</th><th>學分</th><th>成績</th></tr>
-            </thead>
-            <tbody id="listBody"></tbody>
-        </table>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-card-title">🎓 歷年總獲得學分</div>
+                <div class="stat-card-value" id="stat-credits">128 <span>學分</span></div>
+                <div class="stat-card-sub">累計已修習</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">📈 歷年平均 GPA</div>
+                <div class="stat-card-value" id="stat-gpa">3.52 <span>/ 4.00</span></div>
+                <div class="stat-card-sub">累計平均</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">📖 歷年修課總數</div>
+                <div class="stat-card-value" id="stat-courses">42 <span>門</span></div>
+                <div class="stat-card-sub">已修習課程總數</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">✅ 及格率</div>
+                <div class="stat-card-value" id="stat-pass">94.5 <span>%</span></div>
+                <div class="stat-card-sub">歷年平均及格率</div>
+            </div>
+        </div>
 
-        <!--顯示課表-->
+        <div class="filter-panel">
+            <div class="filter-group">
+                <label>學年度 / 學期</label>
+                <select id="semFilter"></select>
+            </div>
+            <div class="filter-group">
+                <label>課程類別</label>
+                <select id="typeFilter">
+                    <option value="all">全部</option>
+                    <option value="required">必修</option>
+                    <option value="elective">選修</option>
+                    <option value="general">通識</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>通識類別</label>
+                <select id="genFilter">
+                    <option value="all">全部</option>
+                    <option value="人文藝術">人文藝術</option>
+                    <option value="社會科學">社會科學</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>搜尋課程名稱</label>
+                <input type="text" id="searchFilter" placeholder="請輸入課程名稱">
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-light" onclick="resetFilters()">重設</button>
+                <button class="btn btn-primary" onclick="renderUI()">查詢</button>
+            </div>
+        </div>
+
+        <div class="record-container">
+            <div class="section-title">修課紀錄清單</div>
+            <table class="record-table">
+                <colgroup>
+                    <col style="width: 15%;"><col style="width: 25%;"><col style="width: 15%;">
+                    <col style="width: 15%;"><col style="width: 10%;"><col style="width: 10%;"><col style="width: 15%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>學年度 / 學期</th>
+                        <th>課程名稱</th>
+                        <th>課程類別</th>
+                        <th>通識類別</th>
+                        <th>學分數</th>
+                        <th>成績</th>
+                        <th>教師</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody"></tbody>
+            </table>
+
+            <div class="table-footer">
+                <div id="tableInfo">顯示第 1 至 10 筆，共 42 筆紀錄</div>
+                <div class="pagination">
+                    <a href="#" class="page-link">◀</a>
+                    <a href="#" class="page-link active">1</a>
+                    <a href="#" class="page-link">2</a>
+                    <a href="#" class="page-link">3</a>
+                    <a href="#" class="page-link">▶</a>
+                </div>
+            </div>
+        </div>
+
         <div class="timetable-box" id="timetableArea">
-            <h3 id="tt-title">📅 當前學期課表</h3>
+            <h3 id="tt-title" class="section-title">📅 當前學期課表</h3>
             <table class="timetable">
+                <colgroup>
+                    <col style="width: 10%;"><col style="width: 18%;"><col style="width: 18%;">
+                    <col style="width: 18%;"><col style="width: 18%;"><col style="width: 18%;">
+                </colgroup>
                 <thead>
                     <tr><th>節次</th><th>週一</th><th>週二</th><th>週三</th><th>週四</th><th>週五</th></tr>
                 </thead>
                 <tbody id="ttBody"></tbody>
             </table>
+        </div>
+
+        <div class="info-banner">
+            ℹ️ 若發現成績或課程資料有誤，請洽教務處註冊組。
         </div>
     </div>
 </div>
@@ -189,15 +421,15 @@
 <div id="courseModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="m-name"></h2>
-        <hr style="margin-bottom: 10px; margin-top:10px">
+        <h2 id="m-name" style="margin-top:0; "></h2>
+        <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
         <p><strong>授課老師：</strong> <span id="m-instructor"></span></p>
         <p><strong>上課地點：</strong> <span id="m-location"></span></p>
-        <p><strong>設課時間：</strong> <span id="m-time"</p>
+        <p><strong>上課時間：</strong> <span id="m-time"></span></p>
         <p><strong>選別：</strong> <span id="m-type"></span></p>
         <p><strong>狀態：</strong> <span id="m-status"></span></p>
         <p><strong>內容大綱：</strong></p>
-        <p id="m-desc" style="background:#f8f9fa; border-radius:5px; font-size:14px; line-height:1.6;"></p>
+        <p id="m-desc" style="background:#f8f9fa; padding:12px; border-radius:6px; font-size:14px; line-height:1.6; color:#475569;"></p>
     </div>
 </div>
 
@@ -208,16 +440,16 @@
     let allCourses = [];
     const periods = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-    // 初始化 sidebar 和頁面標題
     initLayout('course-history', '修課紀錄');
 
-    // 抓取課程資料
+    // 串接 API
     fetch('http://127.0.0.1:8000/course_records/1111708')
         .then(res => res.json())
         .then(data => {
             allCourses = data;
-            initFilter(data); // 建立下拉選單
-            renderUI(); // 立即渲染，這會根據「所有課程」預設顯示資料並隱藏課表
+            initFilter(data);
+            calculateStats(data); 
+            renderUI(); // 初始載入預設載入全部資料
             
             document.getElementById('status-dot').style.background = '#28a745';
             document.getElementById('status-label').innerText = '已連線';
@@ -230,45 +462,77 @@
 
     function initFilter(data) {
         const select = document.getElementById('semFilter');
-        select.innerHTML = '<option value="all">所有課程</option>'; // 設定預設選項
-        
-        // 解析所有存在的學期
+        select.innerHTML = '<option value="all">全部</option>';
         const semesters = [...new Set(data.map(i => `${i.academic_year}-${i.semester}`))].sort();
         semesters.forEach(s => {
-            select.innerHTML += `<option value="${s}">${s} 學年度</option>`;
+            select.innerHTML += `<option value="${s}">${s}</option>`;
         });
-        select.value = "all"; // 確保初始值是 all
+        select.value = "all";
+    }
+
+    function calculateStats(data) {
+        const totalCredits = data.reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
+        document.getElementById('stat-credits').innerHTML = `${totalCredits} <span>學分</span>`;
+        document.getElementById('stat-courses').innerHTML = `${data.length} <span>門</span>`;
+    }
+
+    // 下拉選單開關邏輯
+    function toggleDropdown(event) {
+        event.stopPropagation(); // 防止事件冒泡導致立刻關閉
+        document.getElementById("exportDropdown").classList.toggle("show");
+    }
+
+    // 留給未來的匯出功能處理接口
+    function handleExport(type) {
+        alert('準備匯出 ' + type + ' 檔案，詳細匯出邏輯待後續實作。');
+        // 這裡可以等您提供詳細規格後，再由軟專幫您撰寫對應處理邏輯
+    }
+
+    // 修正：重設按鈕一按下即立刻還原原始狀態
+    function resetFilters() {
+        document.getElementById('semFilter').value = 'all';
+        document.getElementById('typeFilter').value = 'all';
+        document.getElementById('genFilter').value = 'all';
+        document.getElementById('searchFilter').value = '';
+        renderUI(); // 恢復初始狀態
     }
 
     function renderUI() {
         const selectedSem = document.getElementById('semFilter').value;
+        const selectedType = document.getElementById('typeFilter').value;
+        const selectedGen = document.getElementById('genFilter').value;
+        const searchText = document.getElementById('searchFilter').value.toLowerCase();
+        
         const ttArea = document.getElementById('timetableArea');
         
+        let filtered = allCourses.filter(c => {
+            const matchesSem = (selectedSem === "all") || (`${c.academic_year}-${c.semester}` === selectedSem);
+            const matchesType = (selectedType === "all") || (c.type === selectedType);
+            const matchesGen = (selectedGen === "all") || (c.general_type === selectedGen);
+            const matchesSearch = c.name.toLowerCase().includes(searchText);
+            return matchesSem && matchesType && matchesGen && matchesSearch;
+        });
+
         if (selectedSem === "all") {
-            // 如果選「所有課程」，隱藏課表並顯示全部清單
             ttArea.style.display = "none";
-            renderList(allCourses);
         } else {
-            // 如果選特定學期，顯示課表並過濾清單
             ttArea.style.display = "block";
-            const [year, sem] = selectedSem.split('-');
-            const filtered = allCourses.filter(c => c.academic_year === year && c.semester === sem);
-            
-            document.getElementById('tt-title').innerText = `📅 ${selectedSem} 學年度 課表預覽`;
-            renderTimetable(filtered);
-            renderList(filtered);
+            document.getElementById('tt-title').innerText = `📅 ${selectedSem} 學期 課表`;
+            const semData = allCourses.filter(c => `${c.academic_year}-${c.semester}` === selectedSem);
+            renderTimetable(semData);
         }
+
+        renderList(filtered);
+        document.getElementById('tableInfo').innerText = `顯示第 1 至 ${filtered.length} 筆，共 ${filtered.length} 筆紀錄`;
     }
 
     function renderTimetable(courses) {
         const tbody = document.getElementById('ttBody');
         tbody.innerHTML = "";
-
         periods.forEach(p => {
             let row = `<tr><td class="period-header">第 ${p} 節</td>`;
             for (let d = 1; d <= 5; d++) {
                 const targetCode = `${d}0${p}`;
-                // 檢查課程時間字串是否包含該節次
                 const course = courses.find(c => c.time && c.time.split(',').includes(targetCode));
                 row += `<td>${course ? `<div class="course-chip" onclick="showInfo('${course.code}')">${course.name}</div>` : ''}</td>`;
             }
@@ -278,34 +542,57 @@
 
     function renderList(courses) {
         const tbody = document.getElementById('listBody');
-        tbody.innerHTML = courses.map(c => `
-            <tr>
-                <td>${c.academic_year}-${c.semester}</td>
-                <td>${c.code}</td>
-                <td><span class="btn-detail" onclick="showInfo('${c.code}')"><strong>${c.name}</strong></span></td>
-                <td>${c.type === 'required' ? '必修' : '選修'}</td>
-                <td>${c.credits}</td>
-                <td style="font-weight:bold;">${c.grade}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = courses.map(c => {
+            let typeBadge = '';
+            if(c.type === 'required') typeBadge = `<span class="badge badge-required">必修</span>`;
+            else if(c.type === 'elective') typeBadge = `<span class="badge badge-elective">選修</span>`;
+            else typeBadge = `<span class="badge badge-general">通識</span>`;
+
+            return `
+                <tr>
+                    <td>${c.academic_year}-${c.semester}</td>
+                    <td><span class="btn-detail" onclick="showInfo('${c.code}')"><strong>${c.name}</strong></span></td>
+                    <td>${typeBadge}</td>
+                    <td><span style="color:var(--text-muted);">${c.general_type || '—'}</span></td>
+                    <td>${c.credits}</td>
+                    <td style="font-weight:bold; color: #0f172a;">${c.grade || 'A'}</td>
+                    <td>${c.instructor || '陳教授'}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
-    // 彈窗邏輯
     function showInfo(code) {
         const c = allCourses.find(i => i.code === code);
         if (!c) return;
         document.getElementById('m-name').innerText = c.name;
-        document.getElementById('m-instructor').innerText = c.instructor;
-        document.getElementById('m-location').innerText = c.location;
-        document.getElementById('m-time').innerText = c.time;
+        document.getElementById('m-instructor').innerText = c.instructor || "未定";
+        document.getElementById('m-location').innerText = c.location || "未定";
+        document.getElementById('m-time').innerText = c.time || "未定";
         document.getElementById('m-type').innerText = c.type === 'required' ? '專業必修' : '選修';
-        document.getElementById('m-status').innerText = c.status;
+        document.getElementById('m-status').innerText = c.status || "開放";
         document.getElementById('m-desc').innerText = c.desc || "暫無課程描述";
         document.getElementById('courseModal').style.display = "block";
     }
 
     function closeModal() { document.getElementById('courseModal').style.display = "none"; }
-    window.onclick = (event) => { if(event.target == document.getElementById('courseModal')) closeModal(); }
+    
+    // 修正：全域點擊事件同時控管彈窗與下拉選單的收合
+    window.onclick = (event) => { 
+        if (event.target == document.getElementById('courseModal')) {
+            closeModal(); 
+        }
+        // 如果點擊的地方不是匯出按鈕，就強行收合下拉選單
+        if (!event.target.matches('.btn-export')) {
+            const dropdowns = document.getElementsByClassName("dropdown-content");
+            for (let i = 0; i < dropdowns.length; i++) {
+                let openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
 </script>
 </body>
 </html>
