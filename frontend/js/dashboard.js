@@ -27,7 +27,8 @@ function renderCourses(tbody, courses) {
   `).join('');
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  await checkAuth();
   initLayout('dashboard', '儀表板');
   loadDashCourses();
 });

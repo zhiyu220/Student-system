@@ -38,6 +38,7 @@ function markAllRead() {
 }
 
 window.addEventListener('load', async () => {
+  await checkAuth();
   initLayout('notifications', '通知中心');
   try {
     const data = await api.notifications();
