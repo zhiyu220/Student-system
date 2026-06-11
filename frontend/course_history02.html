@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -33,7 +33,7 @@
     flex-wrap: wrap;
   }
   .filter-bar label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
-  .filter-bar select {
+  .filter-bar select, .filter-bar input[type="text"] {
     padding: 7px 12px;
     border-radius: 6px;
     border: 1.5px solid #e0e0e0;
@@ -43,7 +43,9 @@
     cursor: pointer;
     outline: none;
   }
-  .filter-bar select:focus { border-color: #4E6CF0; }
+  .filter-bar select:focus,
+  .filter-bar input[type="text"]:focus { border-color: #4E6CF0; }
+  .filter-bar input[type="text"] { min-width: 180px; cursor: text; }
 
   .record-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .record-table th {
@@ -64,6 +66,14 @@
   }
   .record-table tr:last-child td { border-bottom: none; }
   .record-table tr:hover td { background: #f9f9ff; }
+
+  .name-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .name-link:hover { color: #4E6CF0; text-decoration: underline; }
 
   .badge-type {
     display: inline-block;
@@ -106,6 +116,85 @@
 
   .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
   .card-body { padding: 20px; }
+
+  /* Export dropdown */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .page-header h2 { margin: 0 0 4px; }
+  .page-header p  { margin: 0; font-size: 14px; color: var(--text-muted); }
+  .dropdown { position: relative; display: inline-block; }
+  .btn-export {
+    padding: 8px 16px;
+    background: #4E6CF0;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-export:hover { background: #3a5bd9; }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #fff;
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border-radius: 8px;
+    border: 1px solid #e0e0e8;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .dropdown-content a {
+    display: block;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #1e293b;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .dropdown-content a:hover { background: #f1f5f9; color: #4E6CF0; }
+  .dropdown-content.show { display: block; }
+
+  /* Course detail modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    width: 480px;
+    max-width: 94vw;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #888;
+    background: none;
+    border: none;
+    line-height: 1;
+  }
+  .modal-close:hover { color: #333; }
+  .modal-title { font-size: 18px; font-weight: 700; margin: 0 0 12px; padding-right: 24px; }
+  .modal-divider { border: 0; border-top: 1px solid #e5e7eb; margin: 12px 0; }
+  .modal-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 14px; }
+  .modal-row strong { min-width: 100px; color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -114,7 +203,7 @@
 <aside class="sidebar"></aside>
 <div class="main">
   <header class="topbar">
-    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">☰</button>
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">&#9776;</button>
     <div class="topbar-title"></div>
     <div class="api-status">
       <div class="status-dot" id="status-dot"></div>
@@ -124,27 +213,39 @@
 
   <div class="content">
     <div class="page-header">
-      <h2>Course History</h2>
-      <p>Complete record of all enrolled courses and grades</p>
+      <div>
+        <h2>Course History</h2>
+        <p>Complete record of all enrolled courses and grades</p>
+      </div>
+      <div class="dropdown">
+        <button class="btn-export" onclick="toggleExport(event)">
+          <i class="ti ti-download"></i> Export &#9662;
+        </button>
+        <div id="exportDropdown" class="dropdown-content">
+          <a href="#" onclick="handleExport('PDF')">Export PDF</a>
+          <a href="#" onclick="handleExport('Excel')">Export Excel</a>
+          <a href="#" onclick="handleExport('CSV')">Export CSV</a>
+        </div>
+      </div>
     </div>
 
     <!-- Summary stats -->
     <div class="summary-grid">
       <div class="stat-card">
         <div class="stat-label">Total Credits Earned</div>
-        <div class="stat-value" id="stat-credits">—</div>
+        <div class="stat-value" id="stat-credits">&#8212;</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Cumulative GPA</div>
-        <div class="stat-value" id="stat-gpa">—<span class="stat-unit"> / 4.0</span></div>
+        <div class="stat-value" id="stat-gpa">&#8212;<span class="stat-unit"> / 4.0</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Courses</div>
-        <div class="stat-value" id="stat-courses">—</div>
+        <div class="stat-value" id="stat-courses">&#8212;</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Degree Completion</div>
-        <div class="stat-value" id="stat-completion">—<span class="stat-unit">%</span></div>
+        <div class="stat-value" id="stat-completion">&#8212;<span class="stat-unit">%</span></div>
       </div>
     </div>
 
@@ -162,6 +263,8 @@
         <option value="university_required">University Required</option>
         <option value="general_education">General Education</option>
       </select>
+      <label>Search</label>
+      <input type="text" id="searchFilter" placeholder="Course name or code" oninput="applyFilters()">
     </div>
 
     <!-- Course table -->
@@ -192,8 +295,23 @@
 </div>
 </div>
 
+<!-- Course detail modal -->
+<div class="modal-overlay" id="courseModal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('courseModal').classList.remove('show')">&times;</button>
+    <div class="modal-title" id="m-name"></div>
+    <hr class="modal-divider">
+    <div class="modal-row"><strong>Code</strong><span id="m-code"></span></div>
+    <div class="modal-row"><strong>Type</strong><span id="m-type"></span></div>
+    <div class="modal-row"><strong>Credits</strong><span id="m-credits"></span></div>
+    <div class="modal-row"><strong>Grade</strong><span id="m-grade"></span></div>
+    <div class="modal-row"><strong>GPA Points</strong><span id="m-gpa"></span></div>
+    <div class="modal-row"><strong>Instructor</strong><span id="m-instructor"></span></div>
+    <div class="modal-row"><strong>Status</strong><span id="m-status"></span></div>
+  </div>
+</div>
+
 <script src="js/api.js"></script>
-<script src="js/auth.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 <script>
@@ -223,7 +341,7 @@
   }
 
   function initFilters(records) {
-    const sems = [...new Set(records.map(r => `${r.academic_year}-${r.semester}`))].sort();
+    const sems = [...new Set(records.map(r => r.academic_year + '-' + r.semester))].sort();
     const sel = document.getElementById('semFilter');
     sel.innerHTML = '<option value="all">All Semesters</option>';
     sems.forEach(s => {
@@ -235,12 +353,14 @@
   }
 
   function applyFilters() {
-    const sem  = document.getElementById('semFilter').value;
-    const type = document.getElementById('typeFilter').value;
+    const sem    = document.getElementById('semFilter').value;
+    const type   = document.getElementById('typeFilter').value;
+    const search = document.getElementById('searchFilter').value.toLowerCase();
     filtered = allRecords.filter(r => {
-      const semMatch  = sem  === 'all' || `${r.academic_year}-${r.semester}` === sem;
-      const typeMatch = type === 'all' || r.type === type;
-      return semMatch && typeMatch;
+      const semMatch    = sem  === 'all' || (r.academic_year + '-' + r.semester) === sem;
+      const typeMatch   = type === 'all' || r.type === type;
+      const searchMatch = !search || r.name_en.toLowerCase().includes(search) || r.code.toLowerCase().includes(search);
+      return semMatch && typeMatch && searchMatch;
     });
     currentPage = 1;
     renderPage();
@@ -257,27 +377,27 @@
       return;
     }
 
-    tbody.innerHTML = page.map(r => {
-      const gradeDisp = r.grade !== null ? r.grade.toFixed(0) : '—';
-      const typeBadge = TYPE_BADGE[r.type] || 'badge-elective';
-      const typeLabel = TYPE_LABELS[r.type] || r.type;
+    tbody.innerHTML = page.map(function(r) {
+      const gradeDisp  = r.grade !== null ? parseFloat(r.grade).toFixed(0) : '—';
+      const typeBadge  = TYPE_BADGE[r.type] || 'badge-elective';
+      const typeLabel  = TYPE_LABELS[r.type] || r.type;
       const statusBadge = r.status === 'completed'
         ? '<span class="badge badge-green">Completed</span>'
         : r.status === 'enrolled'
           ? '<span class="badge badge-blue">In Progress</span>'
-          : `<span class="badge badge-amber">${r.status}</span>`;
-      return `
-        <tr>
-          <td style="font-family:'DM Mono',monospace;font-size:13px">${r.academic_year}-${r.semester}</td>
-          <td style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600">${r.code}</td>
-          <td style="max-width:240px">${r.name_en}</td>
-          <td><span class="badge-type ${typeBadge}">${typeLabel}</span></td>
-          <td style="text-align:center">${r.credits}</td>
-          <td style="text-align:center"><span class="${gradeClass(r.grade)}">${gradeDisp}</span></td>
-          <td style="text-align:center">${r.gpa_points.toFixed(1)}</td>
-          <td style="color:var(--text-muted);font-size:13px">${r.instructor || '—'}</td>
-          <td>${statusBadge}</td>
-        </tr>`;
+          : '<span class="badge badge-amber">' + (r.status || '—') + '</span>';
+      const idx = allRecords.indexOf(r);
+      return '<tr>'
+        + '<td style="font-family:\'DM Mono\',monospace;font-size:13px">' + r.academic_year + '-' + r.semester + '</td>'
+        + '<td style="font-family:\'DM Mono\',monospace;font-size:13px;font-weight:600">' + r.code + '</td>'
+        + '<td style="max-width:240px"><span class="name-link" onclick="showDetail(' + idx + ')">' + r.name_en + '</span></td>'
+        + '<td><span class="badge-type ' + typeBadge + '">' + typeLabel + '</span></td>'
+        + '<td style="text-align:center">' + r.credits + '</td>'
+        + '<td style="text-align:center"><span class="' + gradeClass(r.grade) + '">' + gradeDisp + '</span></td>'
+        + '<td style="text-align:center">' + parseFloat(r.gpa_points).toFixed(1) + '</td>'
+        + '<td style="color:var(--text-muted);font-size:13px">' + (r.instructor || '—') + '</td>'
+        + '<td>' + statusBadge + '</td>'
+        + '</tr>';
     }).join('');
 
     renderPagination();
@@ -288,16 +408,16 @@
     const pg = document.getElementById('pagination');
     if (totalPages <= 1) { pg.innerHTML = ''; return; }
 
-    let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹ Prev</button>`;
+    let html = '<button class="page-btn" onclick="goPage(' + (currentPage - 1) + ')"' + (currentPage === 1 ? ' disabled' : '') + '>‹ Prev</button>';
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+        html += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
       } else if (Math.abs(i - currentPage) === 2) {
-        html += `<span class="page-info">…</span>`;
+        html += '<span class="page-info">…</span>';
       }
     }
-    html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next ›</button>`;
-    html += `<span class="page-info">${filtered.length} records</span>`;
+    html += '<button class="page-btn" onclick="goPage(' + (currentPage + 1) + ')"' + (currentPage === totalPages ? ' disabled' : '') + '>Next ›</button>';
+    html += '<span class="page-info">' + filtered.length + ' records</span>';
     pg.innerHTML = html;
   }
 
@@ -308,32 +428,63 @@
     renderPage();
   }
 
-  (async () => {
+  function showDetail(idx) {
+    const r = allRecords[idx];
+    document.getElementById('m-name').textContent       = r.name_en;
+    document.getElementById('m-code').textContent       = r.code;
+    document.getElementById('m-type').textContent       = TYPE_LABELS[r.type] || r.type;
+    document.getElementById('m-credits').textContent    = r.credits;
+    document.getElementById('m-grade').textContent      = r.grade !== null ? parseFloat(r.grade).toFixed(0) : '—';
+    document.getElementById('m-gpa').textContent        = parseFloat(r.gpa_points).toFixed(1);
+    document.getElementById('m-instructor').textContent = r.instructor || '—';
+    document.getElementById('m-status').textContent     = r.status || '—';
+    document.getElementById('courseModal').classList.add('show');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('courseModal')) {
+      document.getElementById('courseModal').classList.remove('show');
+    }
+  }
+
+  function toggleExport(e) {
+    e.stopPropagation();
+    document.getElementById('exportDropdown').classList.toggle('show');
+  }
+
+  function handleExport(type) {
+    alert('Export as ' + type + ' — implementation pending.');
+  }
+
+  window.addEventListener('click', function() {
+    document.getElementById('exportDropdown').classList.remove('show');
+  });
+
+  (async function() {
     await checkAuth();
     initLayout('course-history', 'Course History');
 
     const user = getUser();
-    const studentId = user?.student_id || '1111708';
+    const studentId = user && user.student_id ? user.student_id : '1111708';
 
     try {
       const data = await api.courseRecords(studentId);
 
-      // Fill summary
       document.getElementById('stat-credits').textContent    = data.summary.total_credits;
-      document.getElementById('stat-gpa').innerHTML          = `${data.summary.cumulative_gpa}<span class="stat-unit"> / 4.0</span>`;
+      document.getElementById('stat-gpa').innerHTML          = data.summary.cumulative_gpa + '<span class="stat-unit"> / 4.0</span>';
       document.getElementById('stat-courses').textContent    = data.summary.total_courses;
-      document.getElementById('stat-completion').innerHTML   = `${data.summary.degree_completion}<span class="stat-unit">%</span>`;
+      document.getElementById('stat-completion').innerHTML   = data.summary.degree_completion + '<span class="stat-unit">%</span>';
 
       allRecords = data.records;
       filtered   = allRecords;
       initFilters(allRecords);
       renderPage();
 
-      document.getElementById('status-dot').className   = 'status-dot ok';
+      document.getElementById('status-dot').className    = 'status-dot ok';
       document.getElementById('status-label').textContent = 'API Connected';
     } catch (err) {
       console.error('Failed to load course records:', err);
-      document.getElementById('status-dot').className   = 'status-dot err';
+      document.getElementById('status-dot').className    = 'status-dot err';
       document.getElementById('status-label').textContent = 'API Error';
       document.getElementById('listBody').innerHTML =
         '<tr><td colspan="9" style="text-align:center;padding:32px;color:#dc2626">Failed to load data. Please try again.</td></tr>';
