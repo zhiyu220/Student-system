@@ -434,6 +434,7 @@
 </div>
 
 <script src="js/api.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
 
 <script>
@@ -442,23 +443,25 @@
 
     initLayout('course-history', '修課紀錄');
 
-    // 串接 API
-    fetch('http://127.0.0.1:8000/course_records/1111708')
-        .then(res => res.json())
-        .then(data => {
+    (async () => {
+        try {
+            await checkAuth();
+            const user = getUser();
+            const studentId = user?.student_id || '1111708';
+            const data = await api.courseRecords(studentId);
             allCourses = data;
             initFilter(data);
-            calculateStats(data); 
-            renderUI(); // 初始載入預設載入全部資料
-            
+            calculateStats(data);
+            renderUI();
+
             document.getElementById('status-dot').style.background = '#28a745';
             document.getElementById('status-label').innerText = '已連線';
-        })
-        .catch(err => {
+        } catch (err) {
             console.error("API 連線失敗:", err);
             document.getElementById('status-dot').style.background = '#ff4d4d';
             document.getElementById('status-label').innerText = '連線失敗';
-        });
+        }
+    })();
 
     function initFilter(data) {
         const select = document.getElementById('semFilter');
