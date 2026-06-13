@@ -337,6 +337,14 @@
           <option value="false">Failed</option>
           <option value="null">Not graded</option>
         </select>
+        <select id="ef-type"    onchange="filterEnrollments()">
+          <option value="">All Types</option>
+          <option value="required">required</option>
+          <option value="elective">elective</option>
+          <option value="university_required">university_required</option>
+          <option value="general_education">general_education</option>
+          <option value="common_required">common_required</option>
+        </select>
         <select id="ef-dept"    onchange="filterEnrollments()">
           <option value="">All Departments</option>
         </select>
@@ -653,6 +661,7 @@ function filterEnrollments() {
   const status  = document.getElementById('ef-status').value;
   const sem     = document.getElementById('ef-sem').value;
   const pass    = document.getElementById('ef-pass').value;
+  const type    = document.getElementById('ef-type').value;
   const dept    = document.getElementById('ef-dept').value;
 
   const rows = rawEnrollments.filter(r => {
@@ -666,6 +675,7 @@ function filterEnrollments() {
     )) return false;
     if (status && r.status !== status) return false;
     if (sem && semLabel(r.academic_year, r.semester) !== sem) return false;
+    if (type && r.course_type !== type) return false;
     if (dept && r.dept_code !== dept) return false;
     if (pass === 'true'  && r.pass_flag !== true)  return false;
     if (pass === 'false' && r.pass_flag !== false) return false;
