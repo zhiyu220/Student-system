@@ -160,7 +160,9 @@ function missingChip(c) {
   return `<span class="miss-chip ${cls}" title="${c.name_en} (${c.credits} cr)">${icon} ${c.code} &middot; ${c.name_en} <em>(${c.credits} cr)</em></span>`;
 }
 
-function renderNeeded(buckets, blockingItems, allCourses, takenCodes) {
+// `catalogPending` = the course catalog is still loading, so elective/gen-ed
+// suggestions aren't ready yet and we show a "Loading suggestions…" hint instead.
+function renderNeeded(buckets, blockingItems, allCourses, takenCodes, catalogPending) {
   const container = document.getElementById('needed-list');
   const order = ['Department Required Courses', 'Elective Courses', 'University Compulsory & General Education'];
   const byName = {};
@@ -187,8 +189,18 @@ function renderNeeded(buckets, blockingItems, allCourses, takenCodes) {
       const chips = (b.missing_courses || []).length
         ? `<div class="chip-row">${b.missing_courses.map(missingChip).join('')}</div>`
         : '';
-      const suggestions = buildSuggestions(b, allCourses, takenCodes, gap);
-      body = chips + suggestionsHtml(suggestions, gap);
+      // Credit-sum buckets (elective / gen-ed) rely on the catalog for suggestions.
+      const usesCatalog = meta.types.length > 0 && name !== 'Department Required Courses';
+      let suggestBlock;
+      if (catalogPending && usesCatalog) {
+        suggestBlock = `
+          <div class="needed-suggest">
+            <div class="needed-suggest-label">Loading suggestions&hellip;</div>
+          </div>`;
+      } else {
+        suggestBlock = suggestionsHtml(buildSuggestions(b, allCourses, takenCodes, gap), gap);
+      }
+      body = chips + suggestBlock;
       if (!body) body = `<div class="needed-empty">${gap} more credit(s) of ${meta.short.toLowerCase()} coursework required.</div>`;
     }
 
@@ -282,15 +294,15 @@ window.addEventListener('load', async () => {
   const studentId = user?.student_id || '1111708';
 
   try {
-    // Catalog is best-effort; never let it block the audit.
-    const [grad, recordsData, catalog] = await Promise.all([
+    // Render the page from two fast single-query calls first, so it paints in one
+    // round-trip. The course catalog (/api/academic/courses) is heavier and only
+    // powers the elective/gen-ed suggestion chips, so it loads separately below.
+    const [grad, recordsData] = await Promise.all([
       api.graduation(studentId),
       api.courseRecords(studentId),
-      api.courses().catch(() => ({ courses: [] })),
     ]);
 
     const records    = recordsData.records || [];
-    const allCourses = (catalog && catalog.courses) || [];
     // Codes the student has already attempted (passed, enrolled, or failed) — never re-suggest these.
     const takenCodes = new Set(records.map(r => r.code));
 
@@ -299,11 +311,23 @@ window.addEventListener('load', async () => {
 
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
-    renderNeeded(grad.buckets, grad.blocking_items, allCourses, takenCodes);
+    renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
     renderTables(records);
 
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';
+
+    // Background: load the catalog, then patch in the suggestion chips. A failure
+    // here just leaves the "Loading suggestions…" hint replaced by nothing.
+    api.courses()
+      .then(catalog => {
+        const allCourses = (catalog && catalog.courses) || [];
+        renderNeeded(grad.buckets, grad.blocking_items, allCourses, takenCodes, /* catalogPending */ false);
+      })
+      .catch(err => {
+        console.warn('Course catalog unavailable; suggestions omitted:', err);
+        renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ false);
+      });
   } catch (err) {
     console.error('Graduation page error:', err);
     document.getElementById('status-dot').className     = 'status-dot err';
