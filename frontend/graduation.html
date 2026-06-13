@@ -41,6 +41,68 @@
     padding: 24px 20px;
   }
 
+  /* Eligibility banner */
+  .elig-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid transparent;
+  }
+  .elig-banner.ok   { background: #ecfdf5; border-color: #a7f3d0; }
+  .elig-banner.warn { background: #fffbeb; border-color: #fde68a; }
+  .elig-icon {
+    width: 46px; height: 46px; flex-shrink: 0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #fff;
+  }
+  .elig-banner.ok   .elig-icon { background: #22c55e; }
+  .elig-banner.warn .elig-icon { background: #f59e0b; }
+  .elig-title { font-size: 18px; font-weight: 700; }
+  .elig-banner.ok   .elig-title { color: #166534; }
+  .elig-banner.warn .elig-title { color: #92400e; }
+  .elig-sub   { font-size: 13px; color: #555; margin-top: 2px; }
+
+  /* Credits You Still Need */
+  .needed-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .needed-card.met      { background: #fafffb; }
+  .needed-card.blocking { background: #fef2f2; border-color: #fecaca; }
+  .needed-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .needed-name {
+    font-weight: 600; font-size: 15px;
+    border-left: 4px solid #64748b; padding-left: 10px;
+  }
+  .needed-meta { font-size: 14px; color: #444; display: flex; align-items: center; gap: 8px; }
+  .needed-empty { color: #16a34a; font-size: 13px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .miss-chip, .suggest-chip {
+    display: inline-flex; align-items: center;
+    font-size: 12.5px; padding: 5px 10px; border-radius: 8px;
+    border: 1px solid transparent;
+  }
+  .miss-chip em, .suggest-chip em { color: #6b7280; font-style: normal; margin-left: 4px; }
+  .miss-chip.missing  { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+  .miss-chip.enrolled { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .suggest-chip       { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+
+  .needed-suggest { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e7eb; }
+  .needed-suggest-label { font-size: 12.5px; color: #555; font-weight: 600; margin-bottom: 8px; }
+
+  .blocking-list { margin: 8px 0 0; padding-left: 20px; color: #991b1b; font-size: 13px; }
+  .blocking-list li { margin-bottom: 4px; }
+
   .tab-container {
     display: flex;
     border-bottom: 1px solid #e5e7eb;
@@ -82,8 +144,21 @@
       <div style="color:#666;" id="student-dept">&#8212;</div>
     </div>
 
+    <!-- Eligibility banner -->
+    <div class="elig-banner" id="elig-banner"></div>
+
     <!-- Progress circles -->
     <div class="stats-grid" id="progress-grid"></div>
+
+    <!-- Credits You Still Need -->
+    <div class="card" style="margin-top:28px;">
+      <div class="card-header">
+        <div class="card-title">Credits You Still Need to Graduate</div>
+      </div>
+      <div class="card-body" style="padding:18px 20px;">
+        <div id="needed-list"></div>
+      </div>
+    </div>
 
     <!-- Course & Credit Review List -->
     <div class="card" style="margin-top:28px;">
@@ -93,7 +168,7 @@
       <div class="card-body">
         <div class="tab-container">
           <div class="tab active" onclick="switchTab(0)">&#10003; Completed</div>
-          <div class="tab" onclick="switchTab(1)">&#8987; In Progress</div>
+          <div class="tab" onclick="switchTab(1)">&#9203; In Progress</div>
           <div class="tab" onclick="switchTab(2)">&#9888; Missing / Failed</div>
         </div>
 
@@ -153,152 +228,6 @@
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
-<script>
-  function safePct(earned, total) {
-    if (!total) return 0;
-    return Math.min(100, Math.round(earned / total * 100));
-  }
-
-  function formatType(type) {
-    const map = {
-      required:            'Required',
-      common_required:     'Common Required',
-      elective:            'Elective',
-      general_education:   'General Education',
-      university_required: 'University Required',
-    };
-    return map[type] || type || '&#8212;';
-  }
-
-  function buildCircleCard(label, earned, total, color) {
-    const pct = safePct(earned, total);
-    return `
-      <div class="card stat-card">
-        <div style="color:#666; margin-bottom:10px; font-weight:500;">${label}</div>
-        <div class="progress-circle" style="--ring-color:${color}; --ring-pct:${pct}%;">
-          <div class="inner">
-            <div style="font-size:26px; font-weight:700; color:${color};">${earned}</div>
-            <div style="font-size:12px; color:#999;">/ ${total}</div>
-          </div>
-        </div>
-        <div style="font-size:26px; font-weight:700; color:${color}; margin-top:10px;">${pct}%</div>
-        <div style="color:#888; font-size:13px;">${total - earned} remaining</div>
-      </div>`;
-  }
-
-  function buildOverallCard(earned, total) {
-    const pct = safePct(earned, total);
-    return `
-      <div class="card stat-card">
-        <div style="color:#666; margin-bottom:10px; font-weight:500;">Overall Graduation Progress</div>
-        <div class="progress-circle" style="--ring-color:#22c55e; --ring-pct:${pct}%;">
-          <div class="inner">
-            <div style="font-size:30px; font-weight:700; color:#22c55e;">${pct}%</div>
-          </div>
-        </div>
-        <div style="margin-top:12px; font-size:16px; font-weight:600;">${earned} / ${total} credits</div>
-        <div style="color:#22c55e; font-size:13px;">${total - earned} credits left to graduate</div>
-      </div>`;
-  }
-
-  async function loadGraduationData() {
-    const user = getUser();
-    const studentId = user?.student_id || '1111708';
-
-    const data = await api.courseRecords(studentId);
-    const records = data.records;
-
-    document.getElementById('student-name').textContent = user?.name || 'Student';
-    document.getElementById('student-dept').textContent  = user?.department || '';
-
-    let reqEarned = 0, reqTotal = 0;
-    let elecEarned = 0, elecTotal = 0;
-    let genEarned = 0, genTotal = 0;
-
-    records.forEach(c => {
-      const cr   = c.credits || 0;
-      const done = c.pass_flag === true;
-      const t    = c.type;
-
-      if (t === 'required' || t === 'common_required') {
-        reqTotal += cr;
-        if (done) reqEarned += cr;
-      } else if (t === 'elective') {
-        elecTotal += cr;
-        if (done) elecEarned += cr;
-      } else if (t === 'general_education' || t === 'university_required') {
-        genTotal += cr;
-        if (done) genEarned += cr;
-      }
-    });
-
-    const totalEarned   = data.summary.total_credits;
-    const totalRequired = 128;
-
-    document.getElementById('progress-grid').innerHTML =
-      buildCircleCard('Required Credits',          reqEarned,  reqTotal  || 1, '#3b82f6') +
-      buildOverallCard(totalEarned, totalRequired) +
-      buildCircleCard('Elective Credits',          elecEarned, elecTotal || 1, '#a855f7') +
-      buildCircleCard('General Education Credits', genEarned,  genTotal  || 1, '#f97316');
-
-    const completed  = records.filter(c => c.pass_flag === true);
-    const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
-    const missing    = records.filter(c => !c.pass_flag && c.status !== 'enrolled');
-
-    document.getElementById('completed-table').innerHTML = completed.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><strong>${c.grade != null ? c.grade : '&#8212;'}</strong></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No completed courses.</td></tr>';
-
-    document.getElementById('progress-table').innerHTML = inProgress.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><span style="color:#eab308;">&#8987; In Progress</span></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No courses in progress.</td></tr>';
-
-    document.getElementById('missing-table').innerHTML = missing.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No missing courses.</td></tr>';
-
-    document.getElementById('status-dot').className     = 'status-dot ok';
-    document.getElementById('status-label').textContent = 'API Connected';
-  }
-
-  function switchTab(n) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
-    document.getElementById('tab-completed').style.display = n === 0 ? 'block' : 'none';
-    document.getElementById('tab-progress').style.display  = n === 1 ? 'block' : 'none';
-    document.getElementById('tab-missing').style.display   = n === 2 ? 'block' : 'none';
-  }
-
-  window.addEventListener('load', async () => {
-    await checkAuth();
-    initLayout('graduation', 'Graduation Audit');
-    try {
-      await loadGraduationData();
-    } catch (err) {
-      console.error(err);
-      document.getElementById('status-dot').className     = 'status-dot err';
-      document.getElementById('status-label').textContent = 'API Error';
-      document.getElementById('progress-grid').innerHTML  =
-        '<p style="color:#dc2626;padding:16px;">Failed to load graduation data.</p>';
-    }
-  });
-</script>
+<script src="js/graduation.js"></script>
 </body>
 </html>
