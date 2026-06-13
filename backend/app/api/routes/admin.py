@@ -33,10 +33,13 @@ async def admin_enrollments(
             e.status,
             e.pass_flag,
             e.is_counted,
-            COALESCE(inst.name, '')              AS instructor_name
+            COALESCE(inst.name, '')              AS instructor_name,
+            d.code                              AS dept_code,
+            COALESCE(d.name, '')                AS dept_name
         FROM enrollments e
         JOIN users stu  ON stu.id  = e.user_id
         JOIN courses c  ON c.id    = e.course_id
+        LEFT JOIN departments d    ON d.id     = stu.department_id
         LEFT JOIN course_instructors ci ON ci.course_id = c.id AND ci.role = 'primary'
         LEFT JOIN users inst ON inst.id = ci.instructor_id
         ORDER BY stu.student_id, e.academic_year, e.semester, c.code

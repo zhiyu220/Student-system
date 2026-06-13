@@ -337,6 +337,9 @@
           <option value="false">Failed</option>
           <option value="null">Not graded</option>
         </select>
+        <select id="ef-dept"    onchange="filterEnrollments()">
+          <option value="">All Departments</option>
+        </select>
         <span class="filter-count" id="enroll-filter-count"></span>
       </div>
       <div class="card da-table-wrap">
@@ -650,6 +653,7 @@ function filterEnrollments() {
   const status  = document.getElementById('ef-status').value;
   const sem     = document.getElementById('ef-sem').value;
   const pass    = document.getElementById('ef-pass').value;
+  const dept    = document.getElementById('ef-dept').value;
 
   const rows = rawEnrollments.filter(r => {
     if (student && !(
@@ -662,6 +666,7 @@ function filterEnrollments() {
     )) return false;
     if (status && r.status !== status) return false;
     if (sem && semLabel(r.academic_year, r.semester) !== sem) return false;
+    if (dept && r.dept_code !== dept) return false;
     if (pass === 'true'  && r.pass_flag !== true)  return false;
     if (pass === 'false' && r.pass_flag !== false) return false;
     if (pass === 'null'  && r.pass_flag != null)   return false;
@@ -1249,6 +1254,8 @@ window.addEventListener('load', async () => {
     rawEnrollments = enrollments;
     const semSet = [...new Set(enrollments.map(r => semLabel(r.academic_year, r.semester)))].sort();
     populateSelect('ef-sem', semSet);
+    const eDeptSet = [...new Set(enrollments.map(r => r.dept_code).filter(Boolean))].sort();
+    populateSelect('ef-dept', eDeptSet);
     renderEnrollments(rawEnrollments);
 
     // Courses
