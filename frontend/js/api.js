@@ -98,6 +98,11 @@ const api = {
   adminUpdateUser:        (id, d) => api.put(`/api/admin/users/${id}`,       d),
   adminUpdateDepartment:  (id, d) => api.put(`/api/admin/departments/${id}`, d),
 
+  adminRequirements:       ()   => api.get('/api/admin/requirements'),
+  adminCreateRequirement:  (d)  => api.post('/api/admin/requirements',       d),
+  adminUpdateRequirement:  (id, d) => api.put(`/api/admin/requirements/${id}`, d),
+  adminDeleteRequirement:  (id) => api.delete(`/api/admin/requirements/${id}`),
+
   adminCreateEnrollment:  (d)  => api.post('/api/admin/enrollments',        d),
   adminCreateCourse:      (d)  => api.post('/api/admin/courses',            d),
   adminCreateUser:        (d)  => api.post('/api/admin/users',              d),
