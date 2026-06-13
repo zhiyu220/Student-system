@@ -202,24 +202,29 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
             ug_blocking: list  = []
             sub_requirements: list = []
 
-            # ── 校必修：逐子項判定（學分 + 通過次數，兩者都要達標）──────────
+            # ── 校必修：逐子項判定 ───────────────────────────────────────────
+            # required_credits == 0 的子項（例：體育）視為「非學分必修」，
+            # 不論課程資料的 credits 填多少，一律只看通過次數、不計入學分。
             uni_earned = 0
             for key, rule in UNIVERSITY_COMPULSORY.items():
                 attempts       = passed_by_sub.get(key, [])
-                earned_credits = sum(a["credits"] or 0 for a in attempts)
                 pass_count     = len(attempts)
-                ok = (earned_credits >= rule["required_credits"]
-                      and pass_count >= rule["required_passes"])
-                uni_earned += earned_credits
-                sub_requirements.append({
+                credit_bearing = rule["required_credits"] > 0
+                earned_credits = sum(a["credits"] or 0 for a in attempts) if credit_bearing else 0
+                ok = (pass_count >= rule["required_passes"]
+                      and earned_credits >= rule["required_credits"])
+                uni_earned += earned_credits  # 非學分課貢獻 0，不會灌水總學分
+                row = {
                     "key":             key,
                     "label":           rule["label"],
-                    "required_credits": rule["required_credits"],
-                    "earned_credits":  earned_credits,
                     "required_passes": rule["required_passes"],
                     "passes":          pass_count,
                     "met":             ok,
-                })
+                }
+                if credit_bearing:
+                    row["required_credits"] = rule["required_credits"]
+                    row["earned_credits"]   = earned_credits
+                sub_requirements.append(row)
                 if not ok:
                     ug_blocking.append(f"校必修 — {rule['label']} 尚未完成")
 

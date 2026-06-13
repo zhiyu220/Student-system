@@ -167,9 +167,11 @@ function subReqRow(s) {
   const ok   = s.met;
   const icon = ok ? '&#10003;' : '&#10007;';
   const cls  = ok ? 'sub-ok' : 'sub-miss';
-  const parts = [`${s.earned_credits}/${s.required_credits} cr`];
-  if (s.required_passes)      parts.push(`${s.passes}/${s.required_passes} 次`);
-  if (s.required_categories)  parts.push(`${s.categories}/${s.required_categories} 領域`);
+  const parts = [];
+  // Non-credit items (e.g. PE) omit required_credits and are shown by pass-count only.
+  if (s.required_credits != null) parts.push(`${s.earned_credits}/${s.required_credits} cr`);
+  if (s.required_passes)          parts.push(`${s.passes}/${s.required_passes} 次`);
+  if (s.required_categories)      parts.push(`${s.categories}/${s.required_categories} 領域`);
   return `<div class="sub-req-row ${cls}">
       <span class="sub-req-icon">${icon}</span>
       <span class="sub-req-label">${s.label}</span>
