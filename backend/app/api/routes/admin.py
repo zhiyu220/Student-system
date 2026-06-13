@@ -39,7 +39,7 @@ async def admin_enrollments(
         FROM enrollments e
         JOIN users stu  ON stu.id  = e.user_id
         JOIN courses c  ON c.id    = e.course_id
-        LEFT JOIN departments d    ON d.id     = stu.department_id
+        LEFT JOIN departments d    ON d.id     = c.department_id
         LEFT JOIN course_instructors ci ON ci.course_id = c.id AND ci.role = 'primary'
         LEFT JOIN users inst ON inst.id = ci.instructor_id
         ORDER BY stu.student_id, e.academic_year, e.semester, c.code
