@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Admin — StuPilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/shared.css">
+<style>
+  .da-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .da-tab {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s;
+  }
+  .da-tab:hover { color: var(--accent); }
+  .da-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .da-section { display: none; }
+  .da-section.active { display: block; }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .filter-bar input,
+  .filter-bar select {
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    min-width: 140px;
+  }
+  .filter-bar input:focus,
+  .filter-bar select:focus { border-color: var(--accent); }
+  .filter-bar .filter-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .da-table-wrap { overflow-x: auto; }
+  .da-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .da-table th {
+    background: var(--surface-alt, #f5f7ff);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+  .da-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .da-table tr:last-child td { border-bottom: none; }
+  .da-table tr:hover td { background: var(--accent-light, #eef0fe); }
+
+  .mono { font-family: 'DM Mono', monospace; font-size: 11.5px; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-completed  { background: var(--surface-success); color: var(--surface-success-text); }
+  .badge-enrolled   { background: var(--surface-warn);    color: var(--surface-warn-text); }
+  .badge-dropped    { background: var(--surface-error);   color: var(--surface-error-text); }
+  .badge-pass       { background: var(--surface-success); color: var(--surface-success-text); }
+  .badge-fail       { background: var(--surface-error);   color: var(--surface-error-text); }
+  .badge-null       { background: #f0f0f0; color: #888; }
+
+  .badge-required   { background: var(--cat-required-bg); color: var(--cat-required-fg); }
+  .badge-elective   { background: var(--cat-elective-bg); color: var(--cat-elective-fg); }
+  .badge-univ       { background: var(--cat-univ-bg);     color: var(--cat-univ-fg); }
+  .badge-general    { background: var(--cat-general-bg);  color: var(--cat-general-fg); }
+
+  .badge-student    { background: #e0f2fe; color: #0369a1; }
+  .badge-professor  { background: #fce7f3; color: #9d174d; }
+  .badge-admin      { background: #fef3c7; color: #92400e; }
+
+  .empty-row td { text-align: center; color: var(--text-muted); padding: 28px; }
+
+  .da-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+  .da-table th.sortable:hover { color: var(--accent); }
+  .da-table th.sortable::after { content: ' ⇅'; opacity: .25; font-size: 9px; }
+  .da-table th.sort-asc::after  { content: ' ▲'; opacity: 1; color: var(--accent); }
+  .da-table th.sort-desc::after { content: ' ▼'; opacity: 1; color: var(--accent); }
+
+  .section-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .section-meta h3 { font-size: 15px; margin: 0; }
+  .create-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .create-btn:hover { background: var(--accent); color: #fff; }
+  .record-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .loading-msg {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px;
+    font-size: 13px;
+  }
+
+  /* ── Edit button ── */
+  .action-btns { display: flex; gap: 4px; }
+  .edit-btn, .del-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all .15s;
+    color: var(--text-muted);
+  }
+  .edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .del-btn:hover  { border-color: var(--red, #ef4444); color: var(--red, #ef4444); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    width: 500px;
+    max-width: 95vw;
+    max-height: 82vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.22);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-header h3 { margin: 0; font-size: 15px; }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 22px; line-height: 1; color: var(--text-muted); padding: 0 4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 0;
+  }
+  .form-field { margin-bottom: 14px; }
+  .form-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 5px;
+  }
+  .form-field input,
+  .form-field select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--surface, #fff);
+    color: var(--text);
+    box-sizing: border-box;
+  }
+  .form-field input:focus,
+  .form-field select:focus { outline: none; border-color: var(--accent); }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 8px 20px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--accent, #4E6CF0); color: #fff; }
+  .btn-primary:hover { opacity: .9; }
+  .btn-ghost { background: none; border: 1.5px solid var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+  .modal-error {
+    background: var(--surface-error, #fef2f2);
+    color: var(--surface-error-text, #991b1b);
+    border: 1px solid var(--surface-error-border, #fecaca);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    margin-bottom: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar"></aside>
+<div class="main">
+  <header class="topbar">
+    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">☰</button>
+    <div class="topbar-title"></div>
+    <div class="api-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-label" id="status-label">Connecting...</span>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="page-header">
+      <h2>Data Admin</h2>
+      <p>Browse and verify all database records with resolved references</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="da-tabs">
+      <button class="da-tab active" data-tab="enrollments">
+        <i class="ti ti-clipboard-list" style="margin-right:5px"></i>Enrollments
+      </button>
+      <button class="da-tab" data-tab="courses">
+        <i class="ti ti-book" style="margin-right:5px"></i>Courses
+      </button>
+      <button class="da-tab" data-tab="users">
+        <i class="ti ti-users" style="margin-right:5px"></i>Users
+      </button>
+      <button class="da-tab" data-tab="departments">
+        <i class="ti ti-building" style="margin-right:5px"></i>Departments
+      </button>
+    </div>
+
+    <!-- ── Enrollments ── -->
+    <div class="da-section active" id="sec-enrollments">
+      <div class="section-meta">
+        <h3>Enrollments</h3>
+        <span class="record-badge" id="enroll-count">—</span>
+        <button class="create-btn" onclick="showCreateModal('enrollments')"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div class="filter-bar">
+        <input id="ef-student"  placeholder="Student ID / Name" oninput="filterEnrollments()">
+        <input id="ef-course"   placeholder="Course Code / Name" oninput="filterEnrollments()">
+        <select id="ef-status"  onchange="filterEnrollments()">
+          <option value="">All Statuses</option>
+          <option value="completed">completed</option>
+          <option value="enrolled">enrolled</option>
+          <option value="dropped">dropped</option>
+        </select>
+        <select id="ef-sem"     onchange="filterEnrollments()">
+          <option value="">All Semesters</option>
+        </select>
+        <select id="ef-pass"    onchange="filterEnrollments()">
+          <option value="">Pass / Fail</option>
+          <option value="true">Passed</option>
+          <option value="false">Failed</option>
+          <option value="null">Not graded</option>
+        </select>
+        <span class="filter-count" id="enroll-filter-count"></span>
+      </div>
+      <div class="card da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="enrollments" data-sort="student_id">Student ID</th>
+              <th class="sortable" data-table="enrollments" data-sort="student_name">Student Name</th>
+              <th class="sortable" data-table="enrollments" data-sort="course_code">Course Code</th>
+              <th class="sortable" data-table="enrollments" data-sort="course_name">Course Name</th>
+              <th class="sortable" data-table="enrollments" data-sort="course_type">Type</th>
+              <th class="sortable" data-table="enrollments" data-sort="credits">Cr</th>
+              <th class="sortable" data-table="enrollments" data-sort="semester_label">Semester</th>
+              <th class="sortable" data-table="enrollments" data-sort="grade">Grade</th>
+              <th class="sortable" data-table="enrollments" data-sort="status">Status</th>
+              <th class="sortable" data-table="enrollments" data-sort="pass_flag">Pass</th>
+              <th>Counted</th>
+              <th class="sortable" data-table="enrollments" data-sort="instructor_name">Instructor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="enroll-body">
+            <tr class="empty-row"><td colspan="12"><div class="loading-msg">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Courses ── -->
+    <div class="da-section" id="sec-courses">
+      <div class="section-meta">
+        <h3>Courses</h3>
+        <span class="record-badge" id="courses-count">—</span>
+        <button class="create-btn" onclick="showCreateModal('courses')"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div class="filter-bar">
+        <input id="cf-code"  placeholder="Code / Name" oninput="filterCourses()">
+        <select id="cf-type" onchange="filterCourses()">
+          <option value="">All Types</option>
+          <option value="required">required</option>
+          <option value="elective">elective</option>
+          <option value="university_required">university_required</option>
+          <option value="general_education">general_education</option>
+          <option value="common_required">common_required</option>
+        </select>
+        <select id="cf-sem"  onchange="filterCourses()">
+          <option value="">All Semesters</option>
+        </select>
+        <select id="cf-dept" onchange="filterCourses()">
+          <option value="">All Departments</option>
+        </select>
+        <select id="cf-level" onchange="filterCourses()">
+          <option value="">All Levels</option>
+        </select>
+        <span class="filter-count" id="courses-filter-count"></span>
+      </div>
+      <div class="card da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="courses" data-sort="code">Code</th>
+              <th class="sortable" data-table="courses" data-sort="name_en">Name (EN)</th>
+              <th class="sortable" data-table="courses" data-sort="type">Type</th>
+              <th class="sortable" data-table="courses" data-sort="credits">Cr</th>
+              <th class="sortable" data-table="courses" data-sort="semester_label">Semester</th>
+              <th class="sortable" data-table="courses" data-sort="grade_level">Level</th>
+              <th>Section</th>
+              <th class="sortable" data-table="courses" data-sort="dept_code">Department</th>
+              <th class="sortable" data-table="courses" data-sort="instructor_name">Instructor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="courses-body">
+            <tr class="empty-row"><td colspan="9"><div class="loading-msg">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Users ── -->
+    <div class="da-section" id="sec-users">
+      <div class="section-meta">
+        <h3>Users</h3>
+        <span class="record-badge" id="users-count">—</span>
+        <button class="create-btn" onclick="showCreateModal('users')"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div class="filter-bar">
+        <input id="uf-name"   placeholder="ID / Name / Email" oninput="filterUsers()">
+        <select id="uf-role"  onchange="filterUsers()">
+          <option value="">All Roles</option>
+          <option value="student">student</option>
+          <option value="professor">professor</option>
+          <option value="admin">admin</option>
+        </select>
+        <select id="uf-dept"  onchange="filterUsers()">
+          <option value="">All Departments</option>
+        </select>
+        <span class="filter-count" id="users-filter-count"></span>
+      </div>
+      <div class="card da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="users" data-sort="student_id">Student ID</th>
+              <th class="sortable" data-table="users" data-sort="name">Name</th>
+              <th class="sortable" data-table="users" data-sort="role">Role</th>
+              <th class="sortable" data-table="users" data-sort="email">Email</th>
+              <th class="sortable" data-table="users" data-sort="status">Status</th>
+              <th class="sortable" data-table="users" data-sort="dept_code">Dept Code</th>
+              <th class="sortable" data-table="users" data-sort="dept_name">Department</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-body">
+            <tr class="empty-row"><td colspan="7"><div class="loading-msg">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Departments ── -->
+    <div class="da-section" id="sec-departments">
+      <div class="section-meta">
+        <h3>Departments</h3>
+        <span class="record-badge" id="depts-count">—</span>
+        <button class="create-btn" onclick="showCreateModal('departments')"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div class="filter-bar">
+        <input id="df-name"    placeholder="Code / Name" oninput="filterDepts()">
+        <select id="df-faculty" onchange="filterDepts()">
+          <option value="">All Faculties</option>
+        </select>
+        <span class="filter-count" id="depts-filter-count"></span>
+      </div>
+      <div class="card da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="departments" data-sort="code">Code</th>
+              <th class="sortable" data-table="departments" data-sort="name">Department Name</th>
+              <th class="sortable" data-table="departments" data-sort="faculty">Faculty</th>
+              <th class="sortable" data-table="departments" data-sort="status">Status</th>
+              <th class="sortable" data-table="departments" data-sort="user_count">Users</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="depts-body">
+            <tr class="empty-row"><td colspan="5"><div class="loading-msg">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Edit Record</h3>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div id="modal-error" class="modal-error"></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/sidebar.js"></script>
+<script>
+// ── Raw data stores ────────────────────────────────────────────────────
+let rawEnrollments = [], rawCourses = [], rawUsers = [], rawDepts = [];
+
+// ── Tab switching ─────────────────────────────────────────────────────
+document.querySelectorAll('.da-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.da-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.da-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sec-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function semLabel(yr, sem) { return yr + '-' + sem; }
+
+function typeBadge(type) {
+  const map = {
+    required:            ['badge-required', 'Required'],
+    common_required:     ['badge-required', 'Common Req.'],
+    elective:            ['badge-elective', 'Elective'],
+    university_required: ['badge-univ',     'Univ. Req.'],
+    general_education:   ['badge-general',  'Gen. Ed.'],
+  };
+  const [cls, label] = map[type] || ['badge-null', type || '—'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function statusBadge(status) {
+  const map = { completed:'badge-completed', enrolled:'badge-enrolled', dropped:'badge-dropped' };
+  return `<span class="badge ${map[status] || 'badge-null'}">${status || '—'}</span>`;
+}
+
+function passBadge(pass_flag) {
+  if (pass_flag === true)  return '<span class="badge badge-pass">✓ Pass</span>';
+  if (pass_flag === false) return '<span class="badge badge-fail">✗ Fail</span>';
+  return '<span class="badge badge-null">—</span>';
+}
+
+function roleBadge(role) {
+  const map = { student:'badge-student', professor:'badge-professor', admin:'badge-admin' };
+  return `<span class="badge ${map[role] || 'badge-null'}">${role || '—'}</span>`;
+}
+
+function empty(cols) {
+  return `<tr class="empty-row"><td colspan="${cols}">No records match the current filter.</td></tr>`;
+}
+
+function populateSelect(id, values, labelFn) {
+  const sel = document.getElementById(id);
+  const prev = sel.value;
+  const current = sel.options.length > 1 ? prev : '';
+  while (sel.options.length > 1) sel.remove(1);
+  values.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = labelFn ? labelFn(v) : v;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+// ── Enrollments ───────────────────────────────────────────────────────
+function renderEnrollments(rows) {
+  document.getElementById('enroll-count').textContent = rawEnrollments.length + ' total';
+  document.getElementById('enroll-filter-count').textContent =
+    rows.length < rawEnrollments.length ? `Showing ${rows.length} / ${rawEnrollments.length}` : `${rows.length} records`;
+
+  document.getElementById('enroll-body').innerHTML = rows.length === 0 ? empty(13) :
+    rows.map(r => `
+      <tr>
+        <td class="mono">${r.student_id || '—'}</td>
+        <td>${r.student_name || '—'}</td>
+        <td class="mono" style="font-weight:600">${r.course_code}</td>
+        <td>${r.course_name}</td>
+        <td>${typeBadge(r.course_type)}</td>
+        <td style="text-align:center">${r.credits ?? '—'}</td>
+        <td class="mono">${semLabel(r.academic_year, r.semester)}</td>
+        <td style="text-align:center;font-weight:600">${r.grade != null ? r.grade.toFixed(0) : '—'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${passBadge(r.pass_flag)}</td>
+        <td style="text-align:center">${r.is_counted ? '✓' : r.is_counted === false ? '✗' : '—'}</td>
+        <td style="color:var(--text-muted)">${r.instructor_name || '—'}</td>
+        <td><div class="action-btns"><button class="edit-btn" onclick="showEditModal('enrollments','${r.id}')"><i class="ti ti-pencil"></i></button><button class="del-btn" onclick="deleteRecord('enrollments','${r.id}')"><i class="ti ti-trash"></i></button></div></td>
+      </tr>`).join('');
+  updateSortHeaders('enrollments');
+}
+
+function filterEnrollments() {
+  const student = document.getElementById('ef-student').value.toLowerCase();
+  const course  = document.getElementById('ef-course').value.toLowerCase();
+  const status  = document.getElementById('ef-status').value;
+  const sem     = document.getElementById('ef-sem').value;
+  const pass    = document.getElementById('ef-pass').value;
+
+  const rows = rawEnrollments.filter(r => {
+    if (student && !(
+      (r.student_id || '').toLowerCase().includes(student) ||
+      (r.student_name || '').toLowerCase().includes(student)
+    )) return false;
+    if (course && !(
+      r.course_code.toLowerCase().includes(course) ||
+      r.course_name.toLowerCase().includes(course)
+    )) return false;
+    if (status && r.status !== status) return false;
+    if (sem && semLabel(r.academic_year, r.semester) !== sem) return false;
+    if (pass === 'true'  && r.pass_flag !== true)  return false;
+    if (pass === 'false' && r.pass_flag !== false) return false;
+    if (pass === 'null'  && r.pass_flag != null)   return false;
+    return true;
+  });
+  renderEnrollments(applySort('enrollments', rows));
+}
+
+// ── Courses ───────────────────────────────────────────────────────────
+function renderCourses(rows) {
+  document.getElementById('courses-count').textContent = rawCourses.length + ' total';
+  document.getElementById('courses-filter-count').textContent =
+    rows.length < rawCourses.length ? `Showing ${rows.length} / ${rawCourses.length}` : `${rows.length} records`;
+
+  document.getElementById('courses-body').innerHTML = rows.length === 0 ? empty(10) :
+    rows.map(r => `
+      <tr>
+        <td class="mono" style="font-weight:600">${r.code}</td>
+        <td>${r.name_en || r.name_zh || '—'}</td>
+        <td>${typeBadge(r.type)}</td>
+        <td style="text-align:center">${r.credits ?? '—'}</td>
+        <td class="mono">${semLabel(r.academic_year, r.semester)}</td>
+        <td style="text-align:center">${r.grade_level ?? '—'}</td>
+        <td style="text-align:center">${r.section || '—'}</td>
+        <td title="${r.dept_name || ''}">${r.dept_code || '—'} <span style="color:var(--text-muted);font-size:11px">${r.dept_name ? '· ' + r.dept_name : ''}</span></td>
+        <td style="color:var(--text-muted)">${r.instructor_name || '—'}</td>
+        <td><div class="action-btns"><button class="edit-btn" onclick="showEditModal('courses','${r.id}')"><i class="ti ti-pencil"></i></button><button class="del-btn" onclick="deleteRecord('courses','${r.id}')"><i class="ti ti-trash"></i></button></div></td>
+      </tr>`).join('');
+  updateSortHeaders('courses');
+}
+
+function filterCourses() {
+  const code = document.getElementById('cf-code').value.toLowerCase();
+  const type = document.getElementById('cf-type').value;
+  const sem  = document.getElementById('cf-sem').value;
+  const dept  = document.getElementById('cf-dept').value;
+  const level = document.getElementById('cf-level').value;
+
+  const rows = rawCourses.filter(r => {
+    if (code  && !(r.code.toLowerCase().includes(code) || (r.name_en || '').toLowerCase().includes(code))) return false;
+    if (type  && r.type !== type) return false;
+    if (sem   && semLabel(r.academic_year, r.semester) !== sem) return false;
+    if (dept  && r.dept_code !== dept) return false;
+    if (level && String(r.grade_level) !== level) return false;
+    return true;
+  });
+  renderCourses(applySort('courses', rows));
+}
+
+// ── Users ─────────────────────────────────────────────────────────────
+function renderUsers(rows) {
+  document.getElementById('users-count').textContent = rawUsers.length + ' total';
+  document.getElementById('users-filter-count').textContent =
+    rows.length < rawUsers.length ? `Showing ${rows.length} / ${rawUsers.length}` : `${rows.length} records`;
+
+  document.getElementById('users-body').innerHTML = rows.length === 0 ? empty(8) :
+    rows.map(r => `
+      <tr>
+        <td class="mono">${r.student_id || '—'}</td>
+        <td style="font-weight:500">${r.name}</td>
+        <td>${roleBadge(r.role)}</td>
+        <td style="color:var(--text-muted);font-size:12px">${r.email || '—'}</td>
+        <td>${r.status === 'active' ? '<span class="badge badge-pass">active</span>' : `<span class="badge badge-null">${r.status || '—'}</span>`}</td>
+        <td class="mono">${r.dept_code || '—'}</td>
+        <td style="color:var(--text-muted)">${r.dept_name || '—'}</td>
+        <td><div class="action-btns"><button class="edit-btn" onclick="showEditModal('users','${r.id}')"><i class="ti ti-pencil"></i></button><button class="del-btn" onclick="deleteRecord('users','${r.id}')"><i class="ti ti-trash"></i></button></div></td>
+      </tr>`).join('');
+  updateSortHeaders('users');
+}
+
+function filterUsers() {
+  const q    = document.getElementById('uf-name').value.toLowerCase();
+  const role = document.getElementById('uf-role').value;
+  const dept = document.getElementById('uf-dept').value;
+
+  const rows = rawUsers.filter(r => {
+    if (q && !(
+      (r.student_id || '').toLowerCase().includes(q) ||
+      (r.name || '').toLowerCase().includes(q) ||
+      (r.email || '').toLowerCase().includes(q)
+    )) return false;
+    if (role && r.role !== role) return false;
+    if (dept && r.dept_code !== dept) return false;
+    return true;
+  });
+  renderUsers(applySort('users', rows));
+}
+
+// ── Departments ───────────────────────────────────────────────────────
+function renderDepts(rows) {
+  document.getElementById('depts-count').textContent = rawDepts.length + ' total';
+  document.getElementById('depts-filter-count').textContent =
+    rows.length < rawDepts.length ? `Showing ${rows.length} / ${rawDepts.length}` : `${rows.length} records`;
+
+  document.getElementById('depts-body').innerHTML = rows.length === 0 ? empty(6) :
+    rows.map(r => `
+      <tr>
+        <td class="mono" style="font-weight:600">${r.code}</td>
+        <td>${r.name}</td>
+        <td style="color:var(--text-muted)">${r.faculty || '—'}</td>
+        <td>${r.status === 'active' ? '<span class="badge badge-pass">active</span>' : `<span class="badge badge-null">${r.status || '—'}</span>`}</td>
+        <td style="text-align:center">${r.user_count}</td>
+        <td><div class="action-btns"><button class="edit-btn" onclick="showEditModal('departments','${r.id}')"><i class="ti ti-pencil"></i></button><button class="del-btn" onclick="deleteRecord('departments','${r.id}')"><i class="ti ti-trash"></i></button></div></td>
+      </tr>`).join('');
+  updateSortHeaders('departments');
+}
+
+function filterDepts() {
+  const q       = document.getElementById('df-name').value.toLowerCase();
+  const faculty = document.getElementById('df-faculty').value;
+
+  const rows = rawDepts.filter(r => {
+    if (q && !(r.code.toLowerCase().includes(q) || r.name.toLowerCase().includes(q))) return false;
+    if (faculty && r.faculty !== faculty) return false;
+    return true;
+  });
+  renderDepts(applySort('departments', rows));
+}
+
+// ── Sort ─────────────────────────────────────────────────────────────
+const SORT_STATE = {
+  enrollments: { col: null, dir: 'asc' },
+  courses:     { col: null, dir: 'asc' },
+  users:       { col: null, dir: 'asc' },
+  departments: { col: null, dir: 'asc' },
+};
+
+const RERENDER = {
+  enrollments: () => filterEnrollments(),
+  courses:     () => filterCourses(),
+  users:       () => filterUsers(),
+  departments: () => filterDepts(),
+};
+
+function sortTable(tableKey, col) {
+  const s = SORT_STATE[tableKey];
+  s.dir = (s.col === col && s.dir === 'asc') ? 'desc' : 'asc';
+  s.col = col;
+  RERENDER[tableKey]();
+}
+
+function applySort(tableKey, rows) {
+  const { col, dir } = SORT_STATE[tableKey];
+  if (!col) return rows;
+  const sign = dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    let va, vb;
+    if (col === 'semester_label') {
+      va = (a.academic_year || 0) * 10 + (a.semester || 0);
+      vb = (b.academic_year || 0) * 10 + (b.semester || 0);
+    } else {
+      va = a[col]; vb = b[col];
+    }
+    if (va == null && vb == null) return 0;
+    if (va == null) return sign;
+    if (vb == null) return -sign;
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sign;
+    return String(va).toLowerCase().localeCompare(String(vb).toLowerCase()) * sign;
+  });
+}
+
+function updateSortHeaders(tableKey) {
+  const { col, dir } = SORT_STATE[tableKey];
+  document.querySelectorAll(`th[data-table="${tableKey}"]`).forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.sort === col) th.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
+}
+
+// Delegated click listener for all sortable headers
+document.querySelectorAll('.da-table').forEach(table => {
+  table.addEventListener('click', e => {
+    const th = e.target.closest('th.sortable');
+    if (!th) return;
+    sortTable(th.dataset.table, th.dataset.sort);
+  });
+});
+
+// ── Edit modal ────────────────────────────────────────────────────────
+const EDIT_FIELDS = {
+  enrollments: [
+    { key: 'academic_year', label: 'Academic Year', type: 'number' },
+    { key: 'semester',      label: 'Semester',      type: 'select', options: [1, 2] },
+    { key: 'grade',         label: 'Grade',         type: 'number', nullable: true },
+    { key: 'status',        label: 'Status',        type: 'select', options: ['completed','enrolled','dropped'] },
+    { key: 'pass_flag',     label: 'Pass Flag',     type: 'tristate' },
+    { key: 'is_counted',    label: 'Is Counted',    type: 'tristate' },
+  ],
+  courses: [
+    { key: 'name_en',       label: 'English Name', type: 'text',             nullable: true },
+    { key: 'type',          label: 'Type',         type: 'select',           options: ['required','elective','university_required','general_education','common_required'] },
+    { key: 'credits',       label: 'Credits',      type: 'number',           nullable: true },
+    { key: 'grade_level',   label: 'Grade Level',  type: 'number',           nullable: true },
+    { key: 'section',       label: 'Section',      type: 'text',             nullable: true },
+    { key: 'capacity',      label: 'Capacity',     type: 'number',           nullable: true },
+    { key: 'instructor_id', label: 'Instructor',   type: 'professor_select', nullable: true, span: 2 },
+  ],
+  users: [
+    { key: 'name',   label: 'Name',   type: 'text' },
+    { key: 'email',  label: 'Email',  type: 'text',   nullable: true },
+    { key: 'role',   label: 'Role',   type: 'select', options: ['student','professor','admin'] },
+    { key: 'status', label: 'Status', type: 'select', options: ['active','suspended'] },
+  ],
+  departments: [
+    { key: 'name',    label: 'Name',    type: 'text' },
+    { key: 'faculty', label: 'Faculty', type: 'text',   nullable: true },
+    { key: 'status',  label: 'Status',  type: 'select', options: ['active','inactive'] },
+  ],
+};
+
+const CREATE_FIELDS = {
+  enrollments: [
+    { key: 'user_id',       label: 'Student',       type: 'student_select' },
+    { key: 'course_id',     label: 'Course',        type: 'course_select',  span: 2 },
+    { key: 'academic_year', label: 'Academic Year', type: 'number' },
+    { key: 'semester',      label: 'Semester',      type: 'select', options: [1, 2] },
+    { key: 'status',        label: 'Status',        type: 'select', options: ['enrolled','completed','dropped'] },
+    { key: 'grade',         label: 'Grade',         type: 'number', nullable: true },
+    { key: 'pass_flag',     label: 'Pass Flag',     type: 'tristate' },
+    { key: 'is_counted',    label: 'Is Counted',    type: 'tristate' },
+  ],
+  courses: [
+    { key: 'code',          label: 'Code',          type: 'text' },
+    { key: 'name',          label: 'Name',          type: 'text' },
+    { key: 'name_en',       label: 'Name (EN)',     type: 'text',   nullable: true },
+    { key: 'type',          label: 'Type',          type: 'select', options: ['required','elective','university_required','general_education','common_required'] },
+    { key: 'credits',       label: 'Credits',       type: 'number', nullable: true },
+    { key: 'academic_year', label: 'Academic Year', type: 'number' },
+    { key: 'semester',      label: 'Semester',      type: 'select', options: [1, 2] },
+    { key: 'grade_level',   label: 'Grade Level',   type: 'number', nullable: true },
+    { key: 'section',       label: 'Section',       type: 'text',   nullable: true },
+    { key: 'capacity',      label: 'Capacity',      type: 'number', nullable: true },
+    { key: 'department_id', label: 'Department',    type: 'dept_select',      span: 2 },
+    { key: 'instructor_id', label: 'Instructor',    type: 'professor_select', nullable: true, span: 2 },
+  ],
+  users: [
+    { key: 'name',          label: 'Name',          type: 'text' },
+    { key: 'student_id',    label: 'Student ID',    type: 'text',   nullable: true },
+    { key: 'email',         label: 'Email',         type: 'text' },
+    { key: 'password',      label: 'Password',      type: 'password' },
+    { key: 'role',          label: 'Role',          type: 'select', options: ['student','professor','admin'] },
+    { key: 'department_id', label: 'Department',    type: 'dept_select', nullable: true, span: 2 },
+  ],
+  departments: [
+    { key: 'code',    label: 'Code',    type: 'text' },
+    { key: 'name',    label: 'Name',    type: 'text' },
+    { key: 'faculty', label: 'Faculty', type: 'text',   nullable: true },
+    { key: 'status',  label: 'Status',  type: 'select', options: ['active','inactive'] },
+  ],
+};
+
+let _editTable = null;
+let _editId    = null;
+let _editMode  = 'edit';  // 'edit' | 'create'
+
+function _tristateSelected(value, opt) {
+  if (opt === '' && value == null)    return 'selected';
+  if (opt === 'true'  && value === true)  return 'selected';
+  if (opt === 'false' && value === false) return 'selected';
+  return '';
+}
+
+function buildFormField(field, value) {
+  const id = `_ef_${field.key}`;
+  let input;
+  if (field.type === 'professor_select') {
+    const profs = rawUsers
+      .filter(u => u.role === 'professor')
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const opts = `<option value="">— No instructor —</option>` +
+      profs.map(p => `<option value="${p.id}" ${p.id === value ? 'selected' : ''}>${p.name}</option>`).join('');
+    input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'student_select') {
+    const students = rawUsers
+      .filter(u => u.role === 'student')
+      .sort((a, b) => (a.student_id || '').localeCompare(b.student_id || ''));
+    const opts = `<option value="">— Select student —</option>` +
+      students.map(s => `<option value="${s.id}" ${s.id === value ? 'selected' : ''}>${s.student_id || '?'} · ${s.name}</option>`).join('');
+    input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'course_select') {
+    const seen = new Set();
+    const courses = rawCourses.filter(c => { if (seen.has(c.code)) return false; seen.add(c.code); return true; })
+      .sort((a, b) => a.code.localeCompare(b.code));
+    const opts = `<option value="">— Select course —</option>` +
+      courses.map(c => `<option value="${c.id}" ${c.id === value ? 'selected' : ''}>${c.code} · ${c.name_en || ''}</option>`).join('');
+    input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'dept_select') {
+    const opts = `<option value="">— Select department —</option>` +
+      rawDepts.map(d => `<option value="${d.id}" ${d.id === value ? 'selected' : ''}>${d.code} · ${d.name}</option>`).join('');
+    input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'password') {
+    input = `<input type="password" id="${id}" placeholder="Set password" autocomplete="new-password">`;
+  } else if (field.type === 'select') {
+    const opts = field.options.map(o =>
+      `<option value="${o}" ${String(value) === String(o) ? 'selected' : ''}>${o}</option>`
+    ).join('');
+    input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'tristate') {
+    input = `<select id="${id}">
+      <option value=""   ${_tristateSelected(value, '')}>Null</option>
+      <option value="true"  ${_tristateSelected(value, 'true')}>True</option>
+      <option value="false" ${_tristateSelected(value, 'false')}>False</option>
+    </select>`;
+  } else if (field.type === 'number') {
+    input = `<input type="number" id="${id}" value="${value ?? ''}">`;
+  } else {
+    const safe = String(value ?? '').replace(/"/g, '&quot;');
+    input = `<input type="text" id="${id}" value="${safe}">`;
+  }
+  return `<div class="form-field"><label for="${id}">${field.label}</label>${input}</div>`;
+}
+
+function collectFormValues(tableKey, fields) {
+  fields = fields || EDIT_FIELDS[tableKey];
+  const result = {};
+  for (const field of fields) {
+    const el = document.getElementById(`_ef_${field.key}`);
+    if (field.type === 'number') {
+      result[field.key] = el.value === '' ? null : Number(el.value);
+    } else if (field.type === 'tristate') {
+      result[field.key] = el.value === '' ? null : el.value === 'true';
+    } else if (['professor_select','student_select','course_select','dept_select'].includes(field.type)) {
+      result[field.key] = el.value || (field.nullable ? null : el.value);
+    } else if (field.type === 'password') {
+      if (el.value) result[field.key] = el.value;  // only include if filled
+    } else {
+      result[field.key] = (el.value === '' && field.nullable) ? null : el.value;
+    }
+  }
+  return result;
+}
+
+function _openModal(tableKey, fields, record, title) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-error').style.display = 'none';
+
+  let html = '';
+  let inRow = false;
+  fields.forEach((f, i) => {
+    const fullSpan = f.span === 2;
+    if (fullSpan) {
+      if (inRow) { html += '</div>'; inRow = false; }
+      html += `<div class="form-row" style="grid-template-columns:1fr">${buildFormField(f, record[f.key])}</div>`;
+    } else {
+      if (!inRow) { html += '<div class="form-row">'; inRow = true; }
+      html += buildFormField(f, record[f.key]);
+      if (i === fields.length - 1 || fields[i + 1]?.span === 2 || (i % 2 === 1)) {
+        html += '</div>'; inRow = false;
+      }
+    }
+  });
+  if (inRow) html += '</div>';
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function showCreateModal(tableKey) {
+  _editTable = tableKey;
+  _editId    = null;
+  _editMode  = 'create';
+  const labels = { enrollments: 'Enrollment', courses: 'Course', users: 'User', departments: 'Department' };
+  _openModal(tableKey, CREATE_FIELDS[tableKey], {}, `New ${labels[tableKey]}`);
+  document.getElementById('modal-save-btn').textContent = 'Create';
+}
+
+function showEditModal(tableKey, id) {
+  _editTable = tableKey;
+  _editId    = id;
+  _editMode  = 'edit';
+  const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+  const record = store[tableKey].find(r => r.id === id);
+  if (!record) return;
+
+  const labels = { enrollments: 'Enrollment', courses: 'Course', users: 'User', departments: 'Department' };
+  document.getElementById('modal-save-btn').textContent = 'Save';
+  _openModal(tableKey, EDIT_FIELDS[tableKey], record, `Edit ${labels[tableKey]}`);
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  _editTable = null;
+  _editId    = null;
+}
+
+async function saveEdit() {
+  const errEl   = document.getElementById('modal-error');
+  const saveBtn = document.getElementById('modal-save-btn');
+  errEl.style.display = 'none';
+  saveBtn.disabled = true;
+  saveBtn.textContent = _editMode === 'create' ? 'Creating…' : 'Saving…';
+
+  const fields = _editMode === 'create' ? CREATE_FIELDS[_editTable] : EDIT_FIELDS[_editTable];
+  const data   = collectFormValues(_editTable, fields);
+
+  const rerender = { enrollments: filterEnrollments, courses: filterCourses, users: filterUsers, departments: filterDepts };
+
+  try {
+    if (_editMode === 'create') {
+      const createApi = {
+        enrollments: d => api.adminCreateEnrollment(d),
+        courses:     d => api.adminCreateCourse(d),
+        users:       d => api.adminCreateUser(d),
+        departments: d => api.adminCreateDepartment(d),
+      };
+      // After create, reload the full table to get resolved fields
+      await createApi[_editTable](data);
+      const reloadApi = { enrollments: api.adminEnrollments, courses: api.adminCourses, users: api.adminUsers, departments: api.adminDepartments };
+      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+      const fresh = await reloadApi[_editTable]();
+      store[_editTable].length = 0;
+      store[_editTable].push(...fresh);
+    } else {
+      const updateApi = {
+        enrollments: (id, d) => api.adminUpdateEnrollment(id, d),
+        courses:     (id, d) => api.adminUpdateCourse(id, d),
+        users:       (id, d) => api.adminUpdateUser(id, d),
+        departments: (id, d) => api.adminUpdateDepartment(id, d),
+      };
+      await updateApi[_editTable](_editId, data);
+      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+      const idx = store[_editTable].findIndex(r => r.id === _editId);
+      if (idx !== -1) {
+        Object.assign(store[_editTable][idx], data);
+        if (_editTable === 'courses' && data.instructor_id !== undefined) {
+          const prof = rawUsers.find(u => u.id === data.instructor_id);
+          store.courses[idx].instructor_name = prof ? prof.name : '';
+        }
+      }
+    }
+    rerender[_editTable]();
+    closeModal();
+  } catch (err) {
+    errEl.textContent = (_editMode === 'create' ? 'Create' : 'Save') + ' failed: ' + err.message;
+    errEl.style.display = 'block';
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = _editMode === 'create' ? 'Create' : 'Save';
+  }
+}
+
+async function deleteRecord(tableKey, id) {
+  const labels = { enrollments: 'enrollment', courses: 'course', users: 'user', departments: 'department' };
+  if (!confirm(`Delete this ${labels[tableKey]}? This cannot be undone.`)) return;
+
+  const apiMap = {
+    enrollments: (i) => api.adminDeleteEnrollment(i),
+    courses:     (i) => api.adminDeleteCourse(i),
+    users:       (i) => api.adminDeleteUser(i),
+    departments: (i) => api.adminDeleteDepartment(i),
+  };
+  const rerender = {
+    enrollments: filterEnrollments,
+    courses:     filterCourses,
+    users:       filterUsers,
+    departments: filterDepts,
+  };
+  const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+
+  try {
+    await apiMap[tableKey](id);
+    const arr = store[tableKey];
+    const idx = arr.findIndex(r => r.id === id);
+    if (idx !== -1) arr.splice(idx, 1);
+    rerender[tableKey]();
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Bootstrap ─────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  await checkAuth();
+  initLayout('data-admin', 'Data Admin');
+
+  try {
+    const [enrollments, courses, users, depts] = await Promise.all([
+      api.adminEnrollments(),
+      api.adminCourses(),
+      api.adminUsers(),
+      api.adminDepartments(),
+    ]);
+
+    // Enrollments
+    rawEnrollments = enrollments;
+    const semSet = [...new Set(enrollments.map(r => semLabel(r.academic_year, r.semester)))].sort();
+    populateSelect('ef-sem', semSet);
+    renderEnrollments(rawEnrollments);
+
+    // Courses
+    rawCourses = courses;
+    const cSemSet  = [...new Set(courses.map(r => semLabel(r.academic_year, r.semester)))].sort();
+    const cDeptSet = [...new Set(courses.map(r => r.dept_code).filter(Boolean))].sort();
+    populateSelect('cf-sem',  cSemSet);
+    populateSelect('cf-dept',  cDeptSet);
+    const cLevelSet = [...new Set(courses.map(r => r.grade_level).filter(v => v != null))].sort((a, b) => a - b);
+    populateSelect('cf-level', cLevelSet, v => `Year ${v}`);
+    renderCourses(rawCourses);
+
+    // Users
+    rawUsers = users;
+    const uDeptSet = [...new Set(users.map(r => r.dept_code).filter(Boolean))].sort();
+    populateSelect('uf-dept', uDeptSet);
+    renderUsers(rawUsers);
+
+    // Departments
+    rawDepts = depts;
+    const facSet = [...new Set(depts.map(r => r.faculty).filter(Boolean))].sort();
+    populateSelect('df-faculty', facSet);
+    renderDepts(rawDepts);
+
+    document.getElementById('status-dot').className     = 'status-dot ok';
+    document.getElementById('status-label').textContent = 'API Connected';
+  } catch (err) {
+    console.error('Data Admin error:', err);
+    document.getElementById('status-dot').className     = 'status-dot err';
+    document.getElementById('status-label').textContent = 'API Error';
+    ['enroll-body','courses-body','users-body','depts-body'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<tr class="empty-row"><td colspan="12" style="color:var(--red)">Failed to load data. Check console.</td></tr>`;
+    });
+  }
+});
+</script>
+</body>
+</html>

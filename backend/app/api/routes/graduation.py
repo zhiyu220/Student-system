@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -32,34 +34,34 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
     user_id  = str(user["id"])
     dept_id  = str(user["department_id"]) if user["department_id"] else None
 
-    # ── Step 2: graduation requirements for the department ────────────────
     if not dept_id:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Student has no department assigned")
 
-    req_result = await db.execute(
-        text("""
-            SELECT id::text, rule_name, rule_type, required_value
-            FROM graduation_requirements
-            WHERE department_id = :dept_id
-        """),
-        {"dept_id": dept_id},
+    # ── Steps 2 & 3: run requirements + enrollments queries in parallel ───
+    req_result, enroll_result = await asyncio.gather(
+        db.execute(
+            text("""
+                SELECT id::text, rule_name, rule_type, required_value
+                FROM graduation_requirements
+                WHERE department_id = :dept_id
+            """),
+            {"dept_id": dept_id},
+        ),
+        db.execute(
+            text("""
+                SELECT c.code,
+                       COALESCE(c.name_en, c.name) AS name_en,
+                       c.credits, c.type,
+                       e.pass_flag, e.status, e.is_counted
+                FROM enrollments e
+                JOIN courses c ON c.id = e.course_id
+                WHERE e.user_id = :uid
+            """),
+            {"uid": user_id},
+        ),
     )
     requirements = req_result.mappings().all()
-
-    # ── Step 3: student's enrollments ────────────────────────────────────
-    enroll_result = await db.execute(
-        text("""
-            SELECT c.code,
-                   COALESCE(c.name_en, c.name) AS name_en,
-                   c.credits, c.type,
-                   e.pass_flag, e.status, e.is_counted
-            FROM enrollments e
-            JOIN courses c ON c.id = e.course_id
-            WHERE e.user_id = :uid
-        """),
-        {"uid": user_id},
-    )
-    enrollments = enroll_result.mappings().all()
+    enrollments  = enroll_result.mappings().all()
 
     # Build lookup: code → enrollment record
     enroll_by_code: dict = {}

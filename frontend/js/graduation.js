@@ -8,24 +8,24 @@
 const BUCKET_META = {
   'Department Required Courses': {
     short: 'Department Required',
-    color: '#3b82f6',
+    color: 'var(--cat-required-fg)',
     // course types that count toward this bucket (used for suggestions)
     types: ['required', 'common_required'],
   },
   'Elective Courses': {
     short: 'Elective',
-    color: '#a855f7',
+    color: 'var(--cat-elective-fg)',
     types: ['elective'],
   },
   'University Compulsory & General Education': {
     short: 'University & General Ed.',
-    color: '#f97316',
+    color: 'var(--cat-univ-fg)',
     types: ['university_required', 'general_education'],
   },
 };
 
 function bucketMeta(name) {
-  return BUCKET_META[name] || { short: name, color: '#64748b', types: [] };
+  return BUCKET_META[name] || { short: name, color: 'var(--text-muted)', types: [] };
 }
 
 function safePct(earned, total) {
@@ -44,15 +44,15 @@ function buildCircleCard(label, earned, total, color) {
   const remaining = Math.max(0, total - earned);
   return `
     <div class="card stat-card">
-      <div style="color:#666; margin-bottom:10px; font-weight:500;">${label}</div>
+      <div style="color:var(--text-muted); margin-bottom:10px; font-weight:500;">${label}</div>
       <div class="progress-circle" style="--ring-color:${color}; --ring-pct:${pct}%;">
         <div class="inner">
           <div style="font-size:26px; font-weight:700; color:${color};">${earned}</div>
-          <div style="font-size:12px; color:#999;">/ ${total}</div>
+          <div style="font-size:12px; color:var(--text-muted);">/ ${total}</div>
         </div>
       </div>
       <div style="font-size:26px; font-weight:700; color:${color}; margin-top:10px;">${pct}%</div>
-      <div style="color:#888; font-size:13px;">${remaining} remaining</div>
+      <div style="color:var(--text-muted); font-size:13px;">${remaining} remaining</div>
     </div>`;
 }
 
@@ -61,14 +61,14 @@ function buildOverallCard(earned, total) {
   const remaining = Math.max(0, total - earned);
   return `
     <div class="card stat-card">
-      <div style="color:#666; margin-bottom:10px; font-weight:500;">Overall Graduation Progress</div>
-      <div class="progress-circle" style="--ring-color:#22c55e; --ring-pct:${pct}%;">
+      <div style="color:var(--text-muted); margin-bottom:10px; font-weight:500;">Overall Graduation Progress</div>
+      <div class="progress-circle" style="--ring-color:var(--accent); --ring-pct:${pct}%;">
         <div class="inner">
-          <div style="font-size:30px; font-weight:700; color:#22c55e;">${pct}%</div>
+          <div style="font-size:30px; font-weight:700; color:var(--accent);">${pct}%</div>
         </div>
       </div>
       <div style="margin-top:12px; font-size:16px; font-weight:600;">${earned} / ${total} credits</div>
-      <div style="color:#22c55e; font-size:13px;">${remaining} credits left to graduate</div>
+      <div style="color:var(--text-muted); font-size:13px;">${remaining} credits left to graduate</div>
     </div>`;
 }
 
@@ -251,7 +251,7 @@ function renderTables(records) {
       <td>${formatType(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
-      <td><span style="color:#eab308;">&#9203; In Progress</span></td>
+      <td><span style="color:var(--amber);">&#9203; In Progress</span></td>
     </tr>`).join('') ||
     '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No courses in progress.</td></tr>';
 
@@ -261,7 +261,7 @@ function renderTables(records) {
       <td>${formatType(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
-      <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
+      <td><span style="color:var(--red);">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
     </tr>`).join('') ||
     '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No failed courses.</td></tr>';
 }
@@ -309,6 +309,6 @@ window.addEventListener('load', async () => {
     document.getElementById('status-dot').className     = 'status-dot err';
     document.getElementById('status-label').textContent = 'API Error';
     document.getElementById('progress-grid').innerHTML  =
-      '<p style="color:#dc2626;padding:16px;">Failed to load graduation data.</p>';
+      '<p style="color:var(--red);padding:16px;">Failed to load graduation data.</p>';
   }
 });

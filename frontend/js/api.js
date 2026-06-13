@@ -42,6 +42,19 @@ const api = {
     return res.json();
   },
 
+  async put(path, body) {
+    const token = getToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(API_BASE + path, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+
   async post(path, body) {
     const token = getToken();
     const headers = { 'Content-Type': 'application/json' };
@@ -73,4 +86,34 @@ const api = {
   courseRecords: (id) => api.get(`/api/course-records/${id}`),
   graduation:    (id) => api.get(`/api/graduation/${id}`),
   performance:   (id) => api.get(`/api/academic/students/${id}/performance`),
+
+  // ── Admin / data-review endpoints ──────────────────────────────────
+  adminEnrollments:  () => api.get('/api/admin/enrollments'),
+  adminCourses:      () => api.get('/api/admin/courses'),
+  adminUsers:        () => api.get('/api/admin/users'),
+  adminDepartments:  () => api.get('/api/admin/departments'),
+
+  adminUpdateEnrollment:  (id, d) => api.put(`/api/admin/enrollments/${id}`, d),
+  adminUpdateCourse:      (id, d) => api.put(`/api/admin/courses/${id}`,     d),
+  adminUpdateUser:        (id, d) => api.put(`/api/admin/users/${id}`,       d),
+  adminUpdateDepartment:  (id, d) => api.put(`/api/admin/departments/${id}`, d),
+
+  adminCreateEnrollment:  (d)  => api.post('/api/admin/enrollments',        d),
+  adminCreateCourse:      (d)  => api.post('/api/admin/courses',            d),
+  adminCreateUser:        (d)  => api.post('/api/admin/users',              d),
+  adminCreateDepartment:  (d)  => api.post('/api/admin/departments',        d),
+
+  adminDeleteEnrollment:  (id) => api.delete(`/api/admin/enrollments/${id}`),
+  adminDeleteCourse:      (id) => api.delete(`/api/admin/courses/${id}`),
+  adminDeleteUser:        (id) => api.delete(`/api/admin/users/${id}`),
+  adminDeleteDepartment:  (id) => api.delete(`/api/admin/departments/${id}`),
+};
+
+// extend api with delete method
+api.delete = async function(path) {
+  const token = getToken();
+  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+  const res = await fetch(API_BASE + path, { method: 'DELETE', headers });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 };

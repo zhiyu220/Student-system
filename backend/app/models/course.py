@@ -32,7 +32,7 @@ class CourseInstructor(Base):
     __tablename__ = "course_instructors"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False, index=True)
     instructor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     role = Column(String(20), nullable=False)  # primary / co_instructor / assistant
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
@@ -45,8 +45,8 @@ class Enrollment(Base):
     __tablename__ = "enrollments"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False, index=True)
     grade = Column(Numeric(5, 2), nullable=True)  # 成績
     status = Column(String(20), nullable=False)  # enrolled / dropped / completed
     pass_flag = Column(Boolean, nullable=True)  # 是否通過
