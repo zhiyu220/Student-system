@@ -160,7 +160,9 @@ function missingChip(c) {
   return `<span class="miss-chip ${cls}" title="${c.name_en} (${c.credits} cr)">${icon} ${c.code} &middot; ${c.name_en} <em>(${c.credits} cr)</em></span>`;
 }
 
-function renderNeeded(buckets, blockingItems, allCourses, takenCodes) {
+// `catalogPending` = the course catalog is still loading, so elective/gen-ed
+// suggestions aren't ready yet and we show a "Loading suggestions…" hint instead.
+function renderNeeded(buckets, blockingItems, allCourses, takenCodes, catalogPending) {
   const container = document.getElementById('needed-list');
   const order = ['Department Required Courses', 'Elective Courses', 'University Compulsory & General Education'];
   const byName = {};
@@ -187,8 +189,18 @@ function renderNeeded(buckets, blockingItems, allCourses, takenCodes) {
       const chips = (b.missing_courses || []).length
         ? `<div class="chip-row">${b.missing_courses.map(missingChip).join('')}</div>`
         : '';
-      const suggestions = buildSuggestions(b, allCourses, takenCodes, gap);
-      body = chips + suggestionsHtml(suggestions, gap);
+      // Credit-sum buckets (elective / gen-ed) rely on the catalog for suggestions.
+      const usesCatalog = meta.types.length > 0 && name !== 'Department Required Courses';
+      let suggestBlock;
+      if (catalogPending && usesCatalog) {
+        suggestBlock = `
+          <div class="needed-suggest">
+            <div class="needed-suggest-label">Loading suggestions&hellip;</div>
+          </div>`;
+      } else {
+        suggestBlock = suggestionsHtml(buildSuggestions(b, allCourses, takenCodes, gap), gap);
+      }
+      body = chips + suggestBlock;
       if (!body) body = `<div class="needed-empty">${gap} more credit(s) of ${meta.short.toLowerCase()} coursework required.</div>`;
     }
 
@@ -230,6 +242,47 @@ function formatType(type) {
   return map[type] || type || '&#8212;';
 }
 
+// Colored category badge (shared palette with course_history02).
+const CATEGORY_BADGE = {
+  required:            'badge-required',
+  common_required:     'badge-required',
+  elective:            'badge-elective',
+  university_required: 'badge-univ',
+  general_education:   'badge-general',
+};
+
+function categoryBadge(type) {
+  const cls = CATEGORY_BADGE[type] || 'badge-other';
+  return `<span class="badge-type ${cls}">${formatType(type)}</span>`;
+}
+
+// All course records for the review list; the Category/Semester filters work off this.
+let allRecords = [];
+
+function semKey(c) {
+  return `${c.academic_year}-${c.semester}`;
+}
+
+// Build the Semester <select> options from the distinct semesters in the records.
+function populateSemesterFilter(records) {
+  const sel = document.getElementById('sem-filter');
+  if (!sel) return;
+  const sems = [...new Set(records.map(semKey))].sort();
+  sel.innerHTML = '<option value="all">All Semesters</option>' +
+    sems.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+// Re-render the three tables applying the current Category + Semester filters.
+function applyReviewFilters() {
+  const cat = document.getElementById('cat-filter')?.value || 'all';
+  const sem = document.getElementById('sem-filter')?.value || 'all';
+  const filtered = allRecords.filter(c =>
+    (cat === 'all' || c.type === cat) &&
+    (sem === 'all' || semKey(c) === sem)
+  );
+  renderTables(filtered);
+}
+
 function renderTables(records) {
   const completed  = records.filter(c => c.pass_flag === true);
   const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
@@ -238,7 +291,7 @@ function renderTables(records) {
   document.getElementById('completed-table').innerHTML = completed.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><strong>${c.grade != null ? c.grade : '&#8212;'}</strong></td>
@@ -248,7 +301,7 @@ function renderTables(records) {
   document.getElementById('progress-table').innerHTML = inProgress.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><span style="color:var(--amber);">&#9203; In Progress</span></td>
@@ -258,7 +311,7 @@ function renderTables(records) {
   document.getElementById('missing-table').innerHTML = missing.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><span style="color:var(--red);">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
@@ -282,15 +335,16 @@ window.addEventListener('load', async () => {
   const studentId = user?.student_id || '1111708';
 
   try {
-    // Catalog is best-effort; never let it block the audit.
-    const [grad, recordsData, catalog] = await Promise.all([
+    // Render the page from two fast single-query calls first, so it paints in one
+    // round-trip. The course catalog (/api/academic/courses) is heavier and only
+    // powers the elective/gen-ed suggestion chips, so it loads separately below.
+    const [grad, recordsData] = await Promise.all([
       api.graduation(studentId),
       api.courseRecords(studentId),
-      api.courses().catch(() => ({ courses: [] })),
     ]);
 
     const records    = recordsData.records || [];
-    const allCourses = (catalog && catalog.courses) || [];
+    allRecords = records;
     // Codes the student has already attempted (passed, enrolled, or failed) — never re-suggest these.
     const takenCodes = new Set(records.map(r => r.code));
 
@@ -299,11 +353,24 @@ window.addEventListener('load', async () => {
 
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
-    renderNeeded(grad.buckets, grad.blocking_items, allCourses, takenCodes);
-    renderTables(records);
+    renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
+    populateSemesterFilter(records);
+    applyReviewFilters();
 
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';
+
+    // Background: load the catalog, then patch in the suggestion chips. A failure
+    // here just leaves the "Loading suggestions…" hint replaced by nothing.
+    api.courses()
+      .then(catalog => {
+        const allCourses = (catalog && catalog.courses) || [];
+        renderNeeded(grad.buckets, grad.blocking_items, allCourses, takenCodes, /* catalogPending */ false);
+      })
+      .catch(err => {
+        console.warn('Course catalog unavailable; suggestions omitted:', err);
+        renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ false);
+      });
   } catch (err) {
     console.error('Graduation page error:', err);
     document.getElementById('status-dot').className     = 'status-dot err';
