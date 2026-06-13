@@ -65,8 +65,9 @@ async def admin_courses(
             c.sub_category,
             d.code                                  AS dept_code,
             d.name                                  AS dept_name,
+            c.department_id::text                   AS department_id,
             COALESCE(inst.name, '')                 AS instructor_name,
-            ci.instructor_id::text                 AS instructor_id
+            ci.instructor_id::text                  AS instructor_id
         FROM courses c
         LEFT JOIN departments d ON d.id = c.department_id
         LEFT JOIN course_instructors ci ON ci.course_id = c.id AND ci.role = 'primary'
@@ -134,10 +135,13 @@ class CoursePatch(BaseModel):
     name_en: Optional[str] = None
     type: str
     credits: Optional[int] = None
+    academic_year: Optional[int] = None
+    semester: Optional[int] = None
     grade_level: Optional[int] = None
     section: Optional[str] = None
     capacity: Optional[int] = None
-    sub_category: Optional[str] = None  # 校必修/通識子類別，用於畢業審查逐項判定
+    sub_category: Optional[str] = None
+    department_id: Optional[str] = None
     instructor_id: Optional[str] = None  # "" = remove, UUID = set, None = no-op
 
 
@@ -217,14 +221,17 @@ async def update_course(
     await db.execute(
         text("""
             UPDATE courses
-            SET name_en      = :name_en,
-                type         = :type,
-                credits      = :credits,
-                grade_level  = :grade_level,
-                section      = :section,
-                capacity     = :capacity,
-                sub_category = :sub_category,
-                updated_at   = NOW()
+            SET name_en       = :name_en,
+                type          = :type,
+                credits       = :credits,
+                academic_year = :academic_year,
+                semester      = :semester,
+                grade_level   = :grade_level,
+                section       = :section,
+                capacity      = :capacity,
+                sub_category  = :sub_category,
+                department_id = :department_id,
+                updated_at    = NOW()
             WHERE id = :id
         """),
         {**course_fields, "id": cid},
