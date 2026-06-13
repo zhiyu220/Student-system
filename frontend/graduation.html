@@ -103,6 +103,41 @@
   .blocking-list { margin: 8px 0 0; padding-left: 20px; color: #991b1b; font-size: 13px; }
   .blocking-list li { margin-bottom: 4px; }
 
+  /* Category color badges (shared scheme with course_history02) */
+  .badge-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-required { background: #EEF2FF; color: #4E6CF0; }
+  .badge-elective { background: #F0FDF4; color: #16a34a; }
+  .badge-univ     { background: #FFF7ED; color: #ea580c; }
+  .badge-general  { background: #FEF3C7; color: #d97706; }
+  .badge-other    { background: #f1f5f9; color: #475569; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-bar label { font-size: 13px; font-weight: 500; color: #666; }
+  .filter-bar select {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+  }
+  .filter-bar select:focus { border-color: #4E6CF0; }
+
   .tab-container {
     display: flex;
     border-bottom: 1px solid #e5e7eb;
@@ -166,6 +201,21 @@
         <div class="card-title">Course &amp; Credit Review List</div>
       </div>
       <div class="card-body">
+        <div class="filter-bar">
+          <label for="cat-filter">Category</label>
+          <select id="cat-filter" onchange="applyReviewFilters()">
+            <option value="all">All Categories</option>
+            <option value="required">Required</option>
+            <option value="common_required">Common Required</option>
+            <option value="elective">Elective</option>
+            <option value="university_required">University Required</option>
+            <option value="general_education">General Education</option>
+          </select>
+          <label for="sem-filter">Semester</label>
+          <select id="sem-filter" onchange="applyReviewFilters()">
+            <option value="all">All Semesters</option>
+          </select>
+        </div>
         <div class="tab-container">
           <div class="tab active" onclick="switchTab(0)">&#10003; Completed</div>
           <div class="tab" onclick="switchTab(1)">&#9203; In Progress</div>

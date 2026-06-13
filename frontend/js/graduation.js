@@ -242,6 +242,47 @@ function formatType(type) {
   return map[type] || type || '&#8212;';
 }
 
+// Colored category badge (shared palette with course_history02).
+const CATEGORY_BADGE = {
+  required:            'badge-required',
+  common_required:     'badge-required',
+  elective:            'badge-elective',
+  university_required: 'badge-univ',
+  general_education:   'badge-general',
+};
+
+function categoryBadge(type) {
+  const cls = CATEGORY_BADGE[type] || 'badge-other';
+  return `<span class="badge-type ${cls}">${formatType(type)}</span>`;
+}
+
+// All course records for the review list; the Category/Semester filters work off this.
+let allRecords = [];
+
+function semKey(c) {
+  return `${c.academic_year}-${c.semester}`;
+}
+
+// Build the Semester <select> options from the distinct semesters in the records.
+function populateSemesterFilter(records) {
+  const sel = document.getElementById('sem-filter');
+  if (!sel) return;
+  const sems = [...new Set(records.map(semKey))].sort();
+  sel.innerHTML = '<option value="all">All Semesters</option>' +
+    sems.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+// Re-render the three tables applying the current Category + Semester filters.
+function applyReviewFilters() {
+  const cat = document.getElementById('cat-filter')?.value || 'all';
+  const sem = document.getElementById('sem-filter')?.value || 'all';
+  const filtered = allRecords.filter(c =>
+    (cat === 'all' || c.type === cat) &&
+    (sem === 'all' || semKey(c) === sem)
+  );
+  renderTables(filtered);
+}
+
 function renderTables(records) {
   const completed  = records.filter(c => c.pass_flag === true);
   const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
@@ -250,7 +291,7 @@ function renderTables(records) {
   document.getElementById('completed-table').innerHTML = completed.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><strong>${c.grade != null ? c.grade : '&#8212;'}</strong></td>
@@ -260,7 +301,7 @@ function renderTables(records) {
   document.getElementById('progress-table').innerHTML = inProgress.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><span style="color:#eab308;">&#9203; In Progress</span></td>
@@ -270,7 +311,7 @@ function renderTables(records) {
   document.getElementById('missing-table').innerHTML = missing.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${formatType(c.type)}</td>
+      <td>${categoryBadge(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
       <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
@@ -303,6 +344,7 @@ window.addEventListener('load', async () => {
     ]);
 
     const records    = recordsData.records || [];
+    allRecords = records;
     // Codes the student has already attempted (passed, enrolled, or failed) — never re-suggest these.
     const takenCodes = new Set(records.map(r => r.code));
 
@@ -312,7 +354,8 @@ window.addEventListener('load', async () => {
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
     renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
-    renderTables(records);
+    populateSemesterFilter(records);
+    applyReviewFilters();
 
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';
