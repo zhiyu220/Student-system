@@ -307,6 +307,9 @@
       <button class="da-tab" data-tab="departments">
         <i class="ti ti-building" style="margin-right:5px"></i>Departments
       </button>
+      <button class="da-tab" data-tab="requirements">
+        <i class="ti ti-list-check" style="margin-right:5px"></i>Requirements
+      </button>
     </div>
 
     <!-- ── Enrollments ── -->
@@ -487,6 +490,48 @@
       </div>
     </div>
 
+    <!-- ── Requirements ── -->
+    <div class="da-section" id="sec-requirements">
+      <div class="section-meta">
+        <h3>Graduation Requirements</h3>
+        <span class="record-badge" id="reqs-count">—</span>
+        <button class="create-btn" onclick="showCreateModal('requirements')"><i class="ti ti-plus"></i> New</button>
+      </div>
+      <div class="filter-bar">
+        <input id="rf-name"    placeholder="Rule name" oninput="filterReqs()">
+        <select id="rf-type"   onchange="filterReqs()">
+          <option value="">All Types</option>
+          <option value="CREDIT_SUM">CREDIT_SUM</option>
+          <option value="LIST_ALL">LIST_ALL</option>
+          <option value="LIST_OR">LIST_OR</option>
+          <option value="CUSTOM">CUSTOM</option>
+        </select>
+        <select id="rf-dept"   onchange="filterReqs()">
+          <option value="">All Departments</option>
+        </select>
+        <span class="filter-count" id="reqs-filter-count"></span>
+      </div>
+      <div class="card da-table-wrap">
+        <table class="da-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-table="requirements" data-sort="rule_name">Rule Name</th>
+              <th class="sortable" data-table="requirements" data-sort="rule_type">Type</th>
+              <th class="sortable" data-table="requirements" data-sort="required_value">Required Value</th>
+              <th class="sortable" data-table="requirements" data-sort="dept_code">Department</th>
+              <th class="sortable" data-table="requirements" data-sort="parent_req_name">Parent Rule</th>
+              <th>Description</th>
+              <th class="sortable" data-table="requirements" data-sort="course_count">Courses</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="reqs-body">
+            <tr class="empty-row"><td colspan="8"><div class="loading-msg">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /layout -->
@@ -512,7 +557,7 @@
 <script src="js/sidebar.js"></script>
 <script>
 // ── Raw data stores ────────────────────────────────────────────────────
-let rawEnrollments = [], rawCourses = [], rawUsers = [], rawDepts = [];
+let rawEnrollments = [], rawCourses = [], rawUsers = [], rawDepts = [], rawReqs = [];
 
 // ── Tab switching ─────────────────────────────────────────────────────
 document.querySelectorAll('.da-tab').forEach(btn => {
@@ -736,19 +781,70 @@ function filterDepts() {
   renderDepts(applySort('departments', rows));
 }
 
+// ── Requirements ─────────────────────────────────────────────────────
+const RULE_TYPE_COLORS = {
+  LIST_ALL:   ['#eef0fe','#3d5bd4'],
+  LIST_OR:    ['#e7f4f1','#0d6b5a'],
+  CREDIT_SUM: ['#e8f3fe','#1a6fba'],
+  CUSTOM:     ['#f2efff','#6340cc'],
+};
+function ruleTypeBadge(t) {
+  const [bg, fg] = RULE_TYPE_COLORS[t] || ['#f0f0f0','#555'];
+  return `<span class="badge" style="background:${bg};color:${fg}">${t || '—'}</span>`;
+}
+
+function renderReqs(rows) {
+  document.getElementById('reqs-count').textContent = rawReqs.length + ' total';
+  document.getElementById('reqs-filter-count').textContent =
+    rows.length < rawReqs.length ? `Showing ${rows.length} / ${rawReqs.length}` : `${rows.length} records`;
+
+  document.getElementById('reqs-body').innerHTML = rows.length === 0 ? empty(8) :
+    rows.map(r => `
+      <tr>
+        <td style="font-weight:500">${r.rule_name}</td>
+        <td>${ruleTypeBadge(r.rule_type)}</td>
+        <td style="text-align:center">${r.required_value ?? '—'}</td>
+        <td title="${r.dept_name || ''}">${r.dept_code || '—'}</td>
+        <td style="color:var(--text-muted);font-size:12px">${r.parent_req_name || '—'}</td>
+        <td style="color:var(--text-muted);font-size:12px">${r.description || '—'}</td>
+        <td style="text-align:center">${r.course_count}</td>
+        <td><div class="action-btns">
+          <button class="edit-btn" onclick="showEditModal('requirements','${r.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="del-btn"  onclick="deleteRecord('requirements','${r.id}')"><i class="ti ti-trash"></i></button>
+        </div></td>
+      </tr>`).join('');
+  updateSortHeaders('requirements');
+}
+
+function filterReqs() {
+  const name = document.getElementById('rf-name').value.toLowerCase();
+  const type = document.getElementById('rf-type').value;
+  const dept = document.getElementById('rf-dept').value;
+
+  const rows = rawReqs.filter(r => {
+    if (name && !r.rule_name.toLowerCase().includes(name)) return false;
+    if (type && r.rule_type !== type) return false;
+    if (dept && r.dept_code !== dept) return false;
+    return true;
+  });
+  renderReqs(applySort('requirements', rows));
+}
+
 // ── Sort ─────────────────────────────────────────────────────────────
 const SORT_STATE = {
-  enrollments: { col: null, dir: 'asc' },
-  courses:     { col: null, dir: 'asc' },
-  users:       { col: null, dir: 'asc' },
-  departments: { col: null, dir: 'asc' },
+  enrollments:  { col: null, dir: 'asc' },
+  courses:      { col: null, dir: 'asc' },
+  users:        { col: null, dir: 'asc' },
+  departments:  { col: null, dir: 'asc' },
+  requirements: { col: null, dir: 'asc' },
 };
 
 const RERENDER = {
-  enrollments: () => filterEnrollments(),
-  courses:     () => filterCourses(),
-  users:       () => filterUsers(),
-  departments: () => filterDepts(),
+  enrollments:  () => filterEnrollments(),
+  courses:      () => filterCourses(),
+  users:        () => filterUsers(),
+  departments:  () => filterDepts(),
+  requirements: () => filterReqs(),
 };
 
 function sortTable(tableKey, col) {
@@ -831,7 +927,24 @@ const EDIT_FIELDS = {
     { key: 'faculty', label: 'Faculty', type: 'text',   nullable: true },
     { key: 'status',  label: 'Status',  type: 'select', options: ['active','inactive'] },
   ],
+  requirements: [
+    { key: 'rule_name',      label: 'Rule Name',      type: 'text',       span: 2 },
+    { key: 'rule_type',      label: 'Type',           type: 'select',     options: ['CREDIT_SUM','LIST_ALL','LIST_OR','CUSTOM'] },
+    { key: 'required_value', label: 'Required Value', type: 'number',     nullable: true },
+    { key: 'department_id',  label: 'Department',     type: 'dept_select',nullable: true, span: 2 },
+    { key: 'parent_req_id',  label: 'Parent Rule',    type: 'req_select', nullable: true, span: 2 },
+    { key: 'description',    label: 'Description',    type: 'text',       nullable: true, span: 2 },
+  ],
 };
+
+const CREATE_FIELDS_REQS = [
+  { key: 'rule_name',      label: 'Rule Name',      type: 'text',       span: 2 },
+  { key: 'rule_type',      label: 'Type',           type: 'select',     options: ['CREDIT_SUM','LIST_ALL','LIST_OR','CUSTOM'] },
+  { key: 'required_value', label: 'Required Value', type: 'number',     nullable: true },
+  { key: 'department_id',  label: 'Department',     type: 'dept_select',nullable: true, span: 2 },
+  { key: 'parent_req_id',  label: 'Parent Rule',    type: 'req_select', nullable: true, span: 2 },
+  { key: 'description',    label: 'Description',    type: 'text',       nullable: true, span: 2 },
+];
 
 const CREATE_FIELDS = {
   enrollments: [
@@ -875,6 +988,7 @@ const CREATE_FIELDS = {
     { key: 'faculty', label: 'Faculty', type: 'text',   nullable: true },
     { key: 'status',  label: 'Status',  type: 'select', options: ['active','inactive'] },
   ],
+  requirements: CREATE_FIELDS_REQS,
 };
 
 let _editTable = null;
@@ -916,6 +1030,10 @@ function buildFormField(field, value) {
     const opts = `<option value="">— Select department —</option>` +
       rawDepts.map(d => `<option value="${d.id}" ${d.id === value ? 'selected' : ''}>${d.code} · ${d.name}</option>`).join('');
     input = `<select id="${id}">${opts}</select>`;
+  } else if (field.type === 'req_select') {
+    const opts = `<option value="">— No parent —</option>` +
+      rawReqs.map(r => `<option value="${r.id}" ${r.id === value ? 'selected' : ''}>${r.rule_name}</option>`).join('');
+    input = `<select id="${id}">${opts}</select>`;
   } else if (field.type === 'password') {
     input = `<input type="password" id="${id}" placeholder="Set password" autocomplete="new-password">`;
   } else if (field.type === 'select') {
@@ -951,7 +1069,7 @@ function collectFormValues(tableKey, fields) {
       result[field.key] = el.value === '' ? null : Number(el.value);
     } else if (field.type === 'tristate') {
       result[field.key] = el.value === '' ? null : el.value === 'true';
-    } else if (['professor_select','student_select','course_select','dept_select'].includes(field.type)) {
+    } else if (['professor_select','student_select','course_select','dept_select','req_select'].includes(field.type)) {
       result[field.key] = el.value || (field.nullable ? null : el.value);
     } else if (field.type === 'password') {
       if (el.value) result[field.key] = el.value;  // only include if filled
@@ -1029,27 +1147,34 @@ async function saveEdit() {
   try {
     if (_editMode === 'create') {
       const createApi = {
-        enrollments: d => api.adminCreateEnrollment(d),
-        courses:     d => api.adminCreateCourse(d),
-        users:       d => api.adminCreateUser(d),
-        departments: d => api.adminCreateDepartment(d),
+        enrollments:  d => api.adminCreateEnrollment(d),
+        courses:      d => api.adminCreateCourse(d),
+        users:        d => api.adminCreateUser(d),
+        departments:  d => api.adminCreateDepartment(d),
+        requirements: d => api.adminCreateRequirement(d),
       };
-      // After create, reload the full table to get resolved fields
       await createApi[_editTable](data);
-      const reloadApi = { enrollments: api.adminEnrollments, courses: api.adminCourses, users: api.adminUsers, departments: api.adminDepartments };
-      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+      const reloadApi = {
+        enrollments:  api.adminEnrollments,
+        courses:      api.adminCourses,
+        users:        api.adminUsers,
+        departments:  api.adminDepartments,
+        requirements: api.adminRequirements,
+      };
+      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts, requirements: rawReqs };
       const fresh = await reloadApi[_editTable]();
       store[_editTable].length = 0;
       store[_editTable].push(...fresh);
     } else {
       const updateApi = {
-        enrollments: (id, d) => api.adminUpdateEnrollment(id, d),
-        courses:     (id, d) => api.adminUpdateCourse(id, d),
-        users:       (id, d) => api.adminUpdateUser(id, d),
-        departments: (id, d) => api.adminUpdateDepartment(id, d),
+        enrollments:  (id, d) => api.adminUpdateEnrollment(id, d),
+        courses:      (id, d) => api.adminUpdateCourse(id, d),
+        users:        (id, d) => api.adminUpdateUser(id, d),
+        departments:  (id, d) => api.adminUpdateDepartment(id, d),
+        requirements: (id, d) => api.adminUpdateRequirement(id, d),
       };
       await updateApi[_editTable](_editId, data);
-      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+      const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts, requirements: rawReqs };
       const idx = store[_editTable].findIndex(r => r.id === _editId);
       if (idx !== -1) {
         Object.assign(store[_editTable][idx], data);
@@ -1071,22 +1196,24 @@ async function saveEdit() {
 }
 
 async function deleteRecord(tableKey, id) {
-  const labels = { enrollments: 'enrollment', courses: 'course', users: 'user', departments: 'department' };
+  const labels = { enrollments: 'enrollment', courses: 'course', users: 'user', departments: 'department', requirements: 'requirement' };
   if (!confirm(`Delete this ${labels[tableKey]}? This cannot be undone.`)) return;
 
   const apiMap = {
-    enrollments: (i) => api.adminDeleteEnrollment(i),
-    courses:     (i) => api.adminDeleteCourse(i),
-    users:       (i) => api.adminDeleteUser(i),
-    departments: (i) => api.adminDeleteDepartment(i),
+    enrollments:  (i) => api.adminDeleteEnrollment(i),
+    courses:      (i) => api.adminDeleteCourse(i),
+    users:        (i) => api.adminDeleteUser(i),
+    departments:  (i) => api.adminDeleteDepartment(i),
+    requirements: (i) => api.adminDeleteRequirement(i),
   };
   const rerender = {
-    enrollments: filterEnrollments,
-    courses:     filterCourses,
-    users:       filterUsers,
-    departments: filterDepts,
+    enrollments:  filterEnrollments,
+    courses:      filterCourses,
+    users:        filterUsers,
+    departments:  filterDepts,
+    requirements: filterReqs,
   };
-  const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts };
+  const store = { enrollments: rawEnrollments, courses: rawCourses, users: rawUsers, departments: rawDepts, requirements: rawReqs };
 
   try {
     await apiMap[tableKey](id);
@@ -1110,11 +1237,12 @@ window.addEventListener('load', async () => {
   initLayout('data-admin', 'Data Admin');
 
   try {
-    const [enrollments, courses, users, depts] = await Promise.all([
+    const [enrollments, courses, users, depts, reqs] = await Promise.all([
       api.adminEnrollments(),
       api.adminCourses(),
       api.adminUsers(),
       api.adminDepartments(),
+      api.adminRequirements(),
     ]);
 
     // Enrollments
@@ -1145,13 +1273,19 @@ window.addEventListener('load', async () => {
     populateSelect('df-faculty', facSet);
     renderDepts(rawDepts);
 
+    // Requirements
+    rawReqs = reqs;
+    const rDeptSet = [...new Set(reqs.map(r => r.dept_code).filter(Boolean))].sort();
+    populateSelect('rf-dept', rDeptSet);
+    renderReqs(rawReqs);
+
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';
   } catch (err) {
     console.error('Data Admin error:', err);
     document.getElementById('status-dot').className     = 'status-dot err';
     document.getElementById('status-label').textContent = 'API Error';
-    ['enroll-body','courses-body','users-body','depts-body'].forEach(id => {
+    ['enroll-body','courses-body','users-body','depts-body','reqs-body'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.innerHTML = `<tr class="empty-row"><td colspan="12" style="color:var(--red)">Failed to load data. Check console.</td></tr>`;
     });

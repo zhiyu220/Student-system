@@ -498,3 +498,115 @@ async def create_department(
     new_id = result.fetchone()[0]
     await db.commit()
     return {"ok": True, "id": new_id}
+
+
+# ── Requirements CRUD ────────────────────────────────────────────────────────
+
+@router.get("/requirements")
+async def admin_requirements(
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(get_current_user),
+):
+    result = await db.execute(text("""
+        SELECT
+            gr.id::text,
+            gr.rule_name,
+            COALESCE(gr.description, '')        AS description,
+            gr.rule_type,
+            gr.required_value,
+            gr.department_id::text,
+            gr.parent_req_id::text              AS parent_req_id,
+            d.code                              AS dept_code,
+            COALESCE(d.name, '')                AS dept_name,
+            COALESCE(pr.rule_name, '')          AS parent_req_name,
+            COUNT(rc.id)::int                   AS course_count
+        FROM graduation_requirements gr
+        LEFT JOIN departments d              ON d.id  = gr.department_id
+        LEFT JOIN graduation_requirements pr ON pr.id = gr.parent_req_id
+        LEFT JOIN requirement_courses rc     ON rc.requirement_id = gr.id
+        GROUP BY gr.id, gr.rule_name, gr.description, gr.rule_type,
+                 gr.required_value, gr.department_id, gr.parent_req_id,
+                 d.code, d.name, pr.rule_name
+        ORDER BY d.code, gr.rule_type, gr.rule_name
+    """))
+    return [dict(r) for r in result.mappings().all()]
+
+
+class RequirementPatch(BaseModel):
+    rule_name: str
+    description: Optional[str] = None
+    rule_type: str
+    required_value: Optional[int] = None
+    department_id: Optional[str] = None
+    parent_req_id: Optional[str] = None
+
+
+@router.put("/requirements/{rid}")
+async def update_requirement(
+    rid: str,
+    data: RequirementPatch,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(get_current_user),
+):
+    r = await db.execute(text("SELECT id FROM graduation_requirements WHERE id = :id"), {"id": rid})
+    if not r.fetchone():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requirement not found")
+    await db.execute(
+        text("""
+            UPDATE graduation_requirements
+            SET rule_name      = :rule_name,
+                description    = :description,
+                rule_type      = :rule_type,
+                required_value = :required_value,
+                department_id  = :department_id,
+                parent_req_id  = :parent_req_id
+            WHERE id = :id
+        """),
+        {**data.model_dump(), "id": rid},
+    )
+    await db.commit()
+    return {"ok": True}
+
+
+class RequirementCreate(BaseModel):
+    rule_name: str
+    description: Optional[str] = None
+    rule_type: str
+    required_value: Optional[int] = None
+    department_id: Optional[str] = None
+    parent_req_id: Optional[str] = None
+
+
+@router.post("/requirements")
+async def create_requirement(
+    data: RequirementCreate,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(get_current_user),
+):
+    result = await db.execute(
+        text("""
+            INSERT INTO graduation_requirements
+                (id, rule_name, description, rule_type, required_value,
+                 department_id, parent_req_id, created_at)
+            VALUES
+                (gen_random_uuid(), :rule_name, :description, :rule_type,
+                 :required_value, :department_id, :parent_req_id, NOW())
+            RETURNING id::text
+        """),
+        data.model_dump(),
+    )
+    new_id = result.fetchone()[0]
+    await db.commit()
+    return {"ok": True, "id": new_id}
+
+
+@router.delete("/requirements/{rid}")
+async def delete_requirement(
+    rid: str,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(get_current_user),
+):
+    await db.execute(text("DELETE FROM requirement_courses WHERE requirement_id = :id"), {"id": rid})
+    await db.execute(text("DELETE FROM graduation_requirements WHERE id = :id"), {"id": rid})
+    await db.commit()
+    return {"ok": True}
