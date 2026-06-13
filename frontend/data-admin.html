@@ -812,6 +812,10 @@ const EDIT_FIELDS = {
     { key: 'grade_level',   label: 'Grade Level',  type: 'number',           nullable: true },
     { key: 'section',       label: 'Section',      type: 'text',             nullable: true },
     { key: 'capacity',      label: 'Capacity',     type: 'number',           nullable: true },
+    // 校必修/通識子類別：畢業審查逐項判定的依據（值需與後端 graduation.py 設定一致）
+    { key: 'sub_category',  label: 'Sub-category', type: 'select',           nullable: true, span: 2,
+      options: ['chinese','english','english_cert','programming','service_learning','pe','classic_books',
+                'ge_humanities','ge_social','ge_science','ge_arts'] },
     { key: 'instructor_id', label: 'Instructor',   type: 'professor_select', nullable: true, span: 2 },
   ],
   users: [
@@ -849,6 +853,9 @@ const CREATE_FIELDS = {
     { key: 'grade_level',   label: 'Grade Level',   type: 'number', nullable: true },
     { key: 'section',       label: 'Section',       type: 'text',   nullable: true },
     { key: 'capacity',      label: 'Capacity',      type: 'number', nullable: true },
+    { key: 'sub_category',  label: 'Sub-category',  type: 'select', nullable: true, span: 2,
+      options: ['chinese','english','english_cert','programming','service_learning','pe','classic_books',
+                'ge_humanities','ge_social','ge_science','ge_arts'] },
     { key: 'department_id', label: 'Department',    type: 'dept_select',      span: 2 },
     { key: 'instructor_id', label: 'Instructor',    type: 'professor_select', nullable: true, span: 2 },
   ],
@@ -910,7 +917,11 @@ function buildFormField(field, value) {
   } else if (field.type === 'password') {
     input = `<input type="password" id="${id}" placeholder="Set password" autocomplete="new-password">`;
   } else if (field.type === 'select') {
-    const opts = field.options.map(o =>
+    // Nullable selects get a leading blank option so a value can be left unset/cleared.
+    const blank = field.nullable
+      ? `<option value="" ${value == null || value === '' ? 'selected' : ''}>— None —</option>`
+      : '';
+    const opts = blank + field.options.map(o =>
       `<option value="${o}" ${String(value) === String(o) ? 'selected' : ''}>${o}</option>`
     ).join('');
     input = `<select id="${id}">${opts}</select>`;

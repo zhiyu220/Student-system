@@ -62,6 +62,7 @@ async def admin_courses(
             c.grade_level,
             c.capacity,
             c.section,
+            c.sub_category,
             d.code                                  AS dept_code,
             d.name                                  AS dept_name,
             COALESCE(inst.name, '')                 AS instructor_name,
@@ -136,6 +137,7 @@ class CoursePatch(BaseModel):
     grade_level: Optional[int] = None
     section: Optional[str] = None
     capacity: Optional[int] = None
+    sub_category: Optional[str] = None  # 校必修/通識子類別，用於畢業審查逐項判定
     instructor_id: Optional[str] = None  # "" = remove, UUID = set, None = no-op
 
 
@@ -215,13 +217,14 @@ async def update_course(
     await db.execute(
         text("""
             UPDATE courses
-            SET name_en     = :name_en,
-                type        = :type,
-                credits     = :credits,
-                grade_level = :grade_level,
-                section     = :section,
-                capacity    = :capacity,
-                updated_at  = NOW()
+            SET name_en      = :name_en,
+                type         = :type,
+                credits      = :credits,
+                grade_level  = :grade_level,
+                section      = :section,
+                capacity     = :capacity,
+                sub_category = :sub_category,
+                updated_at   = NOW()
             WHERE id = :id
         """),
         {**course_fields, "id": cid},
@@ -362,6 +365,7 @@ class CourseCreate(BaseModel):
     grade_level: Optional[int] = None
     section: Optional[str] = None
     capacity: Optional[int] = None
+    sub_category: Optional[str] = None
     department_id: str
     instructor_id: Optional[str] = None
 
@@ -416,11 +420,12 @@ async def create_course(
         text("""
             INSERT INTO courses
                 (id, code, name, name_en, type, credits, academic_year, semester,
-                 grade_level, section, capacity, department_id, created_at, updated_at)
+                 grade_level, section, capacity, sub_category, department_id,
+                 created_at, updated_at)
             VALUES
                 (gen_random_uuid(), :code, :name, :name_en, :type, :credits,
                  :academic_year, :semester, :grade_level, :section, :capacity,
-                 :department_id, NOW(), NOW())
+                 :sub_category, :department_id, NOW(), NOW())
             RETURNING id::text
         """),
         payload,
