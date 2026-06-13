@@ -160,6 +160,23 @@ function missingChip(c) {
   return `<span class="miss-chip ${cls}" title="${c.name_en} (${c.credits} cr)">${icon} ${c.code} &middot; ${c.name_en} <em>(${c.credits} cr)</em></span>`;
 }
 
+// One row in the sub-requirement checklist (e.g. 國文 / 體育 / 通識).
+// Shows credits and, where relevant, pass-count or category coverage so 0-credit
+// items (PE) and category breadth (Gen-Ed) are visible — not just total credits.
+function subReqRow(s) {
+  const ok   = s.met;
+  const icon = ok ? '&#10003;' : '&#10007;';
+  const cls  = ok ? 'sub-ok' : 'sub-miss';
+  const parts = [`${s.earned_credits}/${s.required_credits} cr`];
+  if (s.required_passes)      parts.push(`${s.passes}/${s.required_passes} 次`);
+  if (s.required_categories)  parts.push(`${s.categories}/${s.required_categories} 領域`);
+  return `<div class="sub-req-row ${cls}">
+      <span class="sub-req-icon">${icon}</span>
+      <span class="sub-req-label">${s.label}</span>
+      <span class="sub-req-meta">${parts.join(' &middot; ')}</span>
+    </div>`;
+}
+
 // `catalogPending` = the course catalog is still loading, so elective/gen-ed
 // suggestions aren't ready yet and we show a "Loading suggestions…" hint instead.
 function renderNeeded(buckets, blockingItems, allCourses, takenCodes, catalogPending) {
@@ -176,15 +193,26 @@ function renderNeeded(buckets, blockingItems, allCourses, takenCodes, catalogPen
     const meta = bucketMeta(name);
     const pct  = safePct(b.earned_credits, b.required_credits);
     const gap  = Math.max(0, b.required_credits - b.earned_credits);
-    const met  = gap <= 0;
+    // Trust the backend's per-bucket verdict when present: a category can be
+    // "short" on a sub-requirement even when total credits look sufficient.
+    const met  = (typeof b.passed === 'boolean') ? b.passed : (gap <= 0);
 
     const statusBadge = met
       ? '<span class="badge badge-green">&#10003; Met</span>'
-      : `<span class="badge badge-amber">Short by ${gap} cr</span>`;
+      : (gap > 0
+          ? `<span class="badge badge-amber">Short by ${gap} cr</span>`
+          : '<span class="badge badge-amber">Incomplete</span>');
+
+    // Structured sub-requirement checklist (University Compulsory & General Ed.).
+    const subHtml = (b.sub_requirements || []).length
+      ? `<div class="sub-req-list">${b.sub_requirements.map(subReqRow).join('')}</div>`
+      : '';
 
     let body;
     if (met) {
-      body = '<div class="needed-empty">&#10003; All requirements in this category are met.</div>';
+      body = subHtml || '<div class="needed-empty">&#10003; All requirements in this category are met.</div>';
+    } else if (subHtml) {
+      body = subHtml;
     } else {
       const chips = (b.missing_courses || []).length
         ? `<div class="chip-row">${b.missing_courses.map(missingChip).join('')}</div>`

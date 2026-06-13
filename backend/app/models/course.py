@@ -16,7 +16,11 @@ class Course(Base):
     department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"), nullable=False)
     grade_level = Column(Integer, nullable=True)  # 開課年級
     credits = Column(Integer, nullable=True)  # 學分數
-    type = Column(String(20), nullable=False)  # required / elective
+    type = Column(String(20), nullable=False)  # required / elective / university_required / general_education
+    # 子類別：用於校必修/通識的逐項畢業審查。
+    # 例：chinese / english / english_cert / programming / service_learning / pe /
+    #     classic_books / ge_humanities / ge_social / ge_science / ge_arts ...
+    sub_category = Column(String(40), nullable=True)
     academic_year = Column(Integer, nullable=False)  # 學年度
     semester = Column(Integer, nullable=False)  # 學期（1/2）
     capacity = Column(Integer, nullable=True)  # 人數上限
