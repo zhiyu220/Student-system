@@ -31,8 +31,10 @@ UNIVERSITY_COMPULSORY = {
 UNIVERSITY_COMPULSORY_CREDITS = sum(r["required_credits"] for r in UNIVERSITY_COMPULSORY.values())
 
 # ── 通識 (General Education) 規則：總學分 + 跨領域數雙重門檻 ────────────────────
+# 5 大領域：人文(ge_humanities)/社會(ge_social)/自然(ge_science)/藝術(ge_arts)/
+# 跨領域(ge_interdisciplinary)，各 2 學分 × 1 學期，合計 10 學分。
 GE_REQUIRED_CREDITS   = 10
-GE_MIN_CATEGORIES     = 4   # 須橫跨 4 大領域（以不同 sub_category 計）
+GE_MIN_CATEGORIES     = 5   # 須橫跨 5 大領域（以不同 sub_category 計）
 
 
 @router.get("/{student_id}")

@@ -47,8 +47,9 @@ CREATE INDEX IF NOT EXISTS idx_courses_sub_category ON courses (sub_category);
 -- UPDATE courses SET type='university_required', sub_category='classic_books'
 --   WHERE code IN ('GE041');
 
--- 通識 10 學分（橫跨 4 大領域）-----------------------------------------------
--- UPDATE courses SET type='general_education', sub_category='ge_humanities' WHERE code IN (...);
--- UPDATE courses SET type='general_education', sub_category='ge_social'     WHERE code IN (...);
--- UPDATE courses SET type='general_education', sub_category='ge_science'    WHERE code IN (...);
--- UPDATE courses SET type='general_education', sub_category='ge_arts'       WHERE code IN (...);
+-- 通識 10 學分（5 大領域，各 2學分 × 1學期）------------------------------------
+-- UPDATE courses SET type='general_education', sub_category='ge_humanities'       WHERE code IN (...);
+-- UPDATE courses SET type='general_education', sub_category='ge_social'           WHERE code IN (...);
+-- UPDATE courses SET type='general_education', sub_category='ge_science'          WHERE code IN (...);
+-- UPDATE courses SET type='general_education', sub_category='ge_arts'             WHERE code IN (...);
+-- UPDATE courses SET type='general_education', sub_category='ge_interdisciplinary' WHERE code IN (...);
