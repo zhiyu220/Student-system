@@ -99,15 +99,40 @@
 
   /* Structured sub-requirement checklist (University Compulsory & General Ed.) */
   .sub-req-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-  .sub-req-row  { display: flex; align-items: center; gap: 10px; padding: 6px 10px;
-                  border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
-  .sub-req-row.sub-ok   { background: var(--surface-success); border-color: var(--surface-success-border); }
-  .sub-req-row.sub-miss { background: var(--surface-warn);    border-color: var(--surface-warn-border); }
-  .sub-req-icon  { font-weight: 700; }
+  .sub-req-row {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--surface);
+  }
+  .sub-req-row.sub-ok   { border-color: var(--surface-success-border); background: var(--surface-success); }
+  .sub-req-row.sub-miss { border-color: var(--surface-warn-border);    background: var(--surface-warn); }
+  .sub-req-icon { font-weight: 700; text-align: center; }
   .sub-req-row.sub-ok   .sub-req-icon { color: var(--surface-success-text); }
   .sub-req-row.sub-miss .sub-req-icon { color: var(--surface-warn-text); }
-  .sub-req-label { font-weight: 600; flex: 1; }
-  .sub-req-meta  { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .sub-req-center { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .sub-req-label  { font-weight: 600; font-size: 13px; }
+  .sub-req-bar-track {
+    height: 4px; border-radius: 2px;
+    background: rgba(0,0,0,.08); overflow: hidden;
+  }
+  .sub-req-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--surface-warn-text); transition: width .3s;
+  }
+  .sub-req-row.sub-ok .sub-req-bar-fill { background: var(--surface-success-text); }
+  .sub-req-meta {
+    text-align: right; font-size: 11.5px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    line-height: 1.5;
+  }
+  .sub-req-row.sub-ok   .sub-req-meta { color: var(--surface-success-text); }
+  .sub-req-row.sub-miss .sub-req-meta { color: var(--surface-warn-text); }
 
   .needed-suggest { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
   .needed-suggest-label { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }

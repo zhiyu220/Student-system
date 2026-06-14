@@ -160,22 +160,39 @@ function missingChip(c) {
   return `<span class="miss-chip ${cls}" title="${c.name_en} (${c.credits} cr)">${icon} ${c.code} &middot; ${c.name_en} <em>(${c.credits} cr)</em></span>`;
 }
 
-// One row in the sub-requirement checklist (e.g. 國文 / 體育 / 通識).
-// Shows credits and, where relevant, pass-count or category coverage so 0-credit
-// items (PE) and category breadth (Gen-Ed) are visible — not just total credits.
+// Mini progress card for each sub-requirement in University Compulsory & General Ed.
 function subReqRow(s) {
-  const ok   = s.met;
+  const ok  = s.met;
+  const cls = ok ? 'sub-ok' : 'sub-miss';
   const icon = ok ? '&#10003;' : '&#10007;';
-  const cls  = ok ? 'sub-ok' : 'sub-miss';
-  const parts = [];
-  // Non-credit items (e.g. PE) omit required_credits and are shown by pass-count only.
-  if (s.required_credits != null) parts.push(`${s.earned_credits}/${s.required_credits} cr`);
-  if (s.required_passes)          parts.push(`${s.passes}/${s.required_passes} 次`);
-  if (s.required_categories)      parts.push(`${s.categories}/${s.required_categories} 領域`);
-  return `<div class="sub-req-row ${cls}">
+
+  // Bar percentage — credit-bearing items use credits, PE uses pass-count
+  let barPct = 100;
+  if (s.required_credits > 0) {
+    barPct = Math.min(100, Math.round((s.earned_credits / s.required_credits) * 100));
+  } else if (s.required_passes) {
+    barPct = Math.min(100, Math.round((s.passes / s.required_passes) * 100));
+  }
+
+  // Right-side metric lines
+  const lines = [];
+  if (s.required_credits != null && s.required_credits > 0)
+    lines.push(`${s.earned_credits} / ${s.required_credits} cr`);
+  if (s.required_passes)
+    lines.push(`${s.passes} / ${s.required_passes} passes`);
+  if (s.required_categories)
+    lines.push(`${s.categories} / ${s.required_categories} domains`);
+
+  return `
+    <div class="sub-req-row ${cls}">
       <span class="sub-req-icon">${icon}</span>
-      <span class="sub-req-label">${s.label}</span>
-      <span class="sub-req-meta">${parts.join(' &middot; ')}</span>
+      <div class="sub-req-center">
+        <span class="sub-req-label">${s.label}</span>
+        <div class="sub-req-bar-track">
+          <div class="sub-req-bar-fill" style="width:${barPct}%"></div>
+        </div>
+      </div>
+      <span class="sub-req-meta">${lines.join('<br>')}</span>
     </div>`;
 }
 

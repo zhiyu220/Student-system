@@ -19,13 +19,13 @@ DIGITAL_APP_CODES = {"IM120", "IM226", "IM303", "IM240", "IM345"}
 #   required_passes  → 該子項需「通過」的課堂數（學期數）。0 學分課（體育）靠這個判定。
 # 子項由 courses.sub_category 標記（見 migrations/2026_06_13_add_courses_sub_category.sql）。
 UNIVERSITY_COMPULSORY = {
-    "chinese":          {"label": "國文",         "required_credits": 4, "required_passes": 2},
-    "english":          {"label": "英文",         "required_credits": 8, "required_passes": 4},
-    "english_cert":     {"label": "英語檢定",     "required_credits": 1, "required_passes": 1},
-    "programming":      {"label": "程式設計",     "required_credits": 4, "required_passes": 2},
-    "service_learning": {"label": "服務學習",     "required_credits": 1, "required_passes": 1},
-    "pe":               {"label": "體育",         "required_credits": 0, "required_passes": 4},
-    "classic_books":    {"label": "經典五十",     "required_credits": 2, "required_passes": 1},
+    "chinese":          {"label": "Chinese Language",    "required_credits": 4, "required_passes": 2},
+    "english":          {"label": "English Skills",      "required_credits": 8, "required_passes": 4},
+    "english_cert":     {"label": "English Proficiency", "required_credits": 1, "required_passes": 1},
+    "programming":      {"label": "Programming",         "required_credits": 4, "required_passes": 2},
+    "service_learning": {"label": "Service Learning",    "required_credits": 1, "required_passes": 1},
+    "pe":               {"label": "Physical Education",  "required_credits": 0, "required_passes": 4},
+    "classic_books":    {"label": "Classic Books",       "required_credits": 2, "required_passes": 1},
 }
 # 校必修總學分 = 各子項學分加總（目前 20；如貴系為 21，請於上方調整對應子項）。
 UNIVERSITY_COMPULSORY_CREDITS = sum(r["required_credits"] for r in UNIVERSITY_COMPULSORY.values())
@@ -228,7 +228,7 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
                     row["earned_credits"]   = earned_credits
                 sub_requirements.append(row)
                 if not ok:
-                    ug_blocking.append(f"校必修 — {rule['label']} 尚未完成")
+                    ug_blocking.append(f"University Compulsory — {rule['label']} not yet completed")
 
             # ── 通識：總學分 + 跨領域數雙重門檻 ──────────────────────────────
             ge_attempts   = [
@@ -240,7 +240,7 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
             ge_ok = ge_credits >= GE_REQUIRED_CREDITS and len(ge_categories) >= GE_MIN_CATEGORIES
             sub_requirements.append({
                 "key":              "general_education",
-                "label":            "通識",
+                "label":            "General Education",
                 "required_credits": GE_REQUIRED_CREDITS,
                 "earned_credits":   ge_credits,
                 "required_categories": GE_MIN_CATEGORIES,
@@ -249,8 +249,8 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
             })
             if not ge_ok:
                 ug_blocking.append(
-                    f"通識 — 需 {GE_REQUIRED_CREDITS} 學分且橫跨 {GE_MIN_CATEGORIES} 領域"
-                    f"（目前 {ge_credits} 學分 / {len(ge_categories)} 領域）"
+                    f"General Education — needs {GE_REQUIRED_CREDITS} cr across {GE_MIN_CATEGORIES} domains"
+                    f" (currently {ge_credits} cr / {len(ge_categories)} domains)"
                 )
 
             earned       = uni_earned + ge_credits

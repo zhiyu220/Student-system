@@ -16,7 +16,7 @@ async def list_courses(db: AsyncSession = Depends(get_db)):
         result = await db.execute(
             text("""
                 SELECT c.id::text AS id,
-                       c.code, c.name, c.credits, c.type,
+                       c.code, COALESCE(c.name_en, c.name) AS name, c.credits, c.type,
                        c.semester, c.academic_year, c.grade_level,
                        c.capacity, c.section,
                        c.department_id::text AS department_id,
