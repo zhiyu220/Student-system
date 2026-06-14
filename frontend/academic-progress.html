@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-TW">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,14 +26,13 @@
       .timeline { padding: 28px 20px 20px; display: flex; align-items: center; gap: 6px; overflow-x: auto; }
       .tl-node { display: flex; flex-direction: column; align-items: center; min-width: 78px; position: relative; }
       .tl-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); border: 3px solid var(--card-bg); box-shadow: 0 0 0 2px var(--border); margin-bottom: 8px; }
-      .tl-node.done .tl-dot { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+      .tl-node.done .tl-dot { background: var(--text-muted); box-shadow: 0 0 0 2px var(--border); }
       .tl-node.current .tl-dot { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.2); }
       .tl-node.future .tl-dot { background: var(--card-bg); box-shadow: 0 0 0 2px var(--border); }
       .tl-label { font-size: 11.5px; font-family: var(--mono); color: var(--text); }
       .tl-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
       .tl-node.current .tl-label { color: var(--accent); font-weight: 600; }
       .tl-line { flex: 1; height: 2px; background: var(--border); min-width: 14px; }
-      .tl-line.done { background: var(--green); }
 
       .stats-grid.compact { padding: 20px 20px 4px; margin-bottom: 0; grid-template-columns: repeat(4, 1fr); }
       .stats-grid.compact .stat-card { padding: 14px 16px; }
@@ -49,35 +48,35 @@
       <aside class="sidebar"></aside>
       <div class="main">
         <header class="topbar">
-          <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">☰</button>
+          <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
           <div class="topbar-title"></div>
           <div class="api-status">
             <div class="status-dot" id="status-dot"></div>
-            <span class="status-label" id="status-label">連線中...</span>
+            <span class="status-label" id="status-label">Connecting...</span>
           </div>
         </header>
         <div class="content">
           <div class="page-header">
             <h2>Academic Progress</h2>
-            <p>跨學期學業進度總覽</p>
+            <p>Cross-semester academic overview</p>
           </div>
 
           <!-- Card 1: Credit Progress -->
           <div class="card" style="margin-bottom: 16px;">
-            <div class="card-header"><div class="card-title">學分進度</div></div>
+            <div class="card-header"><div class="card-title">Credit Progress</div></div>
             <div class="stats-grid compact" id="credit-stats">
               <!-- filled by JS -->
             </div>
             <div id="credit-buckets"><!-- filled by JS --></div>
             <div class="summary-row">
-              <span>未達成項目：<strong id="missing-count">—</strong> 項</span>
-              <a href="graduation.html">查看畢業條件詳情 →</a>
+              <span>Outstanding items: <strong id="missing-count">—</strong></span>
+              <a href="graduation.html">View graduation details →</a>
             </div>
           </div>
 
           <!-- Card 2: GPA Trend -->
           <div class="card" style="margin-bottom: 16px;">
-            <div class="card-header"><div class="card-title">GPA 走勢</div></div>
+            <div class="card-header"><div class="card-title">GPA Trend</div></div>
             <div class="stats-grid compact" id="gpa-stats">
               <!-- filled by JS -->
             </div>
@@ -86,7 +85,7 @@
 
           <!-- Card 3: Timeline -->
           <div class="card">
-            <div class="card-header"><div class="card-title">學業里程碑</div></div>
+            <div class="card-header"><div class="card-title">Milestones</div></div>
             <div class="timeline" id="timeline"><!-- filled by JS --></div>
           </div>
         </div>
@@ -97,7 +96,6 @@
     <script src="js/sidebar.js"></script>
     <script>
       function pct(a, b) { return b > 0 ? Math.min(100, Math.round((a / b) * 100)) : 0; }
-      function barClass(p) { return p >= 100 ? 'green' : p >= 70 ? 'amber' : 'red'; }
 
       function renderCreditCard(grad) {
         const ov = grad.overall || {};
@@ -107,10 +105,10 @@
         const remaining = Math.max(0, total - earned);
 
         document.getElementById('credit-stats').innerHTML = `
-          <div class="stat-card"><div class="stat-label">已修學分</div><div class="stat-value">${earned}<span class="stat-unit">cr</span></div></div>
-          <div class="stat-card"><div class="stat-label">應修總學分</div><div class="stat-value">${total}<span class="stat-unit">cr</span></div></div>
-          <div class="stat-card ${overallPct >= 100 ? 'green' : overallPct >= 70 ? 'amber' : 'red'}"><div class="stat-label">完成率</div><div class="stat-value">${overallPct}<span class="stat-unit">%</span></div></div>
-          <div class="stat-card"><div class="stat-label">距畢業</div><div class="stat-value">${remaining}<span class="stat-unit">cr</span></div></div>
+          <div class="stat-card"><div class="stat-label">Earned</div><div class="stat-value">${earned}<span class="stat-unit">cr</span></div></div>
+          <div class="stat-card"><div class="stat-label">Required</div><div class="stat-value">${total}<span class="stat-unit">cr</span></div></div>
+          <div class="stat-card ${overallPct >= 100 ? 'green' : overallPct >= 70 ? 'amber' : 'red'}"><div class="stat-label">Completion</div><div class="stat-value">${overallPct}<span class="stat-unit">%</span></div></div>
+          <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value">${remaining}<span class="stat-unit">cr</span></div></div>
         `;
 
         const buckets = grad.buckets || [];
@@ -124,7 +122,7 @@
                 <span class="bucket-name">${b.name}</span>
                 <span class="bucket-num">${e} / ${r} cr · ${p}%</span>
               </div>
-              <div class="progress-wrap"><div class="progress-bar ${barClass(p)}" style="width: ${p}%;"></div></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width: ${p}%;"></div></div>
             </div>
           `;
         }).join('');
@@ -151,10 +149,10 @@
         const trendCls = trend > 0 ? 'green' : trend < 0 ? 'red' : 'amber';
 
         document.getElementById('gpa-stats').innerHTML = `
-          <div class="stat-card"><div class="stat-label">累計 GPA</div><div class="stat-value">${cumulative.toFixed(2)}</div></div>
-          <div class="stat-card green"><div class="stat-label">最高學期</div><div class="stat-value">${highest.toFixed(2)}</div></div>
-          <div class="stat-card"><div class="stat-label">最近學期</div><div class="stat-value">${latest.toFixed(2)}</div></div>
-          <div class="stat-card ${trendCls}"><div class="stat-label">較上學期</div><div class="stat-value">${trendStr}</div></div>
+          <div class="stat-card"><div class="stat-label">Cumulative</div><div class="stat-value">${cumulative.toFixed(2)}</div></div>
+          <div class="stat-card"><div class="stat-label">Best Semester</div><div class="stat-value">${highest.toFixed(2)}</div></div>
+          <div class="stat-card"><div class="stat-label">Latest</div><div class="stat-value">${latest.toFixed(2)}</div></div>
+          <div class="stat-card ${trendCls}"><div class="stat-label">vs Previous</div><div class="stat-value">${trendStr}</div></div>
         `;
 
         const ctx = document.getElementById('gpaTrendChart').getContext('2d');
@@ -176,7 +174,7 @@
                 fill: true,
               },
               {
-                label: '累計 GPA',
+                label: 'Cumulative GPA',
                 data: (() => {
                   let cw = 0, cc = 0;
                   return sems.map(s => {
@@ -185,11 +183,11 @@
                     return cc > 0 ? +(cw / cc).toFixed(2) : null;
                   });
                 })(),
-                borderColor: '#22c55e',
+                borderColor: '#94a3b8',
                 borderDash: [6, 4],
                 borderWidth: 2,
                 pointRadius: 3,
-                pointBackgroundColor: '#22c55e',
+                pointBackgroundColor: '#94a3b8',
                 tension: 0.2,
                 fill: false,
               },
@@ -209,16 +207,14 @@
 
       function renderTimelineCard(perf) {
         const sems = perf.semesters || [];
-        // 預期 8 學期（4 年制）；以已知學期推算起點與終點
         const TOTAL = 8;
         const nodes = [];
 
         if (sems.length === 0) {
-          document.getElementById('timeline').innerHTML = '<div style="padding: 20px; color: var(--text-muted);">尚無學期資料</div>';
+          document.getElementById('timeline').innerHTML = '<div style="padding: 20px; color: var(--text-muted);">No semester data yet</div>';
           return;
         }
 
-        // 以已修學期填入；不足 8 個則在後方補預計學期
         sems.forEach((s, i) => {
           const isLast = i === sems.length - 1;
           nodes.push({
@@ -228,7 +224,6 @@
           });
         });
 
-        // 預測未來學期 label：依最近 label 格式 "YYYY-N" 推算
         const last = sems[sems.length - 1].label || '';
         const m = last.match(/^(\d{4})-(\d)$/);
         let year = m ? parseInt(m[1]) : null;
@@ -238,19 +233,17 @@
           if (year !== null) {
             term = term === 1 ? 2 : 1;
             if (term === 1) year += 1;
-            nodes.push({ label: `${year}-${term}`, sub: '預計', state: 'future' });
+            nodes.push({ label: `${year}-${term}`, sub: 'Projected', state: 'future' });
           } else {
-            nodes.push({ label: `+${i + 1}`, sub: '預計', state: 'future' });
+            nodes.push({ label: `+${i + 1}`, sub: 'Projected', state: 'future' });
           }
         }
 
-        // 預計畢業終點
-        const gradLabel = nodes.length ? nodes[nodes.length - 1].label : '畢業';
-        nodes.push({ label: '畢業', sub: gradLabel, state: 'future', graduation: true });
+        const gradLabel = nodes.length ? nodes[nodes.length - 1].label : '';
+        nodes.push({ label: 'Graduation', sub: gradLabel, state: 'future', graduation: true });
 
-        // 起點：入學
         const firstLabel = sems[0].label;
-        nodes.unshift({ label: '入學', sub: firstLabel, state: 'done' });
+        nodes.unshift({ label: 'Enrolled', sub: firstLabel, state: 'done' });
 
         const html = nodes.map((n, i) => {
           const dot = `
@@ -260,8 +253,7 @@
               <div class="tl-sub">${n.sub}</div>
             </div>`;
           if (i === nodes.length - 1) return dot;
-          const lineDone = (n.state === 'done' && nodes[i + 1].state !== 'future') ? 'done' : '';
-          return dot + `<div class="tl-line ${lineDone}"></div>`;
+          return dot + `<div class="tl-line"></div>`;
         }).join('');
 
         document.getElementById('timeline').innerHTML = html;
