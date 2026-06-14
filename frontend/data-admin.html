@@ -1035,11 +1035,18 @@ function buildFormField(field, value) {
       students.map(s => `<option value="${s.id}" ${s.id === value ? 'selected' : ''}>${s.student_id || '?'} · ${s.name}</option>`).join('');
     input = `<select id="${id}">${opts}</select>`;
   } else if (field.type === 'course_select') {
-    const seen = new Set();
-    const courses = rawCourses.filter(c => { if (seen.has(c.code)) return false; seen.add(c.code); return true; })
-      .sort((a, b) => a.code.localeCompare(b.code));
+    // Show every distinct offering (semester + section) — no dedup.
+    // Sort newest semester first so current courses appear at top.
+    const courses = [...rawCourses].sort((a, b) =>
+      (b.academic_year - a.academic_year) || (b.semester - a.semester) || a.code.localeCompare(b.code)
+    );
     const opts = `<option value="">— Select course —</option>` +
-      courses.map(c => `<option value="${c.id}" ${c.id === value ? 'selected' : ''}>${c.code} · ${c.name_en || ''}</option>`).join('');
+      courses.map(c => {
+        const sem = `${c.academic_year}-${c.semester}`;
+        const sec = c.section ? ` · Sec.${c.section}` : '';
+        const label = `${c.code} · ${sem}${sec} · ${c.name_en || c.code}`;
+        return `<option value="${c.id}" ${c.id === value ? 'selected' : ''}>${label}</option>`;
+      }).join('');
     input = `<select id="${id}">${opts}</select>`;
   } else if (field.type === 'dept_select') {
     const opts = `<option value="">— Select department —</option>` +
