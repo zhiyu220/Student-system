@@ -19,6 +19,7 @@ const NAV_SECTIONS = [
       { id: "grade-inquiry",     label: "Grade Inquiry",         icon: "🔍", href: "grade-inquiry.html",      files: ["grade-inquiry.html"],      title: "Grade Inquiry" },
       { id: "settings",          label: "Settings",              icon: "⚙️", href: "settings.html",           files: ["settings.html"],           title: "Settings" },
       { id: "help",              label: "Help Center",           icon: "❓", href: "help-center.html",        files: ["help-center.html"],        title: "Help Center" },
+      { id: "data-admin",        label: "Data Admin",            icon: "🗄", href: "data-admin.html",         files: ["data-admin.html"],         title: "Data Admin" },
     ],
   },
 ];
@@ -129,6 +130,7 @@ function buildSidebarHTML(activeId, activeGroupId, appVersionLabel) {
     { id: "notifications",     label: "Smart Notifications",   icon: "ti-bell",              href: "notifications.html", badge: 3 },
     { id: "settings",          label: "Settings",              icon: "ti-settings",          href: "settings.html" },
     { id: "help",              label: "Help Center",           icon: "ti-help-circle",       href: "help-center.html" },
+    { id: "data-admin",        label: "Data Admin",            icon: "ti-database",          href: "data-admin.html" },
   ];
 
   const navHTML = NAV_ITEMS.map(({ id, label, icon, href, badge }) => {

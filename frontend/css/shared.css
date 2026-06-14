@@ -13,6 +13,27 @@
   --red: #ef4444;
   --font: 'Noto Sans TC', sans-serif;
   --mono: 'DM Mono', monospace;
+  /* ── Category colour tokens ── */
+  --cat-required-bg:  #eef0fe;
+  --cat-required-fg:  #3d5bd4;
+  --cat-elective-bg:  #e7f4f1;
+  --cat-elective-fg:  #0d6b5a;
+  --cat-univ-bg:      #e8f3fe;
+  --cat-univ-fg:      #1a6fba;
+  --cat-general-bg:   #f2efff;
+  --cat-general-fg:   #6340cc;
+  --cat-required-border: #c7d2fe;
+  /* ── Semantic surface tokens ── */
+  --surface-success:        #ecfdf5;
+  --surface-success-border: #a7f3d0;
+  --surface-success-text:   #166534;
+  --surface-warn:           #fffbeb;
+  --surface-warn-border:    #fde68a;
+  --surface-warn-text:      #92400e;
+  --surface-error:          #fef2f2;
+  --surface-error-border:   #fecaca;
+  --surface-error-text:     #991b1b;
+  --surface-met:            #f7fdf9;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }

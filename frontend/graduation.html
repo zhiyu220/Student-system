@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: conic-gradient(var(--ring-color) var(--ring-pct, 0%), #e5e7eb var(--ring-pct, 0%));
+    background: conic-gradient(var(--ring-color) var(--ring-pct, 0%), var(--border) var(--ring-pct, 0%));
     margin: 0 auto;
   }
   .progress-circle .inner {
@@ -41,21 +41,155 @@
     padding: 24px 20px;
   }
 
+  /* Eligibility banner */
+  .elig-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid transparent;
+  }
+  .elig-banner.ok   { background: var(--surface-success); border-color: var(--surface-success-border); }
+  .elig-banner.warn { background: var(--surface-warn);    border-color: var(--surface-warn-border); }
+  .elig-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #fff;
+  }
+  .elig-banner.ok   .elig-icon { background: var(--green); }
+  .elig-banner.warn .elig-icon { background: var(--amber); }
+  .elig-title { font-size: 15px; font-weight: 700; }
+  .elig-banner.ok   .elig-title { color: var(--surface-success-text); }
+  .elig-banner.warn .elig-title { color: var(--surface-warn-text); }
+  .elig-sub   { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Credits You Still Need */
+  .needed-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .needed-card.met      { background: var(--surface-met); }
+  .needed-card.blocking { background: var(--surface-error); border-color: var(--surface-error-border); }
+  .needed-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .needed-name {
+    font-weight: 600; font-size: 15px;
+    border-left: 4px solid var(--text-muted); padding-left: 10px;
+  }
+  .needed-meta { font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .needed-empty { color: var(--surface-success-text); font-size: 13px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .miss-chip, .suggest-chip {
+    display: inline-flex; align-items: center;
+    font-size: 12.5px; padding: 5px 10px; border-radius: 8px;
+    border: 1px solid transparent;
+  }
+  .miss-chip em, .suggest-chip em { color: var(--text-muted); font-style: normal; margin-left: 4px; }
+  .miss-chip.missing  { background: var(--surface-error); color: var(--surface-error-text); border-color: var(--surface-error-border); }
+  .miss-chip.enrolled { background: var(--surface-warn);  color: var(--surface-warn-text);  border-color: var(--surface-warn-border); }
+  .suggest-chip       { background: var(--accent-light);  color: var(--cat-required-fg);    border-color: var(--cat-required-border); }
+
+  /* Structured sub-requirement checklist (University Compulsory & General Ed.) */
+  .sub-req-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .sub-req-row {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--surface);
+  }
+  .sub-req-row.sub-ok   { border-color: var(--surface-success-border); background: var(--surface-success); }
+  .sub-req-row.sub-miss { border-color: var(--surface-warn-border);    background: var(--surface-warn); }
+  .sub-req-icon { font-weight: 700; text-align: center; }
+  .sub-req-row.sub-ok   .sub-req-icon { color: var(--surface-success-text); }
+  .sub-req-row.sub-miss .sub-req-icon { color: var(--surface-warn-text); }
+  .sub-req-center { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .sub-req-label  { font-weight: 600; font-size: 13px; }
+  .sub-req-bar-track {
+    height: 4px; border-radius: 2px;
+    background: rgba(0,0,0,.08); overflow: hidden;
+  }
+  .sub-req-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: var(--surface-warn-text); transition: width .3s;
+  }
+  .sub-req-row.sub-ok .sub-req-bar-fill { background: var(--surface-success-text); }
+  .sub-req-meta {
+    text-align: right; font-size: 11.5px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    line-height: 1.5;
+  }
+  .sub-req-row.sub-ok   .sub-req-meta { color: var(--surface-success-text); }
+  .sub-req-row.sub-miss .sub-req-meta { color: var(--surface-warn-text); }
+
+  .needed-suggest { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+  .needed-suggest-label { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+
+  .blocking-list { margin: 8px 0 0; padding-left: 20px; color: var(--surface-error-text); font-size: 13px; }
+  .blocking-list li { margin-bottom: 4px; }
+
+  /* Category color badges (shared scheme with course_history02) */
+  .badge-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge-required { background: #EEF2FF; color: #4E6CF0; }
+  .badge-elective { background: #F0FDF4; color: #16a34a; }
+  .badge-univ     { background: #FFF7ED; color: #ea580c; }
+  .badge-general  { background: #FEF3C7; color: #d97706; }
+  .badge-other    { background: #f1f5f9; color: #475569; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-bar label { font-size: 13px; font-weight: 500; color: #666; }
+  .filter-bar select {
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+  }
+  .filter-bar select:focus { border-color: #4E6CF0; }
+
   .tab-container {
     display: flex;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
     margin-bottom: 16px;
   }
   .tab {
     padding: 12px 24px;
     cursor: pointer;
     font-weight: 500;
-    color: #666;
+    color: var(--text-muted);
     user-select: none;
   }
   .tab.active {
-    border-bottom: 3px solid #3b82f6;
-    color: #3b82f6;
+    border-bottom: 3px solid var(--accent);
+    color: var(--accent);
     font-weight: 600;
   }
 </style>
@@ -76,14 +210,37 @@
   <div class="content">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
       <div>
-        <h1 style="margin:0; font-size:26px;">Hello, <span id="student-name">&#8212;</span>!</h1>
+        <h1 style="margin:0; font-size:20px;">Hello, <span id="student-name">&#8212;</span>!</h1>
         <p style="margin:6px 0 0; color:#666;">Welcome back! Here is your current academic progress overview.</p>
       </div>
-      <div style="color:#666;" id="student-dept">&#8212;</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="color:#666;" id="student-dept">&#8212;</div>
+        <button id="export-pdf-btn" onclick="exportGradPDF()" disabled
+                style="display:flex;align-items:center;gap:6px;padding:7px 16px;
+                       border:1.5px solid var(--accent);border-radius:7px;
+                       background:none;color:var(--accent);font-size:13px;
+                       font-weight:600;cursor:pointer;font-family:inherit;
+                       transition:all .15s;white-space:nowrap;">
+          &#8659; Export PDF
+        </button>
+      </div>
     </div>
+
+    <!-- Eligibility banner -->
+    <div class="elig-banner" id="elig-banner"></div>
 
     <!-- Progress circles -->
     <div class="stats-grid" id="progress-grid"></div>
+
+    <!-- Credits You Still Need -->
+    <div class="card" style="margin-top:28px;">
+      <div class="card-header">
+        <div class="card-title">Credits You Still Need to Graduate</div>
+      </div>
+      <div class="card-body" style="padding:18px 20px;">
+        <div id="needed-list"></div>
+      </div>
+    </div>
 
     <!-- Course & Credit Review List -->
     <div class="card" style="margin-top:28px;">
@@ -91,9 +248,24 @@
         <div class="card-title">Course &amp; Credit Review List</div>
       </div>
       <div class="card-body">
+        <div class="filter-bar">
+          <label for="cat-filter">Category</label>
+          <select id="cat-filter" onchange="applyReviewFilters()">
+            <option value="all">All Categories</option>
+            <option value="required">Required</option>
+            <option value="common_required">Common Required</option>
+            <option value="elective">Elective</option>
+            <option value="university_required">University Required</option>
+            <option value="general_education">General Education</option>
+          </select>
+          <label for="sem-filter">Semester</label>
+          <select id="sem-filter" onchange="applyReviewFilters()">
+            <option value="all">All Semesters</option>
+          </select>
+        </div>
         <div class="tab-container">
           <div class="tab active" onclick="switchTab(0)">&#10003; Completed</div>
-          <div class="tab" onclick="switchTab(1)">&#8987; In Progress</div>
+          <div class="tab" onclick="switchTab(1)">&#9203; In Progress</div>
           <div class="tab" onclick="switchTab(2)">&#9888; Missing / Failed</div>
         </div>
 
@@ -150,155 +322,11 @@
 </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
-<script>
-  function safePct(earned, total) {
-    if (!total) return 0;
-    return Math.min(100, Math.round(earned / total * 100));
-  }
-
-  function formatType(type) {
-    const map = {
-      required:            'Required',
-      common_required:     'Common Required',
-      elective:            'Elective',
-      general_education:   'General Education',
-      university_required: 'University Required',
-    };
-    return map[type] || type || '&#8212;';
-  }
-
-  function buildCircleCard(label, earned, total, color) {
-    const pct = safePct(earned, total);
-    return `
-      <div class="card stat-card">
-        <div style="color:#666; margin-bottom:10px; font-weight:500;">${label}</div>
-        <div class="progress-circle" style="--ring-color:${color}; --ring-pct:${pct}%;">
-          <div class="inner">
-            <div style="font-size:26px; font-weight:700; color:${color};">${earned}</div>
-            <div style="font-size:12px; color:#999;">/ ${total}</div>
-          </div>
-        </div>
-        <div style="font-size:26px; font-weight:700; color:${color}; margin-top:10px;">${pct}%</div>
-        <div style="color:#888; font-size:13px;">${total - earned} remaining</div>
-      </div>`;
-  }
-
-  function buildOverallCard(earned, total) {
-    const pct = safePct(earned, total);
-    return `
-      <div class="card stat-card">
-        <div style="color:#666; margin-bottom:10px; font-weight:500;">Overall Graduation Progress</div>
-        <div class="progress-circle" style="--ring-color:#22c55e; --ring-pct:${pct}%;">
-          <div class="inner">
-            <div style="font-size:30px; font-weight:700; color:#22c55e;">${pct}%</div>
-          </div>
-        </div>
-        <div style="margin-top:12px; font-size:16px; font-weight:600;">${earned} / ${total} credits</div>
-        <div style="color:#22c55e; font-size:13px;">${total - earned} credits left to graduate</div>
-      </div>`;
-  }
-
-  async function loadGraduationData() {
-    const user = getUser();
-    const studentId = user?.student_id || '1111708';
-
-    const data = await api.courseRecords(studentId);
-    const records = data.records;
-
-    document.getElementById('student-name').textContent = user?.name || 'Student';
-    document.getElementById('student-dept').textContent  = user?.department || '';
-
-    let reqEarned = 0, reqTotal = 0;
-    let elecEarned = 0, elecTotal = 0;
-    let genEarned = 0, genTotal = 0;
-
-    records.forEach(c => {
-      const cr   = c.credits || 0;
-      const done = c.pass_flag === true;
-      const t    = c.type;
-
-      if (t === 'required' || t === 'common_required') {
-        reqTotal += cr;
-        if (done) reqEarned += cr;
-      } else if (t === 'elective') {
-        elecTotal += cr;
-        if (done) elecEarned += cr;
-      } else if (t === 'general_education' || t === 'university_required') {
-        genTotal += cr;
-        if (done) genEarned += cr;
-      }
-    });
-
-    const totalEarned   = data.summary.total_credits;
-    const totalRequired = 128;
-
-    document.getElementById('progress-grid').innerHTML =
-      buildCircleCard('Required Credits',          reqEarned,  reqTotal  || 1, '#3b82f6') +
-      buildOverallCard(totalEarned, totalRequired) +
-      buildCircleCard('Elective Credits',          elecEarned, elecTotal || 1, '#a855f7') +
-      buildCircleCard('General Education Credits', genEarned,  genTotal  || 1, '#f97316');
-
-    const completed  = records.filter(c => c.pass_flag === true);
-    const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
-    const missing    = records.filter(c => !c.pass_flag && c.status !== 'enrolled');
-
-    document.getElementById('completed-table').innerHTML = completed.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><strong>${c.grade != null ? c.grade : '&#8212;'}</strong></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No completed courses.</td></tr>';
-
-    document.getElementById('progress-table').innerHTML = inProgress.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><span style="color:#eab308;">&#8987; In Progress</span></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No courses in progress.</td></tr>';
-
-    document.getElementById('missing-table').innerHTML = missing.map(c => `
-      <tr>
-        <td>${c.name_en}</td>
-        <td>${formatType(c.type)}</td>
-        <td>${c.credits}</td>
-        <td>${c.academic_year}-${c.semester}</td>
-        <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
-      </tr>`).join('') ||
-      '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No missing courses.</td></tr>';
-
-    document.getElementById('status-dot').className     = 'status-dot ok';
-    document.getElementById('status-label').textContent = 'API Connected';
-  }
-
-  function switchTab(n) {
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
-    document.getElementById('tab-completed').style.display = n === 0 ? 'block' : 'none';
-    document.getElementById('tab-progress').style.display  = n === 1 ? 'block' : 'none';
-    document.getElementById('tab-missing').style.display   = n === 2 ? 'block' : 'none';
-  }
-
-  window.addEventListener('load', async () => {
-    await checkAuth();
-    initLayout('graduation', 'Graduation Audit');
-    try {
-      await loadGraduationData();
-    } catch (err) {
-      console.error(err);
-      document.getElementById('status-dot').className     = 'status-dot err';
-      document.getElementById('status-label').textContent = 'API Error';
-      document.getElementById('progress-grid').innerHTML  =
-        '<p style="color:#dc2626;padding:16px;">Failed to load graduation data.</p>';
-    }
-  });
-</script>
+<script src="js/graduation.js"></script>
 </body>
 </html>

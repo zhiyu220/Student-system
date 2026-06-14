@@ -11,6 +11,7 @@ from app.api.routes import (
     job_registration,
     events,
     ai,
+    admin,
 )
 from app.core.config import settings
 from routers import course_history
@@ -62,6 +63,9 @@ app.include_router(events.router, prefix="/api/events", tags=["events"])
 
 # AI 相關 API
 app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
+
+# 資料管理 (admin)
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(events.router, prefix="/api", tags=["events"])
 
 if __name__ == "__main__":
