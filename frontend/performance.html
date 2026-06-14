@@ -112,6 +112,34 @@
     color: #475569;
     font-weight: 500;
   }
+  .view-by-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .view-by-label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+  }
+  .view-by-select {
+    border: 1px solid #d9d9ef;
+    border-radius: 6px;
+    background: #fff;
+    color: #334155;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .view-by-select:hover {
+    border-color: #4E6CF0;
+  }
+  .view-by-select:focus {
+    outline: none;
+    border-color: #4E6CF0;
+    box-shadow: 0 0 0 3px rgba(78, 108, 240, 0.1);
+  }
   .compare-panel {
     display: flex;
     align-items: center;
@@ -366,6 +394,14 @@
                 <span class="legend-label">Credits Earned</span>
               </div>
             </div>
+            <div class="view-by-section">
+              <label class="view-by-label" for="view-by-select">View By:</label>
+              <select id="view-by-select" class="view-by-select">
+                <option value="gpa">GPA</option>
+                <option value="credits">Credits</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
             <div class="compare-panel">
               <button id="toggle-compare" class="compare-toggle" type="button" aria-expanded="false">Compare</button>
               <div id="compare-controls" class="compare-controls hidden">
@@ -457,6 +493,7 @@
   let semesterData = [];
   let perfChart    = null;
   let activeSemIdx = -1;
+  let viewByMode   = 'both';
 
   const TYPE_PILL  = { required:'pill-required', elective:'pill-elective', university_required:'pill-univ', general_education:'pill-general' };
   const TYPE_LABEL = { required:'Required', elective:'Elective', university_required:'Univ. Required', general_education:'Gen. Education' };
@@ -466,9 +503,30 @@
     return g >= 80 ? 'grade-hi' : g >= 60 ? 'grade-md' : 'grade-lo';
   }
 
+  function formatSemesterLabel(s) {
+    const semester = String(s.semester);
+    const yearNumber = Number(s.academic_year);
+    const yearLabel = Number.isFinite(yearNumber) && yearNumber < 1900
+      ? 1911 + yearNumber
+      : s.academic_year;
+    const seasonLabel = semester === '1' ? 'Fall' : semester === '2' ? 'Spring' : semester;
+    return `${yearLabel} ${seasonLabel} (${s.label})`;
+  }
+
+  function formatSemesterLabelStacked(s) {
+    const semester = String(s.semester);
+    const yearNumber = Number(s.academic_year);
+    const yearLabel = Number.isFinite(yearNumber) && yearNumber < 1900
+      ? 1911 + yearNumber
+      : s.academic_year;
+    const seasonLabel = semester === '1' ? 'Fall' : semester === '2' ? 'Spring' : semester;
+    return [`${yearLabel} ${seasonLabel}`, `(${s.label})`];
+  }
+
   function buildChart(semesters) {
-    const labels  = semesters.map(s => s.label);
-    const gpaData = semesters.map(s => s.gpa);
+    const labels  = semesters.map(formatSemesterLabelStacked);
+    const gpaData = semesters.map(s => (s.gpa > 0 ? s.gpa : null));
+    const gpaPointRadius = gpaData.map(v => (v === null ? 0 : 5));
     const crData  = semesters.map(s => s.credits);
     const gradeData = semesters.map(s => {
       const grades = s.courses
@@ -501,11 +559,12 @@
             borderWidth: 3,
             pointBackgroundColor: '#4E6CF0',
             pointBorderColor: '#fff',
-            pointRadius: 5,
+            pointRadius: gpaPointRadius,
             tension: 0.34,
             fill: true,
             yAxisID: 'y2',
             order: 1,
+            spanGaps: false,
           },
         ],
       },
@@ -519,18 +578,43 @@
           },
           tooltip: {
             callbacks: {
+              title: items => {
+                if (!items.length) return [];
+                const item = items[0];
+                const sem = semesters[item.dataIndex];
+                const label = sem ? formatSemesterLabel(sem) : item.label;
+                return [label];
+              },
               label: ctx => {
                 if (ctx.dataset.label === 'GPA') {
-                  const parts = [`GPA: ${ctx.parsed.y.toFixed(2)}`];
                   const avgGrade = gradeData[ctx.dataIndex];
+                  const lines = [`GPA: ${ctx.parsed.y.toFixed(2)}`];
                   if (avgGrade !== null) {
-                    parts.push(`Grade: ${avgGrade.toFixed(1)}%`);
+                    lines.push(`Grade: ${avgGrade.toFixed(1)}%`);
                   }
-                  return parts;
+                  return lines;
                 }
-                return `Credits Earned: ${ctx.parsed.y}`;
+                const sem = semesters[ctx.dataIndex];
+                const creditLabel = sem && sem.gpa > 0 ? 'Credits Earned' : 'Credits Selected';
+                return `${creditLabel}: ${ctx.parsed.y}`;
               },
+              afterBody: () => ['Click to view course details'],
             },
+            displayColors: false,
+            padding: 14,
+            cornerRadius: 10,
+            backgroundColor: '#ffffff',
+            borderColor: '#cbd5e1',
+            borderWidth: 1,
+            titleColor: '#0f172a',
+            bodyColor: '#334155',
+            footerColor: '#64748b',
+            titleFont: { size: 13, weight: '700' },
+            bodyFont: { size: 12 },
+            footerFont: { size: 11, weight: '500' },
+            bodySpacing: 6,
+            titleSpacing: 8,
+            footerMarginTop: 10,
           },
         },
         scales: {
@@ -557,8 +641,10 @@
         {
           id: 'creditValueLabels',
           afterDatasetsDraw(chart) {
+            if (viewByMode === 'gpa') return;
             const { ctx } = chart;
             const meta = chart.getDatasetMeta(0);
+            const currentIndex = semesters.length - 1;
             ctx.save();
             ctx.fillStyle = '#334155';
             ctx.font = '12px "DM Mono", monospace';
@@ -566,8 +652,15 @@
             ctx.textBaseline = 'top';
             meta.data.forEach((bar, index) => {
               const value = crData[index];
-              const y = bar.base - 18;
-              ctx.fillText(value, bar.x, y);
+              const labelY = bar.base - 18;
+              ctx.fillText(value, bar.x, labelY);
+              if (index === currentIndex) {
+                ctx.fillStyle = '#2563eb';
+                ctx.font = 'bold 11px "DM Mono", monospace';
+                ctx.fillText('★ Current', bar.x, bar.y - 18);
+                ctx.fillStyle = '#334155';
+                ctx.font = '12px "DM Mono", monospace';
+              }
             });
             ctx.restore();
           },
@@ -575,6 +668,7 @@
         {
           id: 'gpaValueLabels',
           afterDatasetsDraw(chart) {
+            if (viewByMode === 'credits') return;
             const { ctx } = chart;
             const meta = chart.getDatasetMeta(1);
             ctx.save();
@@ -584,6 +678,8 @@
             ctx.textBaseline = 'bottom';
             meta.data.forEach((point, index) => {
               const value = gpaData[index];
+              if (value === null || value === undefined) return;
+              if (!point || typeof point.y !== 'number') return;
               const y = point.y - 12;
               ctx.fillText(value.toFixed(2), point.x, y);
             });
@@ -596,13 +692,13 @@
 
   function buildSemChips(semesters) {
     document.getElementById('sem-list').innerHTML = semesters
-      .map((s, i) => `<button class="sem-chip" data-idx="${i}" onclick="selectSemester(${i})">${s.label}</button>`)
+      .map((s, i) => `<button class="sem-chip" data-idx="${i}" onclick="selectSemester(${i})">${formatSemesterLabel(s)}</button>`)
       .join('');
   }
 
   function buildCompareSelectors(semesters) {
     const options = semesters
-      .map((s, i) => `<option value="${i}">${s.label}</option>`)
+      .map((s, i) => `<option value="${i}">${formatSemesterLabel(s)}</option>`)
       .join('');
     document.getElementById('compare-sem-1').innerHTML = options;
     document.getElementById('compare-sem-2').innerHTML = options;
@@ -621,6 +717,34 @@
     const isHidden = panel.classList.toggle('hidden');
     toggle.textContent = isHidden ? 'Compare' : 'Close';
     toggle.setAttribute('aria-expanded', String(!isHidden));
+    if (isHidden) {
+      document.getElementById('compare-result').innerHTML = '';
+    }
+  }
+
+  function handleViewByChange() {
+    const viewBy = document.getElementById('view-by-select').value;
+    viewByMode = viewBy;
+    if (!perfChart) return;
+    
+    const gpaMeta = perfChart.getDatasetMeta(1);
+    const creditsMeta = perfChart.getDatasetMeta(0);
+    
+    switch (viewBy) {
+      case 'gpa':
+        gpaMeta.hidden = false;
+        creditsMeta.hidden = true;
+        break;
+      case 'credits':
+        gpaMeta.hidden = true;
+        creditsMeta.hidden = false;
+        break;
+      case 'both':
+        gpaMeta.hidden = false;
+        creditsMeta.hidden = false;
+        break;
+    }
+    perfChart.update();
   }
 
   function averageGrade(sem) {
@@ -753,6 +877,7 @@
       buildChart(semesterData);
       buildSemChips(semesterData);
       buildCompareSelectors(semesterData);
+      document.getElementById('view-by-select').addEventListener('change', handleViewByChange);
       if (semesterData.length > 0) selectSemester(semesterData.length - 1);
       document.getElementById('status-dot').className     = 'status-dot ok';
       document.getElementById('status-label').textContent = 'API Connected';
