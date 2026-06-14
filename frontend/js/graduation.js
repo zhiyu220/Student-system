@@ -24,6 +24,10 @@ const BUCKET_META = {
   },
 };
 
+// Module-level data store for PDF export
+let _gradData    = null;
+let _recordsData = [];
+
 function bucketMeta(name) {
   return BUCKET_META[name] || { short: name, color: 'var(--text-muted)', types: [] };
 }
@@ -373,6 +377,199 @@ function switchTab(n) {
   document.getElementById('tab-missing').style.display   = n === 2 ? 'block' : 'none';
 }
 
+// ── PDF Export ───────────────────────────────────────────────────────────
+function exportGradPDF() {
+  if (!_gradData) return;
+  const btn = document.getElementById('export-pdf-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W    = doc.internal.pageSize.getWidth();
+    const grad = _gradData;
+    const stu  = grad.student || {};
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+
+    const C = {
+      blue:   [30,  64, 175],
+      green:  [22, 101,  52],
+      amber:  [146, 64,  14],
+      red:    [153, 27,  27],
+      grey:   [100,116, 139],
+      light:  [241,245, 249],
+      white:  [255,255, 255],
+    };
+
+    let y = 0;
+
+    // ── Header band ─────────────────────────────────────────────────────
+    doc.setFillColor(...C.blue);
+    doc.rect(0, 0, W, 22, 'F');
+    doc.setTextColor(...C.white);
+    doc.setFontSize(15); doc.setFont(undefined, 'bold');
+    doc.text('Graduation Audit Report', 14, 14);
+    doc.setFontSize(9);  doc.setFont(undefined, 'normal');
+    doc.text(`Generated: ${today}`, W - 14, 14, { align: 'right' });
+    y = 30;
+
+    // ── Student info box ─────────────────────────────────────────────────
+    doc.setFillColor(...C.light);
+    doc.roundedRect(14, y, W - 28, 22, 3, 3, 'F');
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(11); doc.setFont(undefined, 'bold');
+    doc.text(stu.name || '—', 20, y + 8);
+    doc.setFontSize(9);  doc.setFont(undefined, 'normal');
+    doc.setTextColor(...C.grey);
+    doc.text(`Student ID: ${stu.student_id || '—'}`, 20, y + 15);
+    doc.text(`Department: ${stu.department || '—'}`, W / 2, y + 15);
+    y += 30;
+
+    // ── Eligibility ──────────────────────────────────────────────────────
+    const canGrad = grad.can_graduate;
+    doc.setFontSize(13); doc.setFont(undefined, 'bold');
+    doc.setTextColor(...(canGrad ? C.green : C.amber));
+    doc.text(canGrad ? '✓  Eligible to Graduate' : '✗  Not Yet Eligible to Graduate', 14, y);
+    y += 7;
+    doc.setFontSize(9);  doc.setFont(undefined, 'normal');
+    doc.setTextColor(...C.grey);
+    const ov = grad.overall || {};
+    doc.text(
+      `Overall: ${ov.credits_earned} / ${ov.total_required} credits  (${ov.percentage}%)` +
+      (ov.credits_in_progress ? `   |   ${ov.credits_in_progress} credits in progress` : ''),
+      14, y
+    );
+    y += 10;
+
+    // ── Category summary table ────────────────────────────────────────────
+    const buckets = grad.buckets || [];
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Category Summary', 14, y); y += 4;
+
+    doc.autoTable({
+      startY: y,
+      head: [['Category', 'Required', 'Earned', 'Gap', 'Status']],
+      body: buckets.map(b => {
+        const gap = Math.max(0, b.required_credits - b.earned_credits);
+        const met = (typeof b.passed === 'boolean') ? b.passed : gap === 0;
+        return [
+          b.name,
+          `${b.required_credits} cr`,
+          `${b.earned_credits} cr`,
+          gap > 0 ? `-${gap} cr` : '—',
+          met ? '✓ Met' : `Short ${gap} cr`,
+        ];
+      }),
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: C.blue, textColor: C.white, fontStyle: 'bold' },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        4: { fontStyle: 'bold' },
+      },
+      didParseCell(data) {
+        if (data.column.index === 4 && data.section === 'body') {
+          const met = data.cell.raw.startsWith('✓');
+          data.cell.styles.textColor = met ? C.green : C.amber;
+        }
+      },
+      margin: { left: 14, right: 14 },
+    });
+    y = doc.lastAutoTable.finalY + 8;
+
+    // ── University sub-requirements ───────────────────────────────────────
+    const univBucket = buckets.find(b => b.name === 'University Compulsory & General Education');
+    if (univBucket && (univBucket.sub_requirements || []).length) {
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('University Compulsory & General Education — Detail', 14, y); y += 4;
+
+      doc.autoTable({
+        startY: y,
+        head: [['Requirement', 'Cr Required', 'Cr Earned', 'Passes', 'Domains', 'Status']],
+        body: univBucket.sub_requirements.map(s => [
+          s.label,
+          s.required_credits != null ? `${s.required_credits}` : '—',
+          s.earned_credits   != null ? `${s.earned_credits}`   : '—',
+          s.required_passes  ? `${s.passes}/${s.required_passes}` : '—',
+          s.required_categories ? `${s.categories}/${s.required_categories}` : '—',
+          s.met ? '✓' : '✗',
+        ]),
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [71, 85, 105], textColor: C.white, fontStyle: 'bold' },
+        columnStyles: { 5: { fontStyle: 'bold' } },
+        didParseCell(data) {
+          if (data.column.index === 5 && data.section === 'body') {
+            data.cell.styles.textColor = data.cell.raw === '✓' ? C.green : C.amber;
+          }
+        },
+        margin: { left: 14, right: 14 },
+      });
+      y = doc.lastAutoTable.finalY + 8;
+    }
+
+    // ── Missing dept-required courses ─────────────────────────────────────
+    const deptBucket = buckets.find(b => b.name === 'Department Required Courses');
+    const missing = (deptBucket && deptBucket.missing_courses) || [];
+    if (missing.length) {
+      if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Department Required — Missing / In-Progress Courses', 14, y); y += 4;
+
+      doc.autoTable({
+        startY: y,
+        head: [['Code', 'Course Name', 'Credits', 'Status']],
+        body: missing.map(c => [
+          c.code, c.name_en, `${c.credits} cr`,
+          c.status === 'enrolled' ? 'In Progress' : c.status === 'not_enrolled' ? 'Not Taken' : c.status,
+        ]),
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [153, 27, 27], textColor: C.white, fontStyle: 'bold' },
+        columnStyles: { 0: { cellWidth: 20, fontStyle: 'bold' }, 1: { cellWidth: 100 } },
+        didParseCell(data) {
+          if (data.column.index === 3 && data.section === 'body') {
+            data.cell.styles.textColor =
+              data.cell.raw === 'In Progress' ? C.amber : C.red;
+          }
+        },
+        margin: { left: 14, right: 14 },
+      });
+      y = doc.lastAutoTable.finalY + 8;
+    }
+
+    // ── Blocking items ────────────────────────────────────────────────────
+    const blocking = grad.blocking_items || [];
+    if (blocking.length) {
+      if (y > 250) { doc.addPage(); y = 20; }
+      doc.setFontSize(10); doc.setFont(undefined, 'bold');
+      doc.setTextColor(...C.red);
+      doc.text('Items Requiring Attention', 14, y); y += 5;
+      doc.setFontSize(9); doc.setFont(undefined, 'normal');
+      doc.setTextColor(...C.grey);
+      blocking.forEach(item => {
+        doc.text(`• ${item}`, 18, y); y += 5;
+      });
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────
+    const pages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8); doc.setTextColor(...C.grey);
+      doc.text(
+        `Page ${i} / ${pages}   |   ${stu.name || ''} (${stu.student_id || ''})   |   Generated ${today}`,
+        W / 2, doc.internal.pageSize.getHeight() - 8, { align: 'center' }
+      );
+    }
+
+    const sid = stu.student_id || 'unknown';
+    doc.save(`GraduationAudit_${sid}_${today}.pdf`);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ Export PDF'; }
+  }
+}
+
 // ── Bootstrap ────────────────────────────────────────────────────────────
 window.addEventListener('load', async () => {
   await checkAuth();
@@ -398,11 +595,17 @@ window.addEventListener('load', async () => {
     document.getElementById('student-name').textContent = grad.student?.name || user?.name || 'Student';
     document.getElementById('student-dept').textContent = grad.student?.department || user?.department || '';
 
+    _gradData    = grad;
+    _recordsData = records;
+
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
     renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
     populateSemesterFilter(records);
     applyReviewFilters();
+
+    const btn = document.getElementById('export-pdf-btn');
+    if (btn) btn.disabled = false;
 
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';

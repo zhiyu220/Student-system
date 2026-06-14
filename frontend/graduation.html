@@ -213,7 +213,17 @@
         <h1 style="margin:0; font-size:26px;">Hello, <span id="student-name">&#8212;</span>!</h1>
         <p style="margin:6px 0 0; color:#666;">Welcome back! Here is your current academic progress overview.</p>
       </div>
-      <div style="color:#666;" id="student-dept">&#8212;</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="color:#666;" id="student-dept">&#8212;</div>
+        <button id="export-pdf-btn" onclick="exportGradPDF()" disabled
+                style="display:flex;align-items:center;gap:6px;padding:7px 16px;
+                       border:1.5px solid var(--accent);border-radius:7px;
+                       background:none;color:var(--accent);font-size:13px;
+                       font-weight:600;cursor:pointer;font-family:inherit;
+                       transition:all .15s;white-space:nowrap;">
+          &#8659; Export PDF
+        </button>
+      </div>
     </div>
 
     <!-- Eligibility banner -->
@@ -312,6 +322,8 @@
 </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
