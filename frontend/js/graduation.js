@@ -48,15 +48,15 @@ function buildCircleCard(label, earned, total, color) {
   const remaining = Math.max(0, total - earned);
   return `
     <div class="card stat-card">
-      <div style="color:var(--text-muted); margin-bottom:10px; font-weight:500;">${label}</div>
+      <div style="color:var(--text-muted); margin-bottom:8px; font-weight:500; font-size:13px;">${label}</div>
       <div class="progress-circle" style="--ring-color:${color}; --ring-pct:${pct}%;">
         <div class="inner">
-          <div style="font-size:26px; font-weight:700; color:${color};">${earned}</div>
-          <div style="font-size:12px; color:var(--text-muted);">/ ${total}</div>
+          <div style="font-size:18px; font-weight:700; color:${color};">${earned}</div>
+          <div style="font-size:11px; color:var(--text-muted);">/ ${total}</div>
         </div>
       </div>
-      <div style="font-size:26px; font-weight:700; color:${color}; margin-top:10px;">${pct}%</div>
-      <div style="color:var(--text-muted); font-size:13px;">${remaining} remaining</div>
+      <div style="font-size:18px; font-weight:700; color:${color}; margin-top:8px;">${pct}%</div>
+      <div style="color:var(--text-muted); font-size:12px;">${remaining} remaining</div>
     </div>`;
 }
 
@@ -65,14 +65,14 @@ function buildOverallCard(earned, total) {
   const remaining = Math.max(0, total - earned);
   return `
     <div class="card stat-card">
-      <div style="color:var(--text-muted); margin-bottom:10px; font-weight:500;">Overall Graduation Progress</div>
+      <div style="color:var(--text-muted); margin-bottom:8px; font-weight:500; font-size:13px;">Overall Graduation Progress</div>
       <div class="progress-circle" style="--ring-color:var(--accent); --ring-pct:${pct}%;">
         <div class="inner">
-          <div style="font-size:30px; font-weight:700; color:var(--accent);">${pct}%</div>
+          <div style="font-size:22px; font-weight:700; color:var(--accent);">${pct}%</div>
         </div>
       </div>
-      <div style="margin-top:12px; font-size:16px; font-weight:600;">${earned} / ${total} credits</div>
-      <div style="color:var(--text-muted); font-size:13px;">${remaining} credits left to graduate</div>
+      <div style="margin-top:10px; font-size:13px; font-weight:600;">${earned} / ${total} credits</div>
+      <div style="color:var(--text-muted); font-size:12px;">${remaining} credits left to graduate</div>
     </div>`;
 }
 
