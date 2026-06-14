@@ -272,6 +272,28 @@
     margin-bottom: 12px;
     display: none;
   }
+
+  /* ── Course Picker modal ── */
+  #course-picker-modal { z-index: 1100; }
+  .cp-modal-box {
+    width: 720px;
+    max-width: 96vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .cp-modal-box .filter-bar { margin-bottom: 10px; flex-shrink: 0; }
+  .cp-table-wrap { overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; flex: 1; }
+  .cp-table tbody tr { cursor: pointer; }
+  .cp-table tbody tr:hover td { background: var(--accent-light, #eef0fe); }
+  .browse-btn { white-space: nowrap; flex-shrink: 0; font-size: 12px; padding: 6px 12px; }
+  .browse-input {
+    flex: 1;
+    cursor: default !important;
+    background: var(--surface-alt, #f5f7ff) !important;
+    color: var(--text) !important;
+  }
 </style>
 </head>
 <body>
@@ -546,6 +568,47 @@
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /layout -->
+
+<!-- Course Picker Modal -->
+<div id="course-picker-modal" class="modal-overlay">
+  <div class="modal-box cp-modal-box">
+    <div class="modal-header" style="flex-shrink:0">
+      <h3>Select Course</h3>
+      <button class="modal-close" onclick="closeCoursePicker()" aria-label="Close">×</button>
+    </div>
+    <div class="filter-bar" style="flex-shrink:0">
+      <input id="cp-q"    placeholder="Code / Name" oninput="filterCoursePicker()" style="min-width:160px">
+      <select id="cp-sem"  onchange="filterCoursePicker()"><option value="">All Semesters</option></select>
+      <select id="cp-type" onchange="filterCoursePicker()">
+        <option value="">All Types</option>
+        <option value="required">required</option>
+        <option value="elective">elective</option>
+        <option value="university_required">university_required</option>
+        <option value="general_education">general_education</option>
+        <option value="common_required">common_required</option>
+      </select>
+      <span class="filter-count" id="cp-count"></span>
+    </div>
+    <div class="cp-table-wrap">
+      <table class="da-table cp-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Semester</th>
+            <th>Sec.</th>
+            <th>Type</th>
+            <th>Cr</th>
+            <th>Instructor</th>
+          </tr>
+        </thead>
+        <tbody id="cp-body">
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Modal -->
 <div id="edit-modal" class="modal-overlay">
@@ -906,6 +969,72 @@ document.querySelectorAll('.da-table').forEach(table => {
   });
 });
 
+// ── Course Picker ─────────────────────────────────────────────────────
+function courseLabel(c) {
+  const sec = c.section ? ` · Sec.${c.section}` : '';
+  return `${c.code} · ${c.academic_year}-${c.semester}${sec} · ${c.name_en || c.code}`;
+}
+
+let _cp_hidden_id  = null;
+let _cp_display_id = null;
+
+function openCoursePicker(hiddenId, displayId) {
+  _cp_hidden_id  = hiddenId;
+  _cp_display_id = displayId;
+  const semSet = [...new Set(rawCourses.map(c => `${c.academic_year}-${c.semester}`))].sort().reverse();
+  populateSelect('cp-sem', semSet);
+  document.getElementById('cp-q').value    = '';
+  document.getElementById('cp-type').value = '';
+  filterCoursePicker();
+  document.getElementById('course-picker-modal').classList.add('open');
+}
+
+function closeCoursePicker() {
+  document.getElementById('course-picker-modal').classList.remove('open');
+}
+
+function filterCoursePicker() {
+  const q    = document.getElementById('cp-q').value.toLowerCase();
+  const sem  = document.getElementById('cp-sem').value;
+  const type = document.getElementById('cp-type').value;
+
+  const rows = rawCourses
+    .filter(c => {
+      if (q && !(c.code.toLowerCase().includes(q) || (c.name_en || '').toLowerCase().includes(q))) return false;
+      if (sem  && `${c.academic_year}-${c.semester}` !== sem) return false;
+      if (type && c.type !== type) return false;
+      return true;
+    })
+    .sort((a, b) => (b.academic_year - a.academic_year) || (b.semester - a.semester) || a.code.localeCompare(b.code));
+
+  document.getElementById('cp-count').textContent = `${rows.length} courses`;
+  document.getElementById('cp-body').innerHTML = rows.length === 0
+    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No courses match.</td></tr>`
+    : rows.map(c => `
+        <tr onclick="selectCourseById('${c.id}')">
+          <td class="mono" style="font-weight:600">${c.code}</td>
+          <td>${c.name_en || '—'}</td>
+          <td class="mono">${c.academic_year}-${c.semester}</td>
+          <td style="text-align:center">${c.section || '—'}</td>
+          <td>${typeBadge(c.type)}</td>
+          <td style="text-align:center">${c.credits ?? '—'}</td>
+          <td style="color:var(--text-muted)">${c.instructor_name || '—'}</td>
+        </tr>`).join('');
+}
+
+function selectCourseById(id) {
+  const c = rawCourses.find(r => r.id === id);
+  if (!c) return;
+  document.getElementById(_cp_hidden_id).value  = c.id;
+  document.getElementById(_cp_display_id).value = courseLabel(c);
+  closeCoursePicker();
+}
+
+// Close picker on overlay click
+document.getElementById('course-picker-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeCoursePicker();
+});
+
 // ── Edit modal ────────────────────────────────────────────────────────
 const EDIT_FIELDS = {
   enrollments: [
@@ -1035,19 +1164,21 @@ function buildFormField(field, value) {
       students.map(s => `<option value="${s.id}" ${s.id === value ? 'selected' : ''}>${s.student_id || '?'} · ${s.name}</option>`).join('');
     input = `<select id="${id}">${opts}</select>`;
   } else if (field.type === 'course_select') {
-    // Show every distinct offering (semester + section) — no dedup.
-    // Sort newest semester first so current courses appear at top.
-    const courses = [...rawCourses].sort((a, b) =>
-      (b.academic_year - a.academic_year) || (b.semester - a.semester) || a.code.localeCompare(b.code)
-    );
-    const opts = `<option value="">— Select course —</option>` +
-      courses.map(c => {
-        const sem = `${c.academic_year}-${c.semester}`;
-        const sec = c.section ? ` · Sec.${c.section}` : '';
-        const label = `${c.code} · ${sem}${sec} · ${c.name_en || c.code}`;
-        return `<option value="${c.id}" ${c.id === value ? 'selected' : ''}>${label}</option>`;
-      }).join('');
-    input = `<select id="${id}">${opts}</select>`;
+    const hiddenId  = id;                        // _ef_course_id — read by collectFormValues
+    const displayId = id + '_display';
+    const current   = value ? rawCourses.find(c => c.id === value) : null;
+    const displayVal = current ? courseLabel(current) : '';
+    input = `
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="text"   id="${displayId}" class="browse-input" readonly
+               value="${displayVal.replace(/"/g,'&quot;')}"
+               placeholder="— Click Browse to select a course —">
+        <input type="hidden" id="${hiddenId}" value="${value || ''}">
+        <button type="button" class="btn btn-ghost browse-btn"
+                onclick="openCoursePicker('${hiddenId}','${displayId}')">
+          <i class="ti ti-table-search"></i> Browse
+        </button>
+      </div>`;
   } else if (field.type === 'dept_select') {
     const opts = `<option value="">— Select department —</option>` +
       rawDepts.map(d => `<option value="${d.id}" ${d.id === value ? 'selected' : ''}>${d.code} · ${d.name}</option>`).join('');
