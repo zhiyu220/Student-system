@@ -9,6 +9,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="css/shared.css">
 <style>
+    /* alias shared.css variables to local names used below */
+    :root {
+        --primary: var(--accent);
+        --border-color: var(--border);
+        --text-main: var(--text);
+    }
+
     .content {
         padding: 30px;
         max-width: 1200px;
@@ -363,6 +370,9 @@
     </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/sidebar.js"></script>
@@ -555,8 +565,62 @@
         document.getElementById('exportDropdown').classList.toggle('show');
     }
 
-    function handleExport(type) {
-        alert('Export as ' + type + ' — implementation pending.');
+    function handleExport(format) {
+        document.getElementById('exportDropdown').classList.remove('show');
+
+        var headers = ['Semester', 'Course Code', 'Course Name', 'Type', 'Gen.Ed. Category', 'Credits', 'Grade', 'Status', 'Instructor'];
+        var rows = filtered.map(function(c) {
+            return [
+                c.academic_year + '-' + c.semester,
+                c.code || '',
+                c.name_en || c.code || '',
+                TYPE_LABEL[c.type] || c.type || '',
+                c.general_type || '',
+                c.credits,
+                c.grade !== null && c.grade !== undefined ? parseFloat(c.grade).toFixed(0) : '',
+                c.status || '',
+                c.instructor || ''
+            ];
+        });
+
+        if (format === 'CSV') {
+            var csv = [headers].concat(rows)
+                .map(function(r) {
+                    return r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+                }).join('\r\n');
+            var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'course_history.csv'; a.click();
+            URL.revokeObjectURL(url);
+
+        } else if (format === 'Excel') {
+            var wb = XLSX.utils.book_new();
+            var ws = XLSX.utils.aoa_to_sheet([headers].concat(rows));
+            ws['!cols'] = [14, 14, 28, 16, 18, 8, 8, 12, 16].map(function(w) { return { wch: w }; });
+            XLSX.utils.book_append_sheet(wb, ws, 'Course History');
+            XLSX.writeFile(wb, 'course_history.xlsx');
+
+        } else if (format === 'PDF') {
+            var doc = new window.jspdf.jsPDF({ orientation: 'landscape' });
+            var user = getUser();
+            var studentId = user && user.student_id ? user.student_id : '';
+            doc.setFontSize(18);
+            doc.text('Course History', 14, 20);
+            doc.setFontSize(10);
+            doc.setTextColor(120);
+            doc.text('Student ID: ' + studentId + '   Exported: ' + new Date().toLocaleDateString(), 14, 28);
+            doc.setTextColor(0);
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 34,
+                styles: { fontSize: 8, cellPadding: 3 },
+                headStyles: { fillColor: [79, 110, 247], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] }
+            });
+            doc.save('course_history.pdf');
+        }
     }
 
     window.onclick = function(event) {
