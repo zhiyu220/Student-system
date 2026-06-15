@@ -222,7 +222,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 /* Stats */
 .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
 .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
-.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); border-radius: 12px 12px 0 0; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 12px 12px 0 0; }
 .stat-card.green::before { background: var(--green); }
 .stat-card.amber::before { background: var(--amber); }
 .stat-card.red::before { background: var(--red); }
