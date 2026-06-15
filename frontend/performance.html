@@ -337,6 +337,20 @@
     text-transform: uppercase;
     letter-spacing: .4px;
   }
+  .insight-section { margin-top: 14px; }
+  .insight-block { display: flex; gap: 11px; padding: 12px 0; }
+  .insight-block + .insight-block { border-top: 1px solid #f0f0f5; }
+  .ib-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .ib-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .ib-text { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .ib-green  .ib-icon { background: #E7F7EE; color: #22C55E; } .ib-green  .ib-title { color: #16a34a; }
+  .ib-violet .ib-icon { background: #F1ECFD; color: #8B5CF6; } .ib-violet .ib-title { color: #8B5CF6; }
+  .ib-amber  .ib-icon { background: #FEF3E2; color: #F59E0B; } .ib-amber  .ib-title { color: #d97706; }
 
   .detail-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   .detail-table th {
@@ -1021,17 +1035,36 @@
     document.getElementById('ins-completion').textContent = `${summary.completion_rate}%`;
     document.getElementById('ins-digital').textContent    = insights.digital_app_courses_completed;
 
-    const notes = buildInsightNotes(summary, insights, semesters);
-    let html = notes.length ? '<div class="insight-notes-title">Recommendations</div>' : '';
-    html += notes.map(n =>
-      `<div class="insight-note ${n.cls}"><i class="ti ${n.icon}"></i>${n.text}</div>`
-    ).join('');
-    document.getElementById('insight-notes').innerHTML = html;
+    const sections = buildInsightSections(summary, insights, semesters);
+    document.getElementById('insight-notes').innerHTML =
+      `<div class="insight-section">` + sections.map(s =>
+        `<div class="insight-block ${s.cls}">
+           <div class="ib-icon"><i class="ti ${s.icon}"></i></div>
+           <div>
+             <div class="ib-title">${s.title}</div>
+             <div class="ib-text">${s.text}</div>
+           </div>
+         </div>`
+      ).join('') + `</div>`;
   }
 
-  // Build constructive, recommendation-style insights from the data.
-  function buildInsightNotes(summary, insights, semesters) {
-    const notes = [];
+  const DEPT_NAMES = {
+    IM: 'Information Management', CP: 'Computer Programming', CS: 'Computer Science',
+    CL: 'Chinese', LC: 'English', LE: 'General Education', EE: 'Electrical Engineering',
+    MA: 'Mathematics', PL: 'Physical Education', ST: 'Service Learning', BA: 'Business',
+  };
+  function deptOf(code) {
+    const m = (code || '').match(/^[A-Za-z]+/);
+    const p = m ? m[0].toUpperCase() : '';
+    return DEPT_NAMES[p] || p || 'your major';
+  }
+
+  // Build specific, categorized academic insights from real course data.
+  function buildInsightSections(summary, insights, semesters) {
+    const graded = [];
+    semesters.forEach(s => s.courses.forEach(c => {
+      if (typeof c.grade === 'number') graded.push({ ...c, sem: s.label });
+    }));
 
     // GPA trend (least-squares slope over completed semesters)
     const pts = semesters.map((s, i) => ({ x: i, y: s.gpa })).filter(p => p.y > 0);
@@ -1045,41 +1078,52 @@
       const d = n * sxx - sx * sx;
       if (d !== 0) slope = (n * sxy - sx * sy) / d;
     }
-    if (slope > 0.03) {
-      notes.push({ cls: 'good', icon: 'ti-trending-up', text: `Your GPA is trending up about +${slope.toFixed(2)} per semester — whatever routine you've built is working, so keep it going.` });
-    } else if (slope < -0.03) {
-      notes.push({ cls: '', icon: 'ti-trending-down', text: `Your GPA has slipped roughly ${slope.toFixed(2)} per semester. Try lightening next term's load or booking office hours early.` });
-    } else if (pts.length >= 2) {
-      notes.push({ cls: 'info', icon: 'ti-activity', text: `Your GPA has held steady. Turning one B into an A next term would be enough to lift your overall average.` });
+
+    const g = (c) => `${c.name_en} (${Math.round(c.grade)})`;
+    const top = [...graded].sort((a, b) => b.grade - a.grade).slice(0, 2);
+    const weak = [...graded].sort((a, b) => a.grade - b.grade).slice(0, 2);
+
+    // ---- Strengths ----
+    let strength;
+    if (top.length) {
+      const names = top.map(g).join(' and ');
+      const peak = summary.highest_gpa_semester
+        ? ` Your peak was ${summary.highest_gpa_semester} at GPA ${summary.highest_gpa.toFixed(2)}.` : '';
+      const climb = slope > 0.03 ? ' Your GPA has been climbing steadily — keep that momentum going.' : '';
+      strength = `Your strongest results were ${names}.${peak}${climb}`;
+    } else {
+      strength = `No graded courses yet — a clean slate to set the tone for the semester ahead.`;
     }
 
-    // Performance band
-    if (summary.avg_gpa >= 3.7) {
-      notes.push({ cls: 'good', icon: 'ti-award', text: `At a ${summary.avg_gpa.toFixed(2)} average you're in honours territory — worth exploring scholarships and research opportunities.` });
-    } else if (summary.avg_gpa >= 3.0) {
-      notes.push({ cls: 'info', icon: 'ti-target', text: `A ${summary.avg_gpa.toFixed(2)} average is solid; one extra A-grade course would put the 3.5 honours line within reach.` });
-    } else if (summary.avg_gpa > 0) {
-      notes.push({ cls: '', icon: 'ti-alert-triangle', text: `With a ${summary.avg_gpa.toFixed(2)} average, focus on your required core courses first and lean on tutoring to rebuild momentum.` });
+    // ---- Areas to Improve ----
+    let improve;
+    if (weak.length) {
+      const names = weak.map(g).join(' and ');
+      const trendClause = slope < -0.03
+        ? `, and your GPA has slipped about ${Math.abs(slope).toFixed(2)} per semester recently`
+        : '';
+      improve = `${names} pulled your average down${trendClause}. Give these required core courses extra weekly review time and visit office hours early rather than before exams.`;
+    } else {
+      improve = `Keep an eye on your heavier credit courses this term and start assignments early to stay ahead.`;
     }
 
-    // Consistency gap between best and weakest term
-    if (summary.lowest_gpa_semester && summary.highest_gpa - summary.lowest_gpa >= 0.5) {
-      notes.push({ cls: 'info', icon: 'ti-bulb', text: `Your strongest term was ${summary.highest_gpa_semester} and weakest ${summary.lowest_gpa_semester}. Look back at what made the difference and reuse those study habits.` });
+    // ---- Study Suggestions ----
+    let suggest;
+    if (top.length) {
+      const dept = deptOf(top[0].code);
+      suggest = `You clearly excel in ${dept} (e.g. ${g(top[0])}). Consider advanced ${dept} electives next term to sharpen your edge, and pair them with lighter general-education credits to protect your GPA.`;
+      if (summary.completion_rate >= 80) {
+        suggest += ` With ${summary.completion_rate}% of your degree done, line these up with your graduation and capstone requirements.`;
+      }
+    } else {
+      suggest = `Build a steady weekly study routine now; balancing one challenging course with lighter ones each term keeps your GPA stable.`;
     }
 
-    // Degree planning
-    if (summary.completion_rate >= 90) {
-      notes.push({ cls: 'good', icon: 'ti-flag', text: `You've finished ${summary.completion_rate}% of your degree — now's the time to confirm graduation and capstone requirements.` });
-    } else if (summary.completion_rate >= 40) {
-      notes.push({ cls: 'info', icon: 'ti-map', text: `About ${summary.completion_rate}% through your degree — a good moment to pick electives that line up with your career goals.` });
-    }
-
-    // Keep any decline note the backend already flagged
-    if (insights.decline_note) {
-      notes.push({ cls: '', icon: 'ti-info-circle', text: insights.decline_note });
-    }
-
-    return notes.slice(0, 4);
+    return [
+      { cls: 'ib-green',  icon: 'ti-trending-up',  title: 'Strengths',         text: strength },
+      { cls: 'ib-violet', icon: 'ti-chart-line',   title: 'Areas to Improve',  text: improve },
+      { cls: 'ib-amber',  icon: 'ti-bulb',         title: 'Study Suggestions', text: suggest },
+    ];
   }
 
   function fillStatsCards(summary, semesters) {
