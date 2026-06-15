@@ -694,10 +694,12 @@
             type: 'bar',
             label: 'Credits Earned',
             data: crData,
-            backgroundColor: semesters.map(() => 'rgba(78,108,240,0.18)'),
-            borderColor: 'rgba(78,108,240,0.4)',
-            borderWidth: 1,
-            borderRadius: 12,
+            backgroundColor: semesters.map(() => 'rgba(78,108,240,0.12)'),
+            borderWidth: 0,
+            borderRadius: { topLeft: 6, topRight: 6 },
+            borderSkipped: false,
+            barPercentage: 0.5,
+            categoryPercentage: 0.7,
             yAxisID: 'y1',
             order: 2,
           },
@@ -770,16 +772,16 @@
         },
         scales: {
           y1: {
-            type: 'linear', position: 'left',
+            type: 'linear', position: 'right',
             title: { display: true, text: 'Credits', font: { size: 11 } },
-            grid: { color: '#f0f0f5' },
+            grid: { drawOnChartArea: false },
             ticks: { font: { size: 11 } },
           },
           y2: {
-            type: 'linear', position: 'right',
+            type: 'linear', position: 'left',
             title: { display: true, text: 'GPA', font: { size: 11 } },
             min: 0, max: 4,
-            grid: { drawOnChartArea: false },
+            grid: { color: '#f0f0f5' },
             ticks: { font: { size: 11 } },
           },
           x: { ticks: { font: { size: 11 } }, grid: { display: false } },
@@ -937,7 +939,7 @@
     document.querySelectorAll('.sem-chip').forEach((el, i) => el.classList.toggle('active', i === idx));
     if (perfChart) {
       perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
-        i === idx ? 'rgba(78,108,240,0.5)' : 'rgba(78,108,240,0.15)'
+        i === idx ? 'rgba(78,108,240,0.45)' : 'rgba(78,108,240,0.12)'
       );
       perfChart.update('none');
     }
