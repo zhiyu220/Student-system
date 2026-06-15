@@ -35,66 +35,47 @@
   @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
   .stat-card {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #e0e0e8;
-    background: #fff;
-    text-align: Left;
-    transition: all .2s;
-  }
-  .stat-card:hover { border-color: #4E6CF0; box-shadow: 0 2px 8px rgba(78, 108, 240, 0.1); }
-  .stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .stat-body { flex: 1; min-width: 0; }
-  .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a1a2e;
-    margin: 8px 0;
-    font-family: 'DM Mono', monospace;
+    padding: 6px 4px;
+    text-align: left;
   }
   .stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
   }
-
-  /* Per-metric color themes */
-  .c-blue   .stat-icon { background: #EEF1FE; color: #4E6CF0; }
-  .c-blue   .stat-label { color: #4E6CF0; }
-  .c-green  .stat-icon { background: #E7F7EE; color: #22C55E; }
-  .c-green  .stat-label { color: #22C55E; }
-  .c-violet .stat-icon { background: #F1ECFD; color: #8B5CF6; }
-  .c-violet .stat-label { color: #8B5CF6; }
-  .c-orange .stat-icon { background: #FEF3E2; color: #F59E0B; }
-  .c-orange .stat-label { color: #F59E0B; }
-  .c-sky    .stat-icon { background: #E6F2FE; color: #3B82F6; }
-  .c-sky    .stat-label { color: #3B82F6; }
+  .stat-label i { font-size: 17px; }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 8px 0 6px;
+  }
+  .stat-unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 5px;
+  }
   .stat-subtitle {
     font-size: 12px;
     color: var(--text-muted);
-    margin-top: 6px;
   }
   .stat-trend {
-    font-size: 11px;
-    margin-top: 4px;
+    font-size: 12px;
     font-weight: 600;
+    margin-left: 4px;
   }
   .trend-up { color: #22C55E; }
   .trend-down { color: #dc2626; }
+
+  /* Per-metric color themes (icon + label share the color) */
+  .c-blue   .stat-label { color: #4E6CF0; }
+  .c-green  .stat-label { color: #22C55E; }
+  .c-violet .stat-label { color: #8B5CF6; }
+  .c-orange .stat-label { color: #F59E0B; }
+  .c-sky    .stat-label { color: #3B82F6; }
 
   .perf-grid {
     display: grid;
@@ -373,52 +354,34 @@
     <!-- Stats Cards -->
     <div class="stats-grid">
       <div class="stat-card c-blue">
-        <div class="stat-icon"><i class="ti ti-trending-up"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Average GPA (All)</div>
-          <div class="stat-value" id="stat-avg-gpa">—</div>
-          <div class="stat-subtitle" id="stat-avg-gpa-trend">vs. Last Semester</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-chart-bar"></i>Average GPA (All)</div>
+        <div class="stat-value"><span id="stat-avg-gpa">—</span><span class="stat-unit">/ 4.00</span></div>
+        <div class="stat-subtitle" id="stat-avg-gpa-trend">vs. Last Semester</div>
       </div>
       <div class="stat-card c-green">
-        <div class="stat-icon"><i class="ti ti-star"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Highest GPA (Semester)</div>
-          <div class="stat-value" id="stat-high-gpa">—</div>
-          <div class="stat-subtitle" id="stat-high-gpa-sem">—</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-chart-line"></i>Highest GPA (Semester)</div>
+        <div class="stat-value" id="stat-high-gpa">—</div>
+        <div class="stat-subtitle" id="stat-high-gpa-sem">—</div>
       </div>
       <div class="stat-card c-violet">
-        <div class="stat-icon"><i class="ti ti-alert-circle"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Lowest GPA (Semester)</div>
-          <div class="stat-value" id="stat-low-gpa">—</div>
-          <div class="stat-subtitle" id="stat-low-gpa-sem">—</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-chart-infographic"></i>Lowest GPA (Semester)</div>
+        <div class="stat-value" id="stat-low-gpa">—</div>
+        <div class="stat-subtitle" id="stat-low-gpa-sem">—</div>
       </div>
       <div class="stat-card c-orange">
-        <div class="stat-icon"><i class="ti ti-books"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Total Courses Taken</div>
-          <div class="stat-value" id="stat-total-courses">—</div>
-          <div class="stat-subtitle">Total Completed</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-book"></i>Total Courses Taken</div>
+        <div class="stat-value"><span id="stat-total-courses">—</span><span class="stat-unit">courses</span></div>
+        <div class="stat-subtitle">Total Completed</div>
       </div>
       <div class="stat-card c-sky">
-        <div class="stat-icon"><i class="ti ti-certificate"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Total Credits Earned</div>
-          <div class="stat-value" id="stat-total-credits">—</div>
-          <div class="stat-subtitle">Cumulative Total</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-award"></i>Total Credits Earned</div>
+        <div class="stat-value"><span id="stat-total-credits">—</span><span class="stat-unit">credits</span></div>
+        <div class="stat-subtitle">Cumulative Total</div>
       </div>
       <div class="stat-card c-green">
-        <div class="stat-icon"><i class="ti ti-progress-check"></i></div>
-        <div class="stat-body">
-          <div class="stat-label">Completion Rate</div>
-          <div class="stat-value" id="stat-completion">—</div>
-          <div class="stat-subtitle">Average Completion</div>
-        </div>
+        <div class="stat-label"><i class="ti ti-circle-check"></i>Completion Rate</div>
+        <div class="stat-value"><span id="stat-completion">—</span><span class="stat-unit">%</span></div>
+        <div class="stat-subtitle">Average Completion</div>
       </div>
     </div>
 
@@ -879,11 +842,11 @@
       const prevGpa = semesters[semesters.length - 2].gpa;
       const currGpa = semesters[semesters.length - 1].gpa;
       const diff = currGpa - prevGpa;
-      const trendHtml = diff > 0 
-        ? `<span class="stat-trend trend-up">↑ +${diff.toFixed(2)} vs. Last Semester</span>`
+      const trendHtml = diff > 0
+        ? `vs. Last Semester <span class="stat-trend trend-up">↑ ${diff.toFixed(2)}</span>`
         : diff < 0
-        ? `<span class="stat-trend trend-down">↓ ${diff.toFixed(2)} vs. Last Semester</span>`
-        : `<span class="stat-trend">= Same as Last Semester</span>`;
+        ? `vs. Last Semester <span class="stat-trend trend-down">↓ ${Math.abs(diff).toFixed(2)}</span>`
+        : `vs. Last Semester <span class="stat-trend">= 0.00</span>`;
       document.getElementById('stat-avg-gpa-trend').innerHTML = trendHtml;
     }
 
@@ -899,8 +862,8 @@
     document.getElementById('stat-total-courses').textContent = summary.total_courses;
     document.getElementById('stat-total-credits').textContent = summary.total_credits;
 
-    // Completion Rate
-    document.getElementById('stat-completion').textContent = `${summary.completion_rate}%`;
+    // Completion Rate (unit "%" is rendered statically next to the value)
+    document.getElementById('stat-completion').textContent = summary.completion_rate;
   }
 
   (async () => {
