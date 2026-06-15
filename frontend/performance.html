@@ -285,17 +285,24 @@
 
   .sem-list {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 3px;
     margin-top: 16px;
     padding: 4px;
     background: #f3f4f8;
     border-radius: 12px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #c7cad6 transparent;
   }
+  .sem-list::-webkit-scrollbar { height: 6px; }
+  .sem-list::-webkit-scrollbar-track { background: transparent; }
+  .sem-list::-webkit-scrollbar-thumb { background: #c7cad6; border-radius: 999px; }
   .sem-chip {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     text-align: center;
-    padding: 7px 12px;
+    padding: 7px 14px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
