@@ -309,25 +309,29 @@
   .insight-note.good { background: #F0FDF4; border-color: #22C55E; color: #166534; }
   .insight-note.info { background: #EFF6FF; border-color: #3B82F6; color: #1E40AF; }
 
-  .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .detail-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   .detail-table th {
-    background: #f5f7ff;
-    color: var(--text-muted);
+    background: #fafbff;
+    color: #94a3b8;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .4px;
-    padding: 9px 14px;
+    letter-spacing: .5px;
+    padding: 12px 16px;
     text-align: left;
-    border-bottom: 1.5px solid #e8e8f0;
+    border-bottom: 1px solid #eceef6;
   }
+  .detail-table th:first-child { border-top-left-radius: 10px; }
+  .detail-table th:last-child  { border-top-right-radius: 10px; }
   .detail-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #f0f0f5;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f2f4fa;
     vertical-align: middle;
+    color: #334155;
   }
-  .detail-table tr:last-child td { border-bottom: none; }
-  .detail-table tr:hover td { background: #f9f9ff; }
+  .detail-table tbody tr:last-child td { border-bottom: none; }
+  .detail-table tbody tr { transition: background .12s; }
+  .detail-table tbody tr:hover td { background: #f7f9ff; }
 
   .type-pill {
     display: inline-block;
