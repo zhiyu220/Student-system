@@ -283,22 +283,45 @@
     color: #1f2937;
   }
 
+  .sem-switcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .sem-arrow {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #e5e7ef;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    transition: all .15s;
+  }
+  .sem-arrow:hover { border-color: #4E6CF0; color: #4E6CF0; }
+  .sem-arrow:disabled { opacity: .35; cursor: default; border-color: #e5e7ef; color: #64748b; }
   .sem-list {
+    flex: 1 1 auto;
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 3px;
-    margin-top: 16px;
     padding: 4px;
     background: #f3f4f8;
     border-radius: 12px;
     scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #c7cad6 transparent;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
   }
-  .sem-list::-webkit-scrollbar { height: 6px; }
-  .sem-list::-webkit-scrollbar-track { background: transparent; }
-  .sem-list::-webkit-scrollbar-thumb { background: #c7cad6; border-radius: 999px; }
+  .sem-list::-webkit-scrollbar { display: none; }
   .sem-chip {
     flex: 0 0 auto;
     text-align: center;
@@ -633,7 +656,11 @@
           <canvas id="perfChart"></canvas>
         </div>
         <div id="compare-result" class="compare-result"></div>
-        <div class="sem-list" id="sem-list"></div>
+        <div class="sem-switcher">
+          <button class="sem-arrow" id="sem-prev" type="button" aria-label="Scroll left">‹</button>
+          <div class="sem-list" id="sem-list"></div>
+          <button class="sem-arrow" id="sem-next" type="button" aria-label="Scroll right">›</button>
+        </div>
 
         <!-- Semester course detail (same block as the trend chart) -->
         <div class="detail-section">
@@ -1011,9 +1038,41 @@
     `;
   }
 
+  function centerActiveChip() {
+    const list = document.getElementById('sem-list');
+    const active = list && list.querySelector('.sem-chip.active');
+    if (!list || !active) return;
+    const target = active.offsetLeft - (list.clientWidth - active.offsetWidth) / 2;
+    list.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+  }
+
+  function updateSemArrows() {
+    const list = document.getElementById('sem-list');
+    const prev = document.getElementById('sem-prev');
+    const next = document.getElementById('sem-next');
+    if (!list || !prev || !next) return;
+    const maxScroll = list.scrollWidth - list.clientWidth - 1;
+    prev.disabled = list.scrollLeft <= 0;
+    next.disabled = list.scrollLeft >= maxScroll;
+  }
+
+  function initSemArrows() {
+    const list = document.getElementById('sem-list');
+    const prev = document.getElementById('sem-prev');
+    const next = document.getElementById('sem-next');
+    if (!list || !prev || !next) return;
+    const step = () => Math.max(160, list.clientWidth * 0.7);
+    prev.onclick = () => list.scrollBy({ left: -step(), behavior: 'smooth' });
+    next.onclick = () => list.scrollBy({ left:  step(), behavior: 'smooth' });
+    list.addEventListener('scroll', updateSemArrows, { passive: true });
+    window.addEventListener('resize', updateSemArrows);
+    updateSemArrows();
+  }
+
   function selectSemester(idx) {
     activeSemIdx = idx;
     document.querySelectorAll('.sem-chip').forEach((el, i) => el.classList.toggle('active', i === idx));
+    centerActiveChip();
     if (perfChart) {
       perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
         i === idx ? 'rgba(78,108,240,0.45)' : 'rgba(78,108,240,0.12)'
@@ -1265,6 +1324,7 @@
       fillInsights(data.summary, data.insights, semesterData);
       buildChart(semesterData);
       buildSemChips(semesterData);
+      initSemArrows();
       buildCompareSelectors(semesterData);
       document.getElementById('view-by-select').addEventListener('change', handleViewByChange);
       if (semesterData.length > 0) selectSemester(semesterData.length - 1);
