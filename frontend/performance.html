@@ -113,6 +113,25 @@
   .card-title {
     flex: 0 0 auto;
   }
+  .gpa-pill {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #E7F7EE;
+    color: #16a34a;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    vertical-align: middle;
+  }
+  .detail-meta {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    vertical-align: middle;
+  }
   .chart-legend {
     display: flex;
     align-items: center;
@@ -962,8 +981,10 @@
       perfChart.update('none');
     }
     const sem = semesterData[idx];
-    document.getElementById('detail-title').textContent =
-      `${sem.label} — ${sem.courses.length} courses · GPA ${sem.gpa.toFixed(2)} · ${sem.credits} credits`;
+    document.getElementById('detail-title').innerHTML =
+      `Course Details for ${sem.label}` +
+      `<span class="gpa-pill">GPA: ${sem.gpa.toFixed(2)}</span>` +
+      `<span class="detail-meta">· ${sem.courses.length} courses · ${sem.credits} credits</span>`;
     document.getElementById('detail-body').innerHTML = sem.courses.map(c => {
       const grade = c.grade !== null ? c.grade.toFixed(0) : '—';
       return `
