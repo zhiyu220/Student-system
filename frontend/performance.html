@@ -544,6 +544,10 @@
                 <span class="legend-box" style="background-color:#D4E3F7;"></span>
                 <span class="legend-label">Credits Earned</span>
               </div>
+              <div class="legend-item">
+                <span class="legend-box" style="background:repeating-linear-gradient(90deg,#F59E0B 0 6px,transparent 6px 10px);border-radius:0;"></span>
+                <span class="legend-label">GPA Trend</span>
+              </div>
             </div>
             <div class="view-by-section">
               <label class="view-by-label" for="view-by-select">View By:</label>
@@ -679,6 +683,22 @@
     const gpaData = semesters.map(s => (s.gpa > 0 ? s.gpa : null));
     const gpaPointRadius = gpaData.map(v => (v === null ? 0 : 5));
     const crData  = semesters.map(s => s.credits);
+    // Linear regression (least squares) over available GPA points
+    const regPoints = gpaData.map((v, i) => ({ x: i, y: v })).filter(p => p.y !== null);
+    let trendData = gpaData.map(() => null);
+    if (regPoints.length >= 2) {
+      const n = regPoints.length;
+      const sumX = regPoints.reduce((a, p) => a + p.x, 0);
+      const sumY = regPoints.reduce((a, p) => a + p.y, 0);
+      const sumXY = regPoints.reduce((a, p) => a + p.x * p.y, 0);
+      const sumXX = regPoints.reduce((a, p) => a + p.x * p.x, 0);
+      const denom = n * sumXX - sumX * sumX;
+      if (denom !== 0) {
+        const slope = (n * sumXY - sumX * sumY) / denom;
+        const intercept = (sumY - slope * sumX) / n;
+        trendData = gpaData.map((_, i) => slope * i + intercept);
+      }
+    }
     const gradeData = semesters.map(s => {
       const grades = s.courses
         .map(c => (typeof c.grade === 'number' ? c.grade : null))
@@ -702,7 +722,7 @@
             barPercentage: 0.5,
             categoryPercentage: 0.7,
             yAxisID: 'y1',
-            order: 2,
+            order: 3,
           },
           {
             type: 'line',
@@ -725,6 +745,21 @@
             yAxisID: 'y2',
             order: 1,
             spanGaps: false,
+          },
+          {
+            type: 'line',
+            label: 'GPA Trend',
+            data: trendData,
+            borderColor: '#F59E0B',
+            borderWidth: 2,
+            borderDash: [6, 5],
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            tension: 0,
+            fill: false,
+            yAxisID: 'y2',
+            order: 2,
+            spanGaps: true,
           },
         ],
       },
@@ -754,6 +789,9 @@
                     lines.push(`Grade: ${avgGrade.toFixed(1)}%`);
                   }
                   return lines;
+                }
+                if (ctx.dataset.label === 'GPA Trend') {
+                  return `Trend: ${ctx.parsed.y.toFixed(2)}`;
                 }
                 const sem = semesters[ctx.dataIndex];
                 const creditLabel = sem && sem.gpa > 0 ? 'Credits Earned' : 'Credits Selected';
@@ -896,19 +934,23 @@
     
     const gpaMeta = perfChart.getDatasetMeta(1);
     const creditsMeta = perfChart.getDatasetMeta(0);
-    
+    const trendMeta = perfChart.getDatasetMeta(2);
+
     switch (viewBy) {
       case 'gpa':
         gpaMeta.hidden = false;
         creditsMeta.hidden = true;
+        trendMeta.hidden = false;
         break;
       case 'credits':
         gpaMeta.hidden = true;
         creditsMeta.hidden = false;
+        trendMeta.hidden = true;
         break;
       case 'both':
         gpaMeta.hidden = false;
         creditsMeta.hidden = false;
+        trendMeta.hidden = false;
         break;
     }
     perfChart.update();
