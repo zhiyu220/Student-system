@@ -258,36 +258,62 @@
   .compare-button:hover { background: #3b53c5; }
   .compare-result {
     margin-top: 18px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+  }
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7ef;
+    font-size: 13px;
+  }
+  .compare-table th {
+    background: #f3f4f8;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+  }
+  .compare-table th.sem-col { text-align: center; }
+  .compare-table th.metric-col { text-align: left; width: 110px; }
+  .compare-table td {
+    padding: 11px 16px;
+    border-top: 1px solid #f0f1f5;
+    text-align: center;
+    color: #334155;
+    font-family: 'DM Mono', monospace;
+  }
+  .compare-table td.metric-name {
+    text-align: left;
+    font-family: inherit;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .compare-table tr:first-child td { border-top: none; }
+  .compare-win {
+    color: #4E6CF0;
+    font-weight: 700;
+  }
+  .compare-win::after {
+    content: ' ▲';
+    font-size: 10px;
   }
   .compare-card {
     padding: 14px 16px;
     border-radius: 12px;
     border: 1px solid #e5e7ff;
     background: #f8f9ff;
-    min-height: 84px;
-  }
-  .compare-card strong {
-    display: block;
-    margin-bottom: 6px;
-    color: #475569;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-  .compare-card .compare-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f2937;
   }
 
   .sem-switcher {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 16px;
+    margin-top: 30px;
     margin-left: 70px;
     max-width: 900px;
 
@@ -642,7 +668,7 @@
               <select id="view-by-select" class="view-by-select">
                 <option value="gpa">GPA</option>
                 <option value="credits">Credits</option>
-                <option value="both">Both</option>
+                <option value="both" selected>Both</option>
               </select>
             </div>
             <div class="compare-panel">
@@ -952,9 +978,21 @@
   }
 
   function buildSemChips(semesters) {
-    document.getElementById('sem-list').innerHTML = semesters
+    const list = document.getElementById('sem-list');
+    list.innerHTML = semesters
       .map((s, i) => `<button class="sem-chip" data-idx="${i}" onclick="selectSemester(${i})">${formatSemesterLabel(s)}</button>`)
       .join('');
+    capSemListToFiveChips(list);
+  }
+
+  function capSemListToFiveChips(list) {
+    const chips = list.querySelectorAll('.sem-chip');
+    if (chips.length <= 5) { list.style.maxWidth = ''; return; }
+    const gap = parseFloat(getComputedStyle(list).gap) || 3;
+    const padding = parseFloat(getComputedStyle(list).paddingLeft) + parseFloat(getComputedStyle(list).paddingRight) || 8;
+    let w = padding;
+    for (let i = 0; i < 5; i++) w += chips[i].offsetWidth + (i < 4 ? gap : 0);
+    list.style.maxWidth = w + 'px';
   }
 
   function buildCompareSelectors(semesters) {
@@ -980,6 +1018,12 @@
     toggle.setAttribute('aria-expanded', String(!isHidden));
     if (isHidden) {
       document.getElementById('compare-result').innerHTML = '';
+      if (perfChart) {
+        perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
+          i === activeSemIdx ? 'rgba(78,108,240,0.45)' : 'rgba(78,108,240,0.12)'
+        );
+        perfChart.update('none');
+      }
     }
   }
 
@@ -1019,35 +1063,73 @@
     const idx1 = Number(document.getElementById('compare-sem-1').value);
     const idx2 = Number(document.getElementById('compare-sem-2').value);
     if (idx1 === idx2) {
-      document.getElementById('compare-result').innerHTML = '<div class="compare-card"><strong>Please select two different semesters for comparison.</strong></div>';
+      document.getElementById('compare-result').innerHTML = '<div class="compare-card">Please select two different semesters for comparison.</div>';
       return;
     }
     const first = semesterData[idx1];
     const second = semesterData[idx2];
     const firstAvgGrade = averageGrade(first);
     const secondAvgGrade = averageGrade(second);
+
+    function cell(aVal, bVal, fmt, higherWins = true) {
+      const aNum = typeof aVal === 'number' ? aVal : null;
+      const bNum = typeof bVal === 'number' ? bVal : null;
+      let aWin = false, bWin = false;
+      if (aNum !== null && bNum !== null && aNum !== bNum) {
+        aWin = higherWins ? aNum > bNum : aNum < bNum;
+        bWin = !aWin;
+      }
+      const aStr = aNum !== null ? fmt(aNum) : '—';
+      const bStr = bNum !== null ? fmt(bNum) : '—';
+      return [
+        `<td class="${aWin ? 'compare-win' : ''}">${aStr}</td>`,
+        `<td class="${bWin ? 'compare-win' : ''}">${bStr}</td>`,
+      ];
+    }
+
+    const gpa     = cell(first.gpa > 0 ? first.gpa : null,   second.gpa > 0 ? second.gpa : null,   v => v.toFixed(2));
+    const credits = cell(first.credits,                        second.credits,                        v => v);
+    const grade   = cell(firstAvgGrade,                        secondAvgGrade,                        v => v.toFixed(1) + '%');
+
     document.getElementById('compare-result').innerHTML = `
-      <div class="compare-card">
-        <strong>${first.label}</strong>
-        <div class="compare-value">GPA ${first.gpa.toFixed(2)}</div>
-        <div>Credits: ${first.credits}</div>
-        <div>Avg Grade: ${firstAvgGrade !== null ? firstAvgGrade.toFixed(1) + '%' : '—'}</div>
-      </div>
-      <div class="compare-card">
-        <strong>${second.label}</strong>
-        <div class="compare-value">GPA ${second.gpa.toFixed(2)}</div>
-        <div>Credits: ${second.credits}</div>
-        <div>Avg Grade: ${secondAvgGrade !== null ? secondAvgGrade.toFixed(1) + '%' : '—'}</div>
-      </div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th class="metric-col"></th>
+            <th class="sem-col">${formatSemesterLabel(first)}</th>
+            <th class="sem-col">${formatSemesterLabel(second)}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="metric-name">GPA</td>${gpa.join('')}</tr>
+          <tr><td class="metric-name">Credits</td>${credits.join('')}</tr>
+          <tr><td class="metric-name">Avg Grade</td>${grade.join('')}</tr>
+        </tbody>
+      </table>
     `;
+
+    if (perfChart) {
+      perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
+        i === idx1 || i === idx2 ? 'rgba(220,53,69,0.45)' : 'rgba(78,108,240,0.12)'
+      );
+      perfChart.update('none');
+    }
   }
 
   function centerActiveChip() {
     const list = document.getElementById('sem-list');
     const active = list && list.querySelector('.sem-chip.active');
     if (!list || !active) return;
-    const target = active.offsetLeft - (list.clientWidth - active.offsetWidth) / 2;
-    list.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+    const listRect = list.getBoundingClientRect();
+    const chipRect = active.getBoundingClientRect();
+    const chipVisLeft  = chipRect.left  - listRect.left;
+    const chipVisRight = chipRect.right - listRect.left;
+    if (chipVisLeft >= 0 && chipVisRight <= listRect.width) return;
+    if (chipVisLeft < 0) {
+      list.scrollTo({ left: list.scrollLeft + chipVisLeft - 4, behavior: 'smooth' });
+    } else {
+      list.scrollTo({ left: list.scrollLeft + chipVisRight - listRect.width + 4, behavior: 'smooth' });
+    }
   }
 
   function updateSemArrows() {
