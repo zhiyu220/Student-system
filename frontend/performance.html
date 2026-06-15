@@ -286,23 +286,33 @@
   .sem-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 3px;
     margin-top: 16px;
+    padding: 4px;
+    background: #f3f4f8;
+    border-radius: 12px;
   }
   .sem-chip {
-    padding: 5px 12px;
-    border-radius: 20px;
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 7px 12px;
+    border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     font-family: 'DM Mono', monospace;
     cursor: pointer;
-    border: 1.5px solid #e0e0e0;
-    background: #fff;
+    border: none;
+    background: transparent;
     transition: all .15s;
     color: var(--text-muted);
+    white-space: nowrap;
   }
-  .sem-chip:hover   { border-color: #4E6CF0; color: #4E6CF0; }
-  .sem-chip.active  { background: #4E6CF0; color: #fff; border-color: #4E6CF0; }
+  .sem-chip:hover   { background: #e7e9f1; color: #334155; }
+  .sem-chip.active  {
+    background: #fff;
+    color: #4E6CF0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .12);
+  }
 
   .insights-card { padding: 20px; }
   .insight-stat {
