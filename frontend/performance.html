@@ -12,6 +12,13 @@
 <style>
   .welcome-banner {
     margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .welcome-content {
+    flex: 1;
   }
   .welcome-title {
     font-size: 28px;
@@ -23,6 +30,12 @@
     font-size: 14px;
     color: var(--text-muted);
     font-weight: 400;
+  }
+  .welcome-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
   }
 
   .stats-grid {
@@ -37,6 +50,9 @@
   .stat-card {
     padding: 20px 15px;
     text-align: left;
+  }
+  .stat-card::before {
+    display: none !important;
   }
   .stat-label {
     display: flex;
@@ -328,6 +344,114 @@
   .grade-hi { color: #16a34a; font-weight: 700; }
   .grade-md { color: #d97706; font-weight: 700; }
   .grade-lo { color: #dc2626; font-weight: 700; }
+
+  /* Notification and User Menu */
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    transition: color 0.2s;
+  }
+  .notification-btn:hover {
+    color: #4E6CF0;
+  }
+  .notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #dc2626;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    border: 2px solid #fff;
+  }
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .user-menu:hover {
+    background: #f0f0f5;
+  }
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #4E6CF0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .user-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a2e;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e8e8e4;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    margin-top: 8px;
+    display: none;
+    z-index: 100;
+  }
+  .user-dropdown.show {
+    display: block;
+  }
+  .dropdown-item {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f0f0f5;
+  }
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  .dropdown-item:hover {
+    background: #f5f5f8;
+  }
 </style>
 </head>
 <body>
@@ -347,8 +471,28 @@
 
     <!-- Welcome Banner -->
     <div class="welcome-banner">
-      <div class="welcome-title" id="welcome-text">Hello, Wang, Xiao-Ming! 👋</div>
-      <div class="welcome-subtitle">Explore your academic performance trends and achieve continuous improvement!</div>
+      <div class="welcome-content">
+        <div class="welcome-title" id="welcome-text">Hello, Wang, Xiao-Ming! 👋</div>
+        <div class="welcome-subtitle">Explore your academic performance trends and achieve continuous improvement!</div>
+      </div>
+      <div class="welcome-actions">
+        <button class="notification-btn" id="notification-btn" aria-label="Notifications">
+          <i class="ti ti-bell"></i>
+          <div class="notification-badge" id="notification-badge" style="display: none;">0</div>
+        </button>
+        <div style="position: relative;">
+          <button class="user-menu" id="user-menu-btn" aria-label="User menu">
+            <div class="user-avatar" id="user-avatar">—</div>
+            <span class="user-name" id="user-name">User</span>
+            <i class="ti ti-chevron-down" style="font-size: 14px; color: #888898;"></i>
+          </button>
+          <div class="user-dropdown" id="user-dropdown">
+            <button class="dropdown-item" id="profile-btn"><i class="ti ti-user" style="margin-right: 8px;"></i>Profile</button>
+            <button class="dropdown-item" id="settings-btn"><i class="ti ti-settings" style="margin-right: 8px;"></i>Settings</button>
+            <button class="dropdown-item" id="logout-btn"><i class="ti ti-logout" style="margin-right: 8px;"></i>Logout</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Stats Cards -->
@@ -839,24 +983,28 @@
     // Average GPA
     document.getElementById('stat-avg-gpa').textContent = summary.avg_gpa.toFixed(2);
     if (semesters.length >= 2) {
-      const prevGpa = semesters[semesters.length - 2].gpa;
-      const currGpa = semesters[semesters.length - 1].gpa;
-      const diff = currGpa - prevGpa;
-      const trendHtml = diff > 0
-        ? `vs. Last Semester <span class="stat-trend trend-up">↑ ${diff.toFixed(2)}</span>`
-        : diff < 0
-        ? `vs. Last Semester <span class="stat-trend trend-down">↓ ${Math.abs(diff).toFixed(2)}</span>`
-        : `vs. Last Semester <span class="stat-trend">= 0.00</span>`;
-      document.getElementById('stat-avg-gpa-trend').innerHTML = trendHtml;
+      const prevSemesters = semesters.slice(0, semesters.length - 2).filter(s => s.gpa > 0);
+      if (prevSemesters.length > 0) {
+        const prevAvgGpa = prevSemesters.reduce((sum, s) => sum + s.gpa, 0) / prevSemesters.length;
+        const diff = summary.avg_gpa - prevAvgGpa;
+        const trendHtml = diff > 0
+          ? `vs. Last Semester <span class="stat-trend trend-up">↑ ${diff.toFixed(2)}</span>`
+          : diff < 0
+          ? `vs. Last Semester <span class="stat-trend trend-down">↓ ${Math.abs(diff).toFixed(2)}</span>`
+          : `vs. Last Semester <span class="stat-trend">= 0.00</span>`;
+        document.getElementById('stat-avg-gpa-trend').innerHTML = trendHtml;
+      }
     }
 
     // Highest GPA
     document.getElementById('stat-high-gpa').textContent = summary.highest_gpa.toFixed(2);
-    document.getElementById('stat-high-gpa-sem').textContent = summary.highest_gpa_semester || '—';
+    const highSem = semesters.find(s => s.label === summary.highest_gpa_semester);
+    document.getElementById('stat-high-gpa-sem').textContent = highSem ? formatSemesterLabel(highSem) : summary.highest_gpa_semester || '—';
 
     // Lowest GPA
     document.getElementById('stat-low-gpa').textContent = summary.lowest_gpa.toFixed(2);
-    document.getElementById('stat-low-gpa-sem').textContent = summary.lowest_gpa_semester || '—';
+    const lowSem = semesters.find(s => s.label === summary.lowest_gpa_semester);
+    document.getElementById('stat-low-gpa-sem').textContent = lowSem ? formatSemesterLabel(lowSem) : summary.lowest_gpa_semester || '—';
 
     // Total Courses & Credits
     document.getElementById('stat-total-courses').textContent = summary.total_courses;
@@ -866,9 +1014,80 @@
     document.getElementById('stat-completion').textContent = summary.completion_rate;
   }
 
+  // User Menu and Notification handling
+  function initUserMenu() {
+    const user = getUser();
+    if (user) {
+      // Set user avatar initials
+      const initials = user.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-name').textContent = user.name || 'User';
+    }
+
+    // User menu dropdown toggle
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      userDropdown.classList.remove('show');
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('auth_token');
+      window.location.href = 'login.html';
+    });
+
+    // Profile and Settings (placeholder)
+    document.getElementById('profile-btn').addEventListener('click', () => {
+      alert('Profile page coming soon');
+      userDropdown.classList.remove('show');
+    });
+
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      window.location.href = 'settings.html';
+    });
+  }
+
+  // Fetch and update notifications
+  async function updateNotifications() {
+    try {
+      const user = getUser();
+      const studentId = user?.student_id || '1111708';
+      // Assuming there's an API endpoint for notifications
+      const response = await fetch(`/api/notifications/${studentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const notificationCount = data.total_count || data.unread_count || 0;
+        const badge = document.getElementById('notification-badge');
+        badge.textContent = notificationCount;
+        badge.style.display = 'flex';
+      }
+    } catch (err) {
+      console.log('Notification fetch skipped (endpoint may not exist)');
+      // Show default 0 if API not available
+      const badge = document.getElementById('notification-badge');
+      badge.textContent = '0';
+      badge.style.display = 'flex';
+    }
+  }
+
+  document.getElementById('notification-btn').addEventListener('click', () => {
+    window.location.href = 'notifications.html';
+  });
+
   (async () => {
     await checkAuth();
     initLayout('performance', 'Performance Analytics');
+    initUserMenu();
+    updateNotifications();
     const user = getUser();
     const studentId = user?.student_id || '1111708';
     
