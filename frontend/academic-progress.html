@@ -1,5 +1,5 @@
-﻿<!doctype html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,26 +11,82 @@
     />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
     <link rel="stylesheet" href="css/shared.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <style>
+      .bucket-row { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+      .bucket-row:last-child { border-bottom: none; }
+      .bucket-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 13.5px; }
+      .bucket-name { font-weight: 500; }
+      .bucket-num { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+      .summary-row { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-muted); border-top: 1px solid var(--border); background: #fafaf8; }
+      .summary-row a { color: var(--accent); text-decoration: none; }
+      .summary-row a:hover { text-decoration: underline; }
+      .chart-wrap { padding: 16px 20px 20px; height: 280px; position: relative; }
+
+      .timeline { padding: 28px 20px 20px; display: flex; align-items: center; gap: 6px; overflow-x: auto; }
+      .tl-node { display: flex; flex-direction: column; align-items: center; min-width: 78px; position: relative; }
+      .tl-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); border: 3px solid var(--card-bg); box-shadow: 0 0 0 2px var(--border); margin-bottom: 8px; }
+      .tl-node.done .tl-dot { background: var(--text-muted); box-shadow: 0 0 0 2px var(--border); }
+      .tl-node.current .tl-dot { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.2); }
+      .tl-node.future .tl-dot { background: var(--card-bg); box-shadow: 0 0 0 2px var(--border); }
+      .tl-label { font-size: 11.5px; font-family: var(--mono); color: var(--text); }
+      .tl-sub { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
+      .tl-node.current .tl-label { color: var(--accent); font-weight: 600; }
+      .tl-line { flex: 1; height: 2px; background: var(--border); min-width: 14px; }
+
+      .stats-grid.compact { padding: 20px 20px 4px; margin-bottom: 0; grid-template-columns: repeat(4, 1fr); }
+      .stats-grid.compact .stat-card { padding: 14px 16px; }
+      .stats-grid.compact .stat-value { font-size: 22px; }
+
+      @media (max-width: 720px) {
+        .stats-grid.compact { grid-template-columns: repeat(2, 1fr); }
+      }
+    </style>
   </head>
   <body>
     <div class="layout">
       <aside class="sidebar"></aside>
       <div class="main">
         <header class="topbar">
-          <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">☰</button>
+          <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
           <div class="topbar-title"></div>
           <div class="api-status">
             <div class="status-dot" id="status-dot"></div>
-            <span class="status-label" id="status-label">連線中...</span>
+            <span class="status-label" id="status-label">Connecting...</span>
           </div>
         </header>
         <div class="content">
           <div class="page-header">
             <h2>Academic Progress</h2>
-            <p>此頁面開發中，功能即將上線</p>
+            <p>Cross-semester academic overview</p>
           </div>
+
+          <!-- Card 1: Credit Progress -->
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header"><div class="card-title">Credit Progress</div></div>
+            <div class="stats-grid compact" id="credit-stats">
+              <!-- filled by JS -->
+            </div>
+            <div id="credit-buckets"><!-- filled by JS --></div>
+            <div class="summary-row">
+              <span>Outstanding items: <strong id="missing-count">—</strong></span>
+              <a href="graduation.html">View graduation details →</a>
+            </div>
+          </div>
+
+          <!-- Card 2: GPA Trend -->
+          <div class="card" style="margin-bottom: 16px;">
+            <div class="card-header"><div class="card-title">GPA Trend</div></div>
+            <div class="stats-grid compact" id="gpa-stats">
+              <!-- filled by JS -->
+            </div>
+            <div class="chart-wrap"><canvas id="gpaTrendChart"></canvas></div>
+          </div>
+
+          <!-- Card 3: Timeline -->
           <div class="card">
-            <div class="card-body" style="height: 300px;"></div>
+            <div class="card-header"><div class="card-title">Milestones</div></div>
+            <div class="timeline" id="timeline"><!-- filled by JS --></div>
           </div>
         </div>
       </div>
@@ -39,9 +95,189 @@
     <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
     <script>
+      function pct(a, b) { return b > 0 ? Math.min(100, Math.round((a / b) * 100)) : 0; }
+
+      function renderCreditCard(grad) {
+        const ov = grad.overall || {};
+        const earned = ov.credits_earned ?? 0;
+        const total = ov.total_required ?? 0;
+        const overallPct = pct(earned, total);
+        const remaining = Math.max(0, total - earned);
+
+        document.getElementById('credit-stats').innerHTML = `
+          <div class="stat-card"><div class="stat-label">Earned</div><div class="stat-value">${earned}<span class="stat-unit">cr</span></div></div>
+          <div class="stat-card"><div class="stat-label">Required</div><div class="stat-value">${total}<span class="stat-unit">cr</span></div></div>
+          <div class="stat-card ${overallPct >= 100 ? 'green' : overallPct >= 70 ? 'amber' : 'red'}"><div class="stat-label">Completion</div><div class="stat-value">${overallPct}<span class="stat-unit">%</span></div></div>
+          <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value">${remaining}<span class="stat-unit">cr</span></div></div>
+        `;
+
+        const buckets = grad.buckets || [];
+        document.getElementById('credit-buckets').innerHTML = buckets.map(b => {
+          const e = b.earned_credits ?? 0;
+          const r = b.required_credits ?? 0;
+          const p = pct(e, r);
+          return `
+            <div class="bucket-row">
+              <div class="bucket-head">
+                <span class="bucket-name">${b.name}</span>
+                <span class="bucket-num">${e} / ${r} cr · ${p}%</span>
+              </div>
+              <div class="progress-wrap"><div class="progress-bar" style="width: ${p}%;"></div></div>
+            </div>
+          `;
+        }).join('');
+
+        const missing = buckets.reduce((sum, b) => sum + ((b.missing_courses || []).length), 0)
+                      + ((grad.blocking_items || []).length);
+        document.getElementById('missing-count').textContent = missing;
+      }
+
+      function renderGpaCard(perf) {
+        const sems = perf.semesters || [];
+        const gpas = sems.map(s => s.gpa).filter(g => typeof g === 'number');
+        const credits = sems.map(s => s.credits || 0);
+        const totalCredits = credits.reduce((a, b) => a + b, 0);
+        // Cumulative GPA: credit-weighted across semesters
+        const weighted = sems.reduce((acc, s) => acc + (s.gpa || 0) * (s.credits || 0), 0);
+        const cumulative = totalCredits > 0 ? (weighted / totalCredits) : 0;
+        const highest = gpas.length ? Math.max(...gpas) : 0;
+        const latest = sems.length ? (sems[sems.length - 1].gpa || 0) : 0;
+        const trend = sems.length >= 2
+          ? ((sems[sems.length - 1].gpa || 0) - (sems[sems.length - 2].gpa || 0))
+          : 0;
+        const trendStr = (trend > 0 ? '+' : '') + trend.toFixed(2);
+        const trendCls = trend > 0 ? 'green' : trend < 0 ? 'red' : 'amber';
+
+        document.getElementById('gpa-stats').innerHTML = `
+          <div class="stat-card"><div class="stat-label">Cumulative</div><div class="stat-value">${cumulative.toFixed(2)}</div></div>
+          <div class="stat-card"><div class="stat-label">Best Semester</div><div class="stat-value">${highest.toFixed(2)}</div></div>
+          <div class="stat-card"><div class="stat-label">Latest</div><div class="stat-value">${latest.toFixed(2)}</div></div>
+          <div class="stat-card ${trendCls}"><div class="stat-label">vs Previous</div><div class="stat-value">${trendStr}</div></div>
+        `;
+
+        const ctx = document.getElementById('gpaTrendChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: sems.map(s => s.label),
+            datasets: [
+              {
+                label: 'GPA',
+                data: sems.map(s => s.gpa),
+                borderColor: '#4E6CF0',
+                backgroundColor: 'rgba(78,108,240,0.12)',
+                borderWidth: 3,
+                pointBackgroundColor: '#4E6CF0',
+                pointBorderColor: '#fff',
+                pointRadius: 5,
+                tension: 0.34,
+                fill: true,
+              },
+              {
+                label: 'Cumulative GPA',
+                data: (() => {
+                  let cw = 0, cc = 0;
+                  return sems.map(s => {
+                    cw += (s.gpa || 0) * (s.credits || 0);
+                    cc += (s.credits || 0);
+                    return cc > 0 ? +(cw / cc).toFixed(2) : null;
+                  });
+                })(),
+                borderColor: '#94a3b8',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: '#94a3b8',
+                tension: 0.2,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'top', labels: { font: { size: 12 } } } },
+            scales: {
+              y: { min: 0, max: 4, ticks: { font: { size: 11 } }, grid: { color: '#f0f0f5' } },
+              x: { ticks: { font: { size: 11 } }, grid: { display: false } },
+            },
+          },
+        });
+      }
+
+      function renderTimelineCard(perf) {
+        const sems = perf.semesters || [];
+        const TOTAL = 8;
+        const nodes = [];
+
+        if (sems.length === 0) {
+          document.getElementById('timeline').innerHTML = '<div style="padding: 20px; color: var(--text-muted);">No semester data yet</div>';
+          return;
+        }
+
+        sems.forEach((s, i) => {
+          const isLast = i === sems.length - 1;
+          nodes.push({
+            label: s.label,
+            sub: `${s.credits || 0} cr · GPA ${(s.gpa || 0).toFixed(2)}`,
+            state: isLast ? 'current' : 'done',
+          });
+        });
+
+        const last = sems[sems.length - 1].label || '';
+        const m = last.match(/^(\d{4})-(\d)$/);
+        let year = m ? parseInt(m[1]) : null;
+        let term = m ? parseInt(m[2]) : null;
+        const remaining = Math.max(0, TOTAL - sems.length);
+        for (let i = 0; i < remaining; i++) {
+          if (year !== null) {
+            term = term === 1 ? 2 : 1;
+            if (term === 1) year += 1;
+            nodes.push({ label: `${year}-${term}`, sub: 'Projected', state: 'future' });
+          } else {
+            nodes.push({ label: `+${i + 1}`, sub: 'Projected', state: 'future' });
+          }
+        }
+
+        const gradLabel = nodes.length ? nodes[nodes.length - 1].label : '';
+        nodes.push({ label: 'Graduation', sub: gradLabel, state: 'future', graduation: true });
+
+        const firstLabel = sems[0].label;
+        nodes.unshift({ label: 'Enrolled', sub: firstLabel, state: 'done' });
+
+        const html = nodes.map((n, i) => {
+          const dot = `
+            <div class="tl-node ${n.state}">
+              <div class="tl-dot"></div>
+              <div class="tl-label">${n.label}</div>
+              <div class="tl-sub">${n.sub}</div>
+            </div>`;
+          if (i === nodes.length - 1) return dot;
+          return dot + `<div class="tl-line"></div>`;
+        }).join('');
+
+        document.getElementById('timeline').innerHTML = html;
+      }
+
       window.addEventListener('load', async () => {
         await checkAuth();
         initLayout('academic-progress', 'Academic Progress');
+
+        const user = getUser();
+        const studentId = user?.student_id;
+        if (!studentId) return;
+
+        try {
+          const [grad, perf] = await Promise.all([
+            api.graduation(studentId),
+            api.performance(studentId),
+          ]);
+          renderCreditCard(grad);
+          renderGpaCard(perf);
+          renderTimelineCard(perf);
+        } catch (e) {
+          console.error('Academic Progress load failed:', e);
+        }
       });
     </script>
   </body>
