@@ -695,6 +695,7 @@
             label: 'Credits Earned',
             data: crData,
             backgroundColor: semesters.map(() => 'rgba(78,108,240,0.12)'),
+            hoverBackgroundColor: 'rgba(78,108,240,0.28)',
             borderWidth: 0,
             borderRadius: { topLeft: 6, topRight: 6 },
             borderSkipped: false,
@@ -710,9 +711,15 @@
             borderColor: '#4E6CF0',
             backgroundColor: 'rgba(78,108,240,0.12)',
             borderWidth: 3,
+            borderCapStyle: 'round',
+            borderJoinStyle: 'round',
             pointBackgroundColor: '#4E6CF0',
             pointBorderColor: '#fff',
+            pointBorderWidth: 2,
             pointRadius: gpaPointRadius,
+            pointHoverRadius: 7,
+            pointHoverBorderWidth: 3,
+            pointHoverBackgroundColor: '#4E6CF0',
             tension: 0.34,
             fill: false,
             yAxisID: 'y2',
@@ -724,6 +731,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { top: 24, left: 4, right: 4 } },
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
@@ -773,18 +781,24 @@
         scales: {
           y1: {
             type: 'linear', position: 'right',
-            title: { display: true, text: 'Credits', font: { size: 11 } },
+            title: { display: true, text: 'Credits', color: '#94a3b8', font: { size: 11 } },
             grid: { drawOnChartArea: false },
-            ticks: { font: { size: 11 } },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 }, padding: 6 },
           },
           y2: {
             type: 'linear', position: 'left',
-            title: { display: true, text: 'GPA', font: { size: 11 } },
+            title: { display: true, text: 'GPA', color: '#94a3b8', font: { size: 11 } },
             min: 0, max: 4,
-            grid: { color: '#f0f0f5' },
-            ticks: { font: { size: 11 } },
+            grid: { color: '#eef1f6', borderDash: [4, 4], tickLength: 0 },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 }, padding: 6, stepSize: 1 },
           },
-          x: { ticks: { font: { size: 11 } }, grid: { display: false } },
+          x: {
+            ticks: { color: '#64748b', font: { size: 11 } },
+            grid: { display: false },
+            border: { display: false },
+          },
         },
         onClick: (evt, elements) => {
           if (elements.length > 0) selectSemester(elements[0].index);
@@ -799,7 +813,7 @@
             const meta = chart.getDatasetMeta(0);
             const currentIndex = semesters.length - 1;
             ctx.save();
-            ctx.fillStyle = '#334155';
+            ctx.fillStyle = '#64748b';
             ctx.font = '12px "DM Mono", monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
