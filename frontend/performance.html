@@ -352,6 +352,7 @@
   .ib-violet .ib-icon { background: #F1ECFD; color: #8B5CF6; } .ib-violet .ib-title { color: #8B5CF6; }
   .ib-amber  .ib-icon { background: #FEF3E2; color: #F59E0B; } .ib-amber  .ib-title { color: #d97706; }
 
+  .detail-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eef0f6; }
   .detail-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   .detail-table th {
     background: #fafbff;
@@ -616,6 +617,31 @@
         </div>
         <div id="compare-result" class="compare-result"></div>
         <div class="sem-list" id="sem-list"></div>
+
+        <!-- Semester course detail (same block as the trend chart) -->
+        <div class="detail-section">
+          <div class="card-title" id="detail-title" style="margin-bottom:12px">Select a semester to view courses</div>
+          <div style="overflow-x:auto">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Course Name</th>
+                  <th>Type</th>
+                  <th>Credits</th>
+                  <th>Grade</th>
+                  <th>GPA Points</th>
+                  <th>Instructor</th>
+                </tr>
+              </thead>
+              <tbody id="detail-body">
+                <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
+                  Click a semester chip or bar to view courses
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Right: AI Insights -->
@@ -651,33 +677,6 @@
           <span class="insight-stat-val" id="ins-digital">—</span>
         </div>
         <div id="insight-notes"></div>
-      </div>
-    </div>
-
-    <!-- Semester course detail table -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title" id="detail-title">Select a semester to view courses</div>
-      </div>
-      <div class="card-body" style="padding:0">
-        <table class="detail-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Course Name</th>
-              <th>Type</th>
-              <th>Credits</th>
-              <th>Grade</th>
-              <th>GPA Points</th>
-              <th>Instructor</th>
-            </tr>
-          </thead>
-          <tbody id="detail-body">
-            <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
-              Click a semester chip or bar to view courses
-            </td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
