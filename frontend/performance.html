@@ -125,6 +125,7 @@
     letter-spacing: .2px;
     vertical-align: middle;
   }
+  .gpa-pill.in-progress { background: #FEF3E2; color: #d97706; }
   .detail-meta {
     margin-left: 8px;
     font-size: 13px;
@@ -327,6 +328,15 @@
   }
   .insight-note.good { background: #F0FDF4; border-color: #22C55E; color: #166534; }
   .insight-note.info { background: #EFF6FF; border-color: #3B82F6; color: #1E40AF; }
+  .insight-note i { margin-right: 6px; vertical-align: -1px; }
+  .insight-notes-title {
+    margin-top: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
 
   .detail-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   .detail-table th {
@@ -981,9 +991,12 @@
       perfChart.update('none');
     }
     const sem = semesterData[idx];
+    const inProgress = !(sem.gpa > 0);
+    const gpaPill = inProgress
+      ? `<span class="gpa-pill in-progress">In Progress</span>`
+      : `<span class="gpa-pill">GPA: ${sem.gpa.toFixed(2)}</span>`;
     document.getElementById('detail-title').innerHTML =
-      `Course Details for ${sem.label}` +
-      `<span class="gpa-pill">GPA: ${sem.gpa.toFixed(2)}</span>` +
+      `Course Details for ${sem.label}` + gpaPill +
       `<span class="detail-meta">· ${sem.courses.length} courses · ${sem.credits} credits</span>`;
     document.getElementById('detail-body').innerHTML = sem.courses.map(c => {
       const grade = c.grade !== null ? c.grade.toFixed(0) : '—';
@@ -1000,7 +1013,7 @@
     }).join('');
   }
 
-  function fillInsights(summary, insights) {
+  function fillInsights(summary, insights, semesters = []) {
     document.getElementById('ins-avg-gpa').textContent    = summary.avg_gpa.toFixed(2);
     document.getElementById('ins-best-sem').textContent   = summary.highest_gpa_semester || '—';
     document.getElementById('ins-best-gpa').textContent   = summary.highest_gpa.toFixed(2);
@@ -1008,16 +1021,65 @@
     document.getElementById('ins-completion').textContent = `${summary.completion_rate}%`;
     document.getElementById('ins-digital').textContent    = insights.digital_app_courses_completed;
 
-    let html = '';
-    if (insights.decline_note) {
-      html += `<div class="insight-note">${insights.decline_note}</div>`;
-    } else if (summary.avg_gpa >= 3.5) {
-      html += `<div class="insight-note good">Strong academic performance — GPA consistently above 3.5.</div>`;
-    }
-    if (insights.strength_semester) {
-      html += `<div class="insight-note info">Best semester: <strong>${insights.strength_semester}</strong> (GPA ${summary.highest_gpa.toFixed(2)})</div>`;
-    }
+    const notes = buildInsightNotes(summary, insights, semesters);
+    let html = notes.length ? '<div class="insight-notes-title">Recommendations</div>' : '';
+    html += notes.map(n =>
+      `<div class="insight-note ${n.cls}"><i class="ti ${n.icon}"></i>${n.text}</div>`
+    ).join('');
     document.getElementById('insight-notes').innerHTML = html;
+  }
+
+  // Build constructive, recommendation-style insights from the data.
+  function buildInsightNotes(summary, insights, semesters) {
+    const notes = [];
+
+    // GPA trend (least-squares slope over completed semesters)
+    const pts = semesters.map((s, i) => ({ x: i, y: s.gpa })).filter(p => p.y > 0);
+    let slope = 0;
+    if (pts.length >= 2) {
+      const n = pts.length;
+      const sx = pts.reduce((a, p) => a + p.x, 0);
+      const sy = pts.reduce((a, p) => a + p.y, 0);
+      const sxy = pts.reduce((a, p) => a + p.x * p.y, 0);
+      const sxx = pts.reduce((a, p) => a + p.x * p.x, 0);
+      const d = n * sxx - sx * sx;
+      if (d !== 0) slope = (n * sxy - sx * sy) / d;
+    }
+    if (slope > 0.03) {
+      notes.push({ cls: 'good', icon: 'ti-trending-up', text: `Your GPA is trending up about +${slope.toFixed(2)} per semester — whatever routine you've built is working, so keep it going.` });
+    } else if (slope < -0.03) {
+      notes.push({ cls: '', icon: 'ti-trending-down', text: `Your GPA has slipped roughly ${slope.toFixed(2)} per semester. Try lightening next term's load or booking office hours early.` });
+    } else if (pts.length >= 2) {
+      notes.push({ cls: 'info', icon: 'ti-activity', text: `Your GPA has held steady. Turning one B into an A next term would be enough to lift your overall average.` });
+    }
+
+    // Performance band
+    if (summary.avg_gpa >= 3.7) {
+      notes.push({ cls: 'good', icon: 'ti-award', text: `At a ${summary.avg_gpa.toFixed(2)} average you're in honours territory — worth exploring scholarships and research opportunities.` });
+    } else if (summary.avg_gpa >= 3.0) {
+      notes.push({ cls: 'info', icon: 'ti-target', text: `A ${summary.avg_gpa.toFixed(2)} average is solid; one extra A-grade course would put the 3.5 honours line within reach.` });
+    } else if (summary.avg_gpa > 0) {
+      notes.push({ cls: '', icon: 'ti-alert-triangle', text: `With a ${summary.avg_gpa.toFixed(2)} average, focus on your required core courses first and lean on tutoring to rebuild momentum.` });
+    }
+
+    // Consistency gap between best and weakest term
+    if (summary.lowest_gpa_semester && summary.highest_gpa - summary.lowest_gpa >= 0.5) {
+      notes.push({ cls: 'info', icon: 'ti-bulb', text: `Your strongest term was ${summary.highest_gpa_semester} and weakest ${summary.lowest_gpa_semester}. Look back at what made the difference and reuse those study habits.` });
+    }
+
+    // Degree planning
+    if (summary.completion_rate >= 90) {
+      notes.push({ cls: 'good', icon: 'ti-flag', text: `You've finished ${summary.completion_rate}% of your degree — now's the time to confirm graduation and capstone requirements.` });
+    } else if (summary.completion_rate >= 40) {
+      notes.push({ cls: 'info', icon: 'ti-map', text: `About ${summary.completion_rate}% through your degree — a good moment to pick electives that line up with your career goals.` });
+    }
+
+    // Keep any decline note the backend already flagged
+    if (insights.decline_note) {
+      notes.push({ cls: '', icon: 'ti-info-circle', text: insights.decline_note });
+    }
+
+    return notes.slice(0, 4);
   }
 
   function fillStatsCards(summary, semesters) {
@@ -1140,7 +1202,7 @@
       const data = await api.performance(studentId);
       semesterData = data.semesters;
       fillStatsCards(data.summary, semesterData);
-      fillInsights(data.summary, data.insights);
+      fillInsights(data.summary, data.insights, semesterData);
       buildChart(semesterData);
       buildSemChips(semesterData);
       buildCompareSelectors(semesterData);
