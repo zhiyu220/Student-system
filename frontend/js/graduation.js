@@ -650,7 +650,6 @@ window.addEventListener('load', async () => {
     _bucketsForMissing = grad.buckets || [];
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
-    renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
     populateSemesterFilter(records);
     applyReviewFilters();
 
@@ -660,17 +659,6 @@ window.addEventListener('load', async () => {
     document.getElementById('status-dot').className     = 'status-dot ok';
     document.getElementById('status-label').textContent = 'API Connected';
 
-    // Background: load the catalog, then patch in the suggestion chips. A failure
-    // here just leaves the "Loading suggestions…" hint replaced by nothing.
-    api.courses()
-      .then(catalog => {
-        const allCourses = (catalog && catalog.courses) || [];
-        renderNeeded(grad.buckets, grad.blocking_items, allCourses, takenCodes, /* catalogPending */ false);
-      })
-      .catch(err => {
-        console.warn('Course catalog unavailable; suggestions omitted:', err);
-        renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ false);
-      });
   } catch (err) {
     console.error('Graduation page error:', err);
     document.getElementById('status-dot').className     = 'status-dot err';
