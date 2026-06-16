@@ -42,53 +42,79 @@ function barClass(pct, met) {
   return pct >= 70 ? 'amber' : 'red';
 }
 
-// ── Progress circles ─────────────────────────────────────────────────────
-function buildCircleCard(label, earned, total, color) {
+// ── Progress circles (dashboard-style donuts) ────────────────────────────
+function buildDonutCol(label, earned, total, colorKey) {
   const pct       = safePct(earned, total);
   const remaining = Math.max(0, total - earned);
   return `
-    <div class="card stat-card">
-      <div style="color:var(--text-muted); margin-bottom:8px; font-weight:500; font-size:13px;">${label}</div>
-      <div class="progress-circle" style="--ring-color:${color}; --ring-pct:${pct}%;">
-        <div class="inner">
-          <div style="font-size:18px; font-weight:700; color:${color};">${earned}</div>
-          <div style="font-size:11px; color:var(--text-muted);">/ ${total}</div>
+    <div class="donut-col">
+      <div class="donut-title"><i class="ti ti-book ${colorKey}"></i> ${label}</div>
+      <div class="donut donut-${colorKey}" style="--pct: ${pct};">
+        <div class="donut-inner">
+          <div class="donut-frac"><span class="num">${earned}</span><span class="den">/ ${total}</span></div>
+          <div class="donut-sub">credits</div>
         </div>
       </div>
-      <div style="font-size:18px; font-weight:700; color:${color}; margin-top:8px;">${pct}%</div>
-      <div style="color:var(--text-muted); font-size:12px;">${remaining} remaining</div>
+      <div class="donut-pct ${colorKey}-text">${pct}%</div>
+      <div class="donut-remain">${remaining} credits remaining</div>
     </div>`;
 }
 
-function buildOverallCard(earned, total) {
+function buildOverallDonut(earned, total) {
   const pct       = safePct(earned, total);
   const remaining = Math.max(0, total - earned);
   return `
-    <div class="card stat-card">
-      <div style="color:var(--text-muted); margin-bottom:8px; font-weight:500; font-size:13px;">Overall Graduation Progress</div>
-      <div class="progress-circle" style="--ring-color:var(--accent); --ring-pct:${pct}%;">
-        <div class="inner">
-          <div style="font-size:22px; font-weight:700; color:var(--accent);">${pct}%</div>
+    <div class="donut-col donut-col-big">
+      <div class="donut-title"><i class="ti ti-book green"></i> Overall Graduation Progress</div>
+      <div class="donut donut-green donut-large" style="--pct: ${pct};">
+        <div class="donut-inner">
+          <div class="donut-big-pct">${pct}%</div>
+          <div class="donut-sub">Completed ${earned} / ${total} credits</div>
         </div>
       </div>
-      <div style="margin-top:10px; font-size:13px; font-weight:600;">${earned} / ${total} credits</div>
-      <div style="color:var(--text-muted); font-size:12px;">${remaining} credits left to graduate</div>
+      <div class="grad-pill">${remaining} credits left to graduate!</div>
     </div>`;
 }
 
 function renderCircles(overall, buckets) {
-  const order = ['Department Required Courses', 'Elective Courses', 'University Compulsory & General Education'];
   const byName = {};
   buckets.forEach(b => { byName[b.name] = b; });
 
-  let html = buildOverallCard(overall.credits_earned, overall.total_required);
-  order.forEach(name => {
-    const b = byName[name];
-    if (!b) return;
-    const meta = bucketMeta(name);
-    html += buildCircleCard(meta.short, b.earned_credits, b.required_credits || 1, meta.color);
-  });
+  const req     = byName['Department Required Courses'];
+  const elec    = byName['Elective Courses'];
+  const genEd   = byName['University Compulsory & General Education'];
+
+  let html = '';
+  if (req)   html += buildDonutCol('Required Credits', req.earned_credits, req.required_credits || 1, 'blue');
+  html += buildOverallDonut(overall.credits_earned, overall.total_required);
+  if (elec)  html += buildDonutCol('Elective Credits', elec.earned_credits, elec.required_credits || 1, 'purple');
+  if (genEd) html += buildDonutCol('General Education Credits', genEd.earned_credits, genEd.required_credits || 1, 'orange');
+
   document.getElementById('progress-grid').innerHTML = html;
+}
+
+// Pill style category badge (dashboard look)
+const CATEGORY_PILL = {
+  required:            { cls: 'pill-blue',   label: 'Required' },
+  common_required:     { cls: 'pill-blue',   label: 'Common Required' },
+  elective:            { cls: 'pill-purple', label: 'Elective' },
+  university_required: { cls: 'pill-orange', label: 'University Required' },
+  general_education:   { cls: 'pill-orange', label: 'General Ed.' },
+};
+function categoryPill(type) {
+  const m = CATEGORY_PILL[type] || { cls: 'pill-blue', label: type || '—' };
+  return `<span class="pill ${m.cls}">${m.label}</span>`;
+}
+
+// Pill from a bucket name (for the missing-side table)
+function bucketPill(bucketName) {
+  if (bucketName === 'Department Required Courses')
+    return `<span class="pill pill-blue">Required</span>`;
+  if (bucketName === 'Elective Courses')
+    return `<span class="pill pill-purple">Elective</span>`;
+  if (bucketName === 'University Compulsory & General Education')
+    return `<span class="pill pill-orange">General Ed.</span>`;
+  return `<span class="pill pill-blue">—</span>`;
 }
 
 // ── Eligibility banner ───────────────────────────────────────────────────
@@ -334,6 +360,27 @@ function applyReviewFilters() {
   renderTables(filtered);
 }
 
+// Side table on the Completed tab — populated from buckets' missing_courses.
+let _bucketsForMissing = [];
+function renderMissingSide() {
+  const tbody = document.getElementById('missing-side-table');
+  if (!tbody) return;
+  const rows = [];
+  _bucketsForMissing.forEach(b => {
+    (b.missing_courses || []).forEach(c => {
+      if (c.status === 'enrolled') return; // skip in-progress
+      rows.push({ bucket: b.name, code: c.code, name: c.name_en, credits: c.credits });
+    });
+  });
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="red-text">${r.name}</td>
+      <td>${bucketPill(r.bucket)}</td>
+      <td>${r.credits}</td>
+    </tr>`).join('') ||
+    '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:24px;">No missing courses.</td></tr>';
+}
+
 function renderTables(records) {
   const completed  = records.filter(c => c.pass_flag === true);
   const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
@@ -342,36 +389,38 @@ function renderTables(records) {
   document.getElementById('completed-table').innerHTML = completed.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${categoryBadge(c.type)}</td>
+      <td>${categoryPill(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
-      <td><strong>${c.grade != null ? c.grade : '&#8212;'}</strong></td>
+      <td class="grade">${c.grade != null ? c.grade : '&#8212;'}</td>
     </tr>`).join('') ||
-    '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No completed courses.</td></tr>';
+    '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No completed courses.</td></tr>';
+
+  renderMissingSide();
 
   document.getElementById('progress-table').innerHTML = inProgress.map(c => `
     <tr>
       <td>${c.name_en}</td>
-      <td>${categoryBadge(c.type)}</td>
+      <td>${categoryPill(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
-      <td><span style="color:var(--amber);">&#9203; In Progress</span></td>
+      <td><span style="color:#f59e0b;">&#9203; In Progress</span></td>
     </tr>`).join('') ||
-    '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No courses in progress.</td></tr>';
+    '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No courses in progress.</td></tr>';
 
   document.getElementById('missing-table').innerHTML = missing.map(c => `
     <tr>
-      <td>${c.name_en}</td>
-      <td>${categoryBadge(c.type)}</td>
+      <td class="red-text">${c.name_en}</td>
+      <td>${categoryPill(c.type)}</td>
       <td>${c.credits}</td>
       <td>${c.academic_year}-${c.semester}</td>
-      <td><span style="color:var(--red);">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
+      <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
     </tr>`).join('') ||
-    '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">No failed courses.</td></tr>';
+    '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No failed courses.</td></tr>';
 }
 
 function switchTab(n) {
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+  document.querySelectorAll('#grad-tabs .dash-tab').forEach((t, i) => t.classList.toggle('active', i === n));
   document.getElementById('tab-completed').style.display = n === 0 ? 'block' : 'none';
   document.getElementById('tab-progress').style.display  = n === 1 ? 'block' : 'none';
   document.getElementById('tab-missing').style.display   = n === 2 ? 'block' : 'none';
@@ -598,6 +647,7 @@ window.addEventListener('load', async () => {
     _gradData    = grad;
     _recordsData = records;
 
+    _bucketsForMissing = grad.buckets || [];
     renderEligibility(grad.can_graduate, grad.overall, grad.blocking_items);
     renderCircles(grad.overall, grad.buckets);
     renderNeeded(grad.buckets, grad.blocking_items, [], takenCodes, /* catalogPending */ true);
