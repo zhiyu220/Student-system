@@ -192,13 +192,13 @@
           </section>
 
           <!-- Course & Credit Review List -->
-          <section class="dash-card" style="margin-top: 20px">
-            <div class="dash-card-header">
+          <section class="dash-card" style="margin-top: 20px; background: transparent; border: none; box-shadow: none;">
+            <div class="dash-card-header" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 16px;">
               <i class="ti ti-clipboard-list"></i>
               <h2>Course &amp; Credit Review List</h2>
             </div>
 
-            <div class="filter-bar">
+            <div class="filter-bar" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 20px; margin-bottom: 16px;">
               <label for="cat-filter">Category</label>
               <select id="cat-filter" onchange="applyReviewFilters()">
                 <option value="all">All Categories</option>
@@ -214,34 +214,19 @@
               </select>
             </div>
 
-            <div class="dash-tabs" id="grad-tabs">
-              <button
-                class="dash-tab active"
-                data-tab="completed"
-                onclick="switchTab(0)"
-              >
-                <i class="ti ti-circle-check"></i> Completed
-              </button>
-              <button
-                class="dash-tab"
-                data-tab="in-progress"
-                onclick="switchTab(1)"
-              >
-                <i class="ti ti-hourglass"></i> In Progress
-              </button>
-              <button
-                class="dash-tab red"
-                data-tab="missing"
-                onclick="switchTab(2)"
-              >
-                <i class="ti ti-alert-triangle"></i> Missing / Failed
-              </button>
-            </div>
+            <div class="review-split">
+              <!-- LEFT: Completed / In Progress -->
+              <div class="review-panel">
+                <div class="dash-tabs review-panel-tabs">
+                  <button class="dash-tab active" data-side="completed" onclick="switchSideTab('completed')">
+                    <i class="ti ti-circle-check"></i> Completed
+                  </button>
+                  <button class="dash-tab" data-side="in-progress" onclick="switchSideTab('in-progress')">
+                    <i class="ti ti-hourglass"></i> In Progress
+                  </button>
+                </div>
 
-            <!-- Completed: dual table -->
-            <div id="tab-completed" class="tab-content">
-              <div class="review-grid">
-                <div class="review-col">
+                <div id="side-completed" class="side-panel-content">
                   <table class="review-table">
                     <thead>
                       <tr>
@@ -256,7 +241,32 @@
                   </table>
                   <a class="review-link" id="completed-side-toggle" href="javascript:void(0)" onclick="toggleCompletedSide()">View all completed courses →</a>
                 </div>
-                <div class="review-col">
+
+                <div id="side-progress" class="side-panel-content" style="display:none;">
+                  <table class="review-table">
+                    <thead>
+                      <tr>
+                        <th>Course Title</th>
+                        <th>Category</th>
+                        <th>Credits</th>
+                        <th>Semester</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="progress-table"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- RIGHT: Missing / Remaining -->
+              <div class="review-panel">
+                <div class="dash-tabs review-panel-tabs">
+                  <button class="dash-tab red active" data-side="missing">
+                    <i class="ti ti-alert-triangle"></i> Missing / Remaining
+                  </button>
+                </div>
+
+                <div class="side-panel-content">
                   <table class="review-table">
                     <thead>
                       <tr>
@@ -269,42 +279,6 @@
                   </table>
                   <a class="review-link" id="missing-side-toggle" href="javascript:void(0)" onclick="toggleMissingSide()">View more missing courses →</a>
                 </div>
-              </div>
-            </div>
-
-            <!-- In Progress -->
-            <div id="tab-progress" class="tab-content" style="display: none">
-              <div style="padding: 0">
-                <table class="review-table">
-                  <thead>
-                    <tr>
-                      <th>Course Title</th>
-                      <th>Category</th>
-                      <th>Credits</th>
-                      <th>Semester</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="progress-table"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Missing / Failed -->
-            <div id="tab-missing" class="tab-content" style="display: none">
-              <div style="padding: 0">
-                <table class="review-table">
-                  <thead>
-                    <tr>
-                      <th>Course Title</th>
-                      <th>Category</th>
-                      <th>Credits</th>
-                      <th>Semester</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="missing-table"></tbody>
-                </table>
               </div>
             </div>
           </section>

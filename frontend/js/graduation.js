@@ -462,22 +462,28 @@ function renderTables(records) {
     </tr>`).join('') ||
     '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No courses in progress.</td></tr>';
 
-  document.getElementById('missing-table').innerHTML = missing.map(c => `
-    <tr>
-      <td class="red-text">${c.name_en}</td>
-      <td>${categoryPill(c.type)}</td>
-      <td>${c.credits}</td>
-      <td>${c.academic_year}-${c.semester}</td>
-      <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
-    </tr>`).join('') ||
-    '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No failed courses.</td></tr>';
+  const missingEl = document.getElementById('missing-table');
+  if (missingEl) {
+    missingEl.innerHTML = missing.map(c => `
+      <tr>
+        <td class="red-text">${c.name_en}</td>
+        <td>${categoryPill(c.type)}</td>
+        <td>${c.credits}</td>
+        <td>${c.academic_year}-${c.semester}</td>
+        <td><span style="color:#ef4444;">&#9888; ${c.status === 'failed' ? 'Failed' : 'Not Passed'}</span></td>
+      </tr>`).join('') ||
+      '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No failed courses.</td></tr>';
+  }
 }
 
-function switchTab(n) {
-  document.querySelectorAll('#grad-tabs .dash-tab').forEach((t, i) => t.classList.toggle('active', i === n));
-  document.getElementById('tab-completed').style.display = n === 0 ? 'block' : 'none';
-  document.getElementById('tab-progress').style.display  = n === 1 ? 'block' : 'none';
-  document.getElementById('tab-missing').style.display   = n === 2 ? 'block' : 'none';
+// Left panel: switch between Completed and In Progress tables
+function switchSideTab(side) {
+  document.querySelectorAll('.review-panel-tabs .dash-tab[data-side]').forEach(t => {
+    if (t.dataset.side === 'missing') return; // right panel's lone tab — leave alone
+    t.classList.toggle('active', t.dataset.side === side);
+  });
+  document.getElementById('side-completed').style.display = side === 'completed'   ? 'block' : 'none';
+  document.getElementById('side-progress').style.display  = side === 'in-progress' ? 'block' : 'none';
 }
 
 // ── PDF Export ───────────────────────────────────────────────────────────

@@ -732,3 +732,28 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); disp
 @media (max-width: 960px) {
   .features-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Review List: left/right split panels ───────────────────────────── */
+.review-split {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+}
+.review-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.review-panel-tabs {
+  padding: 0 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafbfc;
+}
+.review-panel .side-panel-content { padding: 4px 0 12px; }
+.review-panel .review-table th { background: #fff; }
+.review-panel .review-link { margin: 8px 20px 4px; }
+
+@media (max-width: 960px) {
+  .review-split { grid-template-columns: 1fr; }
+}
