@@ -688,7 +688,8 @@ window.addEventListener('load', async () => {
     const takenCodes = new Set(records.map(r => r.code));
 
     document.getElementById('student-name').textContent = grad.student?.name || user?.name || 'Student';
-    document.getElementById('student-dept').textContent = grad.student?.department || user?.department || '';
+    const deptEl = document.getElementById('student-dept');
+    if (deptEl) deptEl.textContent = grad.student?.department || user?.department || '';
 
     _gradData    = grad;
     _recordsData = records;
