@@ -1,318 +1,312 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graduation Audit — StuPilot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="css/shared.css">
-<style>
-  /* Eligibility banner */
-  .elig-banner {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-    border: 1px solid transparent;
-  }
-  .elig-banner.ok   { background: var(--surface-success); border-color: var(--surface-success-border); }
-  .elig-banner.warn { background: var(--surface-warn);    border-color: var(--surface-warn-border); }
-  .elig-icon {
-    width: 36px; height: 36px; flex-shrink: 0;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: #fff;
-  }
-  .elig-banner.ok   .elig-icon { background: var(--green); }
-  .elig-banner.warn .elig-icon { background: var(--amber); }
-  .elig-title { font-size: 15px; font-weight: 700; }
-  .elig-banner.ok   .elig-title { color: var(--surface-success-text); }
-  .elig-banner.warn .elig-title { color: var(--surface-warn-text); }
-  .elig-sub   { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Graduation Audit — StuPilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css"
+    />
+    <link rel="stylesheet" href="css/shared.css" />
+    <style>
+      /* Eligibility banner */
+      .elig-banner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        border: 1px solid transparent;
+      }
+      .elig-banner.ok {
+        background: var(--surface-success);
+        border-color: var(--surface-success-border);
+      }
+      .elig-banner.warn {
+        background: var(--surface-warn);
+        border-color: var(--surface-warn-border);
+      }
+      .elig-icon {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #fff;
+      }
+      .elig-banner.ok .elig-icon {
+        background: var(--green);
+      }
+      .elig-banner.warn .elig-icon {
+        background: var(--amber);
+      }
+      .elig-title {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .elig-banner.ok .elig-title {
+        color: var(--surface-success-text);
+      }
+      .elig-banner.warn .elig-title {
+        color: var(--surface-warn-text);
+      }
+      .elig-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
 
-  /* Credits You Still Need */
-  .needed-card {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 14px;
-  }
-  .needed-card.met      { background: var(--surface-met); }
-  .needed-card.blocking { background: var(--surface-error); border-color: var(--surface-error-border); }
-  .needed-head {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-  }
-  .needed-name {
-    font-weight: 600; font-size: 15px;
-    border-left: 4px solid var(--text-muted); padding-left: 10px;
-  }
-  .needed-meta { font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .needed-empty { color: var(--surface-success-text); font-size: 13px; }
+      /* Export PDF button */
+      .export-pdf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 16px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid #3b82f6;
+        background: #fff;
+        color: #3b82f6;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: var(--font);
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+      .export-pdf-btn:hover:not(:disabled) {
+        background: #eff6ff;
+      }
+      .export-pdf-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
 
-  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .miss-chip, .suggest-chip {
-    display: inline-flex; align-items: center;
-    font-size: 12.5px; padding: 5px 10px; border-radius: 8px;
-    border: 1px solid transparent;
-  }
-  .miss-chip em, .suggest-chip em { color: var(--text-muted); font-style: normal; margin-left: 4px; }
-  .miss-chip.missing  { background: var(--surface-error); color: var(--surface-error-text); border-color: var(--surface-error-border); }
-  .miss-chip.enrolled { background: var(--surface-warn);  color: var(--surface-warn-text);  border-color: var(--surface-warn-border); }
-  .suggest-chip       { background: var(--accent-light);  color: var(--cat-required-fg);    border-color: var(--cat-required-border); }
+      .grad-dept-label {
+        color: #64748b;
+        font-size: 13.5px;
+      }
 
-  /* Structured sub-requirement checklist */
-  .sub-req-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-  .sub-req-row {
-    display: grid;
-    grid-template-columns: 20px 1fr auto;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 13px;
-    background: var(--surface);
-  }
-  .sub-req-row.sub-ok   { border-color: var(--surface-success-border); background: var(--surface-success); }
-  .sub-req-row.sub-miss { border-color: var(--surface-warn-border);    background: var(--surface-warn); }
-  .sub-req-icon { font-weight: 700; text-align: center; }
-  .sub-req-row.sub-ok   .sub-req-icon { color: var(--surface-success-text); }
-  .sub-req-row.sub-miss .sub-req-icon { color: var(--surface-warn-text); }
-  .sub-req-center { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .sub-req-label  { font-weight: 600; font-size: 13px; }
-  .sub-req-bar-track {
-    height: 4px; border-radius: 2px;
-    background: rgba(0,0,0,.08); overflow: hidden;
-  }
-  .sub-req-bar-fill {
-    height: 100%; border-radius: 2px;
-    background: var(--surface-warn-text); transition: width .3s;
-  }
-  .sub-req-row.sub-ok .sub-req-bar-fill { background: var(--surface-success-text); }
-  .sub-req-meta {
-    text-align: right; font-size: 11.5px;
-    font-variant-numeric: tabular-nums; white-space: nowrap;
-    line-height: 1.5;
-  }
-  .sub-req-row.sub-ok   .sub-req-meta { color: var(--surface-success-text); }
-  .sub-req-row.sub-miss .sub-req-meta { color: var(--surface-warn-text); }
+      /* Filter bar */
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 24px 0;
+        flex-wrap: wrap;
+      }
+      .filter-bar label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+      }
+      .filter-bar select {
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        font-size: 13.5px;
+        font-family: inherit;
+        background: #fff;
+        cursor: pointer;
+        outline: none;
+      }
+      .filter-bar select:focus {
+        border-color: #3b82f6;
+      }
 
-  .needed-suggest { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
-  .needed-suggest-label { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
-
-  .blocking-list { margin: 8px 0 0; padding-left: 20px; color: var(--surface-error-text); font-size: 13px; }
-  .blocking-list li { margin-bottom: 4px; }
-
-  /* Export PDF button */
-  .export-pdf-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 0 16px; height: 40px;
-    border-radius: 10px;
-    border: 1px solid #3b82f6;
-    background: #fff;
-    color: #3b82f6;
-    font-size: 13.5px; font-weight: 600;
-    cursor: pointer; font-family: var(--font);
-    transition: background 0.15s;
-    white-space: nowrap;
-  }
-  .export-pdf-btn:hover:not(:disabled) { background: #eff6ff; }
-  .export-pdf-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-  .grad-dept-label { color: #64748b; font-size: 13.5px; }
-
-  /* Filter bar */
-  .filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 24px 0;
-    flex-wrap: wrap;
-  }
-  .filter-bar label { font-size: 13px; font-weight: 500; color: #64748b; }
-  .filter-bar select {
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 13.5px;
-    font-family: inherit;
-    background: #fff;
-    cursor: pointer;
-    outline: none;
-  }
-  .filter-bar select:focus { border-color: #3b82f6; }
-</style>
-</head>
-<body>
-<div class="layout">
-<aside class="sidebar"></aside>
-<div class="main">
-  <header class="topbar">
-    <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle menu">&#9776;</button>
-    <div class="api-status">
-      <div class="status-dot" id="status-dot"></div>
-      <span class="status-label" id="status-label">Connecting...</span>
-    </div>
-  </header>
-
-  <div class="content dash-content">
-
-    <!-- Greeting topbar -->
-    <div class="dash-topbar">
-      <div class="dash-greeting">
-        <h1>Hello, <span id="student-name">&#8212;</span>! <span class="wave">👋</span></h1>
-        <p>Welcome back! Here is your current academic progress overview.</p>
-      </div>
-      <div class="dash-actions">
-        <span class="grad-dept-label" id="student-dept">&#8212;</span>
-        <button id="export-pdf-btn" class="export-pdf-btn" onclick="exportGradPDF()" disabled>
-          <i class="ti ti-download"></i> Export PDF
-        </button>
-      </div>
-    </div>
-
-    <!-- Academic Progress Overview -->
-    <section class="dash-card">
-      <div class="dash-card-header">
-        <i class="ti ti-book"></i>
-        <h2>Academic Progress Overview</h2>
-      </div>
-      <div class="dash-card-body">
-        <div class="donut-grid" id="progress-grid"></div>
-      </div>
-    </section>
-
-    <!-- Eligibility banner -->
-    <div class="elig-banner" id="elig-banner"></div>
-
-    <!-- Credits You Still Need -->
-    <section class="dash-card" style="margin-top: 20px;">
-      <div class="dash-card-header">
-        <i class="ti ti-list-check"></i>
-        <h2>Credits You Still Need to Graduate</h2>
-      </div>
-      <div class="dash-card-body">
-        <div id="needed-list"></div>
-      </div>
-    </section>
-
-    <!-- Course & Credit Review List -->
-    <section class="dash-card" style="margin-top: 20px;">
-      <div class="dash-card-header">
-        <i class="ti ti-clipboard-list"></i>
-        <h2>Course &amp; Credit Review List</h2>
-      </div>
-
-      <div class="filter-bar">
-        <label for="cat-filter">Category</label>
-        <select id="cat-filter" onchange="applyReviewFilters()">
-          <option value="all">All Categories</option>
-          <option value="required">Required</option>
-          <option value="common_required">Common Required</option>
-          <option value="elective">Elective</option>
-          <option value="university_required">University Required</option>
-          <option value="general_education">General Education</option>
-        </select>
-        <label for="sem-filter">Semester</label>
-        <select id="sem-filter" onchange="applyReviewFilters()">
-          <option value="all">All Semesters</option>
-        </select>
-      </div>
-
-      <div class="dash-tabs" id="grad-tabs">
-        <button class="dash-tab active" data-tab="completed" onclick="switchTab(0)">
-          <i class="ti ti-circle-check"></i> Completed
-        </button>
-        <button class="dash-tab" data-tab="in-progress" onclick="switchTab(1)">
-          <i class="ti ti-hourglass"></i> In Progress
-        </button>
-        <button class="dash-tab red" data-tab="missing" onclick="switchTab(2)">
-          <i class="ti ti-alert-triangle"></i> Missing / Failed
-        </button>
-      </div>
-
-      <!-- Completed: dual table -->
-      <div id="tab-completed" class="tab-content">
-        <div class="review-grid">
-          <div class="review-col">
-            <table class="review-table">
-              <thead>
-                <tr>
-                  <th>Course Title</th>
-                  <th>Category</th>
-                  <th>Credits</th>
-                  <th>Semester</th>
-                  <th>Grade</th>
-                </tr>
-              </thead>
-              <tbody id="completed-table"></tbody>
-            </table>
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar"></aside>
+      <div class="main">
+        <header class="topbar">
+          <button
+            class="topbar-toggle"
+            id="sidebar-toggle"
+            aria-label="Toggle menu"
+          >
+            &#9776;
+          </button>
+          <div class="api-status">
+            <div class="status-dot" id="status-dot"></div>
+            <span class="status-label" id="status-label">Connecting...</span>
           </div>
-          <div class="review-col">
-            <table class="review-table">
-              <thead>
-                <tr>
-                  <th>Course Title</th>
-                  <th>Category</th>
-                  <th>Credits Needed</th>
-                </tr>
-              </thead>
-              <tbody id="missing-side-table"></tbody>
-            </table>
+        </header>
+
+        <div class="content dash-content">
+          <!-- Greeting topbar -->
+          <div class="dash-topbar">
+            <div class="dash-greeting">
+              <h1>
+                Hello, <span id="student-name">&#8212;</span>!
+                <span class="wave">👋</span>
+              </h1>
+              <p>
+                Welcome back! Here is your current academic progress overview.
+              </p>
+            </div>
+            <div class="dash-actions">
+              <span class="grad-dept-label" id="student-dept">&#8212;</span>
+              <button
+                id="export-pdf-btn"
+                class="export-pdf-btn"
+                onclick="exportGradPDF()"
+                disabled
+              >
+                <i class="ti ti-download"></i> Export PDF
+              </button>
+            </div>
           </div>
+          <!-- Eligibility banner -->
+          <section><div class="elig-banner" id="elig-banner"></div></section>
+
+          <br>
+          <!-- Academic Progress Overview -->
+          <section class="dash-card">
+            <div class="dash-card-header">
+              <i class="ti ti-book"></i>
+              <h2>Academic Progress Overview</h2>
+            </div>
+            <div class="dash-card-body">
+              <div class="donut-grid" id="progress-grid"></div>
+            </div>
+          </section>
+
+          <!-- Course & Credit Review List -->
+          <section class="dash-card" style="margin-top: 20px">
+            <div class="dash-card-header">
+              <i class="ti ti-clipboard-list"></i>
+              <h2>Course &amp; Credit Review List</h2>
+            </div>
+
+            <div class="filter-bar">
+              <label for="cat-filter">Category</label>
+              <select id="cat-filter" onchange="applyReviewFilters()">
+                <option value="all">All Categories</option>
+                <option value="required">Required</option>
+                <option value="common_required">Common Required</option>
+                <option value="elective">Elective</option>
+                <option value="university_required">University Required</option>
+                <option value="general_education">General Education</option>
+              </select>
+              <label for="sem-filter">Semester</label>
+              <select id="sem-filter" onchange="applyReviewFilters()">
+                <option value="all">All Semesters</option>
+              </select>
+            </div>
+
+            <div class="dash-tabs" id="grad-tabs">
+              <button
+                class="dash-tab active"
+                data-tab="completed"
+                onclick="switchTab(0)"
+              >
+                <i class="ti ti-circle-check"></i> Completed
+              </button>
+              <button
+                class="dash-tab"
+                data-tab="in-progress"
+                onclick="switchTab(1)"
+              >
+                <i class="ti ti-hourglass"></i> In Progress
+              </button>
+              <button
+                class="dash-tab red"
+                data-tab="missing"
+                onclick="switchTab(2)"
+              >
+                <i class="ti ti-alert-triangle"></i> Missing / Failed
+              </button>
+            </div>
+
+            <!-- Completed: dual table -->
+            <div id="tab-completed" class="tab-content">
+              <div class="review-grid">
+                <div class="review-col">
+                  <table class="review-table">
+                    <thead>
+                      <tr>
+                        <th>Course Title</th>
+                        <th>Category</th>
+                        <th>Credits</th>
+                        <th>Semester</th>
+                        <th>Grade</th>
+                      </tr>
+                    </thead>
+                    <tbody id="completed-table"></tbody>
+                  </table>
+                </div>
+                <div class="review-col">
+                  <table class="review-table">
+                    <thead>
+                      <tr>
+                        <th>Course Title</th>
+                        <th>Category</th>
+                        <th>Credits Needed</th>
+                      </tr>
+                    </thead>
+                    <tbody id="missing-side-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- In Progress -->
+            <div id="tab-progress" class="tab-content" style="display: none">
+              <div style="padding: 0">
+                <table class="review-table">
+                  <thead>
+                    <tr>
+                      <th>Course Title</th>
+                      <th>Category</th>
+                      <th>Credits</th>
+                      <th>Semester</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="progress-table"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Missing / Failed -->
+            <div id="tab-missing" class="tab-content" style="display: none">
+              <div style="padding: 0">
+                <table class="review-table">
+                  <thead>
+                    <tr>
+                      <th>Course Title</th>
+                      <th>Category</th>
+                      <th>Credits</th>
+                      <th>Semester</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="missing-table"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
+    </div>
 
-      <!-- In Progress -->
-      <div id="tab-progress" class="tab-content" style="display:none;">
-        <div style="padding: 0;">
-          <table class="review-table">
-            <thead>
-              <tr>
-                <th>Course Title</th>
-                <th>Category</th>
-                <th>Credits</th>
-                <th>Semester</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="progress-table"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Missing / Failed -->
-      <div id="tab-missing" class="tab-content" style="display:none;">
-        <div style="padding: 0;">
-          <table class="review-table">
-            <thead>
-              <tr>
-                <th>Course Title</th>
-                <th>Category</th>
-                <th>Credits</th>
-                <th>Semester</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="missing-table"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </div>
-</div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/sidebar.js"></script>
-<script src="js/graduation.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/graduation.js"></script>
+  </body>
 </html>
