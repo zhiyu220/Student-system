@@ -362,6 +362,8 @@ function applyReviewFilters() {
 
 // Side table on the Completed tab — populated from buckets' missing_courses.
 let _bucketsForMissing = [];
+let _missingExpanded = false;
+const MISSING_PREVIEW = 6;
 function renderMissingSide() {
   const tbody = document.getElementById('missing-side-table');
   if (!tbody) return;
@@ -372,21 +374,40 @@ function renderMissingSide() {
       rows.push({ bucket: b.name, code: c.code, name: c.name_en, credits: c.credits });
     });
   });
-  tbody.innerHTML = rows.map(r => `
+  const shown = _missingExpanded ? rows : rows.slice(0, MISSING_PREVIEW);
+  tbody.innerHTML = shown.map(r => `
     <tr>
       <td class="red-text">${r.name}</td>
       <td>${bucketPill(r.bucket)}</td>
       <td>${r.credits}</td>
     </tr>`).join('') ||
     '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:24px;">No missing courses.</td></tr>';
+
+  const link = document.getElementById('missing-side-toggle');
+  if (link) {
+    if (rows.length <= MISSING_PREVIEW) {
+      link.style.display = 'none';
+    } else {
+      link.style.display = '';
+      link.textContent = _missingExpanded
+        ? 'Show fewer ↑'
+        : `View more missing courses (${rows.length - MISSING_PREVIEW}) →`;
+    }
+  }
+}
+function toggleMissingSide() {
+  _missingExpanded = !_missingExpanded;
+  renderMissingSide();
 }
 
-function renderTables(records) {
-  const completed  = records.filter(c => c.pass_flag === true);
-  const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
-  const missing    = records.filter(c => !c.pass_flag && c.status !== 'enrolled');
-
-  document.getElementById('completed-table').innerHTML = completed.map(c => `
+let _completedExpanded = false;
+const COMPLETED_PREVIEW = 6;
+let _completedRows = [];
+function renderCompletedSide() {
+  const tbody = document.getElementById('completed-table');
+  if (!tbody) return;
+  const shown = _completedExpanded ? _completedRows : _completedRows.slice(0, COMPLETED_PREVIEW);
+  tbody.innerHTML = shown.map(c => `
     <tr>
       <td>${c.name_en}</td>
       <td>${categoryPill(c.type)}</td>
@@ -395,6 +416,31 @@ function renderTables(records) {
       <td class="grade">${c.grade != null ? c.grade : '&#8212;'}</td>
     </tr>`).join('') ||
     '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:24px;">No completed courses.</td></tr>';
+
+  const link = document.getElementById('completed-side-toggle');
+  if (link) {
+    if (_completedRows.length <= COMPLETED_PREVIEW) {
+      link.style.display = 'none';
+    } else {
+      link.style.display = '';
+      link.textContent = _completedExpanded
+        ? 'Show fewer ↑'
+        : `View all completed courses (${_completedRows.length}) →`;
+    }
+  }
+}
+function toggleCompletedSide() {
+  _completedExpanded = !_completedExpanded;
+  renderCompletedSide();
+}
+
+function renderTables(records) {
+  const completed  = records.filter(c => c.pass_flag === true);
+  const inProgress = records.filter(c => c.status === 'enrolled' && !c.pass_flag);
+  const missing    = records.filter(c => !c.pass_flag && c.status !== 'enrolled');
+
+  _completedRows = completed;
+  renderCompletedSide();
 
   renderMissingSide();
 
