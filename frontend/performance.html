@@ -10,6 +10,89 @@
 <link rel="stylesheet" href="css/shared.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
+  .welcome-banner {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .welcome-content {
+    flex: 1;
+  }
+  .welcome-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .welcome-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .welcome-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-card {
+    padding: 20px 15px;
+    text-align: left;
+  }
+  .stat-card::before {
+    display: none !important;
+  }
+  .stat-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .stat-label i { font-size: 27px; }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 8px 0 6px;
+  }
+  .stat-unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 5px;
+  }
+  .stat-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .stat-trend {
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+  .trend-up { color: #22C55E; }
+  .trend-down { color: #dc2626; }
+
+  /* Per-metric color themes (icon + label share the color) */
+  .c-blue   .stat-label { color: #4E6CF0; }
+  .c-green  .stat-label { color: #22C55E; }
+  .c-violet .stat-label { color: #8B5CF6; }
+  .c-orange .stat-label { color: #F59E0B; }
+  .c-sky    .stat-label { color: #3B82F6; }
+
   .perf-grid {
     display: grid;
     grid-template-columns: 1fr 300px;
@@ -20,27 +103,276 @@
 
   .chart-card { padding: 20px; }
   .chart-wrap { position: relative; height: 280px; }
-
-  .sem-list {
+  .chart-header-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 16px;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
   }
-  .sem-chip {
-    padding: 5px 12px;
-    border-radius: 20px;
+  .card-title {
+    flex: 0 0 auto;
+  }
+  .gpa-pill {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #E7F7EE;
+    color: #16a34a;
     font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    vertical-align: middle;
+  }
+  .gpa-pill.in-progress { background: #FEF3E2; color: #d97706; }
+  .detail-meta {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    vertical-align: middle;
+  }
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .legend-label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+  }
+  .view-by-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .view-by-label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+  }
+  .view-by-select {
+    border: 1px solid #d9d9ef;
+    border-radius: 6px;
+    background: #fff;
+    color: #334155;
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .view-by-select:hover {
+    border-color: #4E6CF0;
+  }
+  .view-by-select:focus {
+    outline: none;
+    border-color: #4E6CF0;
+    box-shadow: 0 0 0 3px rgba(78, 108, 240, 0.1);
+  }
+  .compare-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+  }
+  .compare-toggle {
+    border: 1px solid #d9d9ef;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .compare-toggle:hover {
+    border-color: #4E6CF0;
+    color: #4E6CF0;
+  }
+  .compare-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .compare-label {
+    font-size: 12px;
+    color: var(--text-muted);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .compare-select {
+    border: 1px solid #d9d9ef;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #fff;
+    color: #1f2937;
+  }
+  .compare-toggle {
+    border: 1px solid #d9d9ef;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .compare-toggle:hover {
+    border-color: #4E6CF0;
+    color: #4E6CF0;
+  }
+  .compare-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .hidden { display: none !important; }
+  .compare-button {
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: #4E6CF0;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .compare-button:hover { background: #3b53c5; }
+  .compare-result {
+    margin-top: 18px;
+  }
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7ef;
+    font-size: 13px;
+  }
+  .compare-table th {
+    background: #f3f4f8;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #64748b;
+  }
+  .compare-table th.sem-col { text-align: center; }
+  .compare-table th.metric-col { text-align: left; width: 110px; }
+  .compare-table td {
+    padding: 11px 16px;
+    border-top: 1px solid #f0f1f5;
+    text-align: center;
+    color: #334155;
+    font-family: 'DM Mono', monospace;
+  }
+  .compare-table td.metric-name {
+    text-align: left;
+    font-family: inherit;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .compare-table tr:first-child td { border-top: none; }
+  .compare-win {
+    color: #4E6CF0;
+    font-weight: 700;
+  }
+  .compare-win::after {
+    content: ' ▲';
+    font-size: 10px;
+  }
+  .compare-card {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7ff;
+    background: #f8f9ff;
+  }
+
+  .sem-switcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+    margin-left: 70px;
+    max-width: 900px;
+
+  }
+  .sem-arrow {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #e5e7ef;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    transition: all .15s;
+  }
+  .sem-arrow:hover { border-color: #4E6CF0; color: #4E6CF0; }
+  .sem-arrow:disabled { opacity: .35; cursor: default; border-color: #e5e7ef; color: #64748b; }
+  .sem-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 3px;
+    padding: 4px;
+    background: #f3f4f8;
+    border-radius: 12px;
+  
+    scrollbar-width: none;
+  
+    cursor: grab;
+  }
+  .sem-list.dragging { cursor: grabbing; user-select: none; }
+  .sem-list::-webkit-scrollbar { display: none; }
+  .sem-chip {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 400;
     font-family: 'DM Mono', monospace;
     cursor: pointer;
-    border: 1.5px solid #e0e0e0;
-    background: #fff;
+    border: none;
+    background: transparent;
     transition: all .15s;
     color: var(--text-muted);
+    white-space: nowrap;
   }
-  .sem-chip:hover   { border-color: #4E6CF0; color: #4E6CF0; }
-  .sem-chip.active  { background: #4E6CF0; color: #fff; border-color: #4E6CF0; }
+  .sem-chip:hover   { background: #e7e9f1; color: #334155; }
+  .sem-chip.active  {
+    background: #fff;
+    color: #4E6CF0;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .12);
+  }
 
   .insights-card { padding: 20px; }
   .insight-stat {
@@ -66,26 +398,54 @@
   }
   .insight-note.good { background: #F0FDF4; border-color: #22C55E; color: #166534; }
   .insight-note.info { background: #EFF6FF; border-color: #3B82F6; color: #1E40AF; }
-
-  .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .detail-table th {
-    background: #f5f7ff;
+  .insight-note i { margin-right: 6px; vertical-align: -1px; }
+  .insight-notes-title {
+    margin-top: 16px;
+    font-size: 12px;
+    font-weight: 700;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .insight-section { margin-top: 14px; }
+  .insight-block { display: flex; gap: 11px; padding: 12px 0; }
+  .insight-block + .insight-block { border-top: 1px solid #f0f0f5; }
+  .ib-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .ib-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .ib-text { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+  .ib-green  .ib-icon { background: #E7F7EE; color: #22C55E; } .ib-green  .ib-title { color: #16a34a; }
+  .ib-violet .ib-icon { background: #F1ECFD; color: #8B5CF6; } .ib-violet .ib-title { color: #8B5CF6; }
+  .ib-amber  .ib-icon { background: #FEF3E2; color: #F59E0B; } .ib-amber  .ib-title { color: #d97706; }
+
+  .detail-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid #eef0f6; }
+  .detail-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .detail-table th {
+    background: #fafbff;
+    color: #94a3b8;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .4px;
-    padding: 9px 14px;
+    letter-spacing: .5px;
+    padding: 12px 16px;
     text-align: left;
-    border-bottom: 1.5px solid #e8e8f0;
+    border-bottom: 1px solid #eceef6;
   }
+  .detail-table th:first-child { border-top-left-radius: 10px; }
+  .detail-table th:last-child  { border-top-right-radius: 10px; }
   .detail-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #f0f0f5;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f2f4fa;
     vertical-align: middle;
+    color: #334155;
   }
-  .detail-table tr:last-child td { border-bottom: none; }
-  .detail-table tr:hover td { background: #f9f9ff; }
+  .detail-table tbody tr:last-child td { border-bottom: none; }
+  .detail-table tbody tr { transition: background .12s; }
+  .detail-table tbody tr:hover td { background: #f7f9ff; }
 
   .type-pill {
     display: inline-block;
@@ -102,6 +462,114 @@
   .grade-hi { color: #16a34a; font-weight: 700; }
   .grade-md { color: #d97706; font-weight: 700; }
   .grade-lo { color: #dc2626; font-weight: 700; }
+
+  /* Notification and User Menu */
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .notification-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    transition: color 0.2s;
+  }
+  .notification-btn:hover {
+    color: #4E6CF0;
+  }
+  .notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #dc2626;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    border: 2px solid #fff;
+  }
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .user-menu:hover {
+    background: #f0f0f5;
+  }
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #4E6CF0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .user-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a1a2e;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e8e8e4;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    margin-top: 8px;
+    display: none;
+    z-index: 100;
+  }
+  .user-dropdown.show {
+    display: block;
+  }
+  .dropdown-item {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #f0f0f5;
+  }
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+  .dropdown-item:hover {
+    background: #f5f5f8;
+  }
 </style>
 </head>
 <body>
@@ -118,21 +586,136 @@
   </header>
 
   <div class="content">
-    <div class="page-header">
-      <h2>Performance Analytics</h2>
-      <p>GPA trends, credit load, and semester-by-semester breakdown</p>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div class="welcome-content">
+        <div class="welcome-title" id="welcome-text">Hello, Wang, Xiao-Ming! 👋</div>
+        <div class="welcome-subtitle">Explore your academic performance trends and achieve continuous improvement!</div>
+      </div>
+      <div class="welcome-actions">
+        <button class="notification-btn" id="notification-btn" aria-label="Notifications">
+          <i class="ti ti-bell"></i>
+          <div class="notification-badge" id="notification-badge" style="display: none;">0</div>
+        </button>
+        <div style="position: relative;">
+          <button class="user-menu" id="user-menu-btn" aria-label="User menu">
+            <div class="user-avatar" id="user-avatar">—</div>
+            <span class="user-name" id="user-name">User</span>
+            <i class="ti ti-chevron-down" style="font-size: 14px; color: #888898;"></i>
+          </button>
+          <div class="user-dropdown" id="user-dropdown">
+            <button class="dropdown-item" id="profile-btn"><i class="ti ti-user" style="margin-right: 8px;"></i>Profile</button>
+            <button class="dropdown-item" id="settings-btn"><i class="ti ti-settings" style="margin-right: 8px;"></i>Settings</button>
+            <button class="dropdown-item" id="logout-btn"><i class="ti ti-logout" style="margin-right: 8px;"></i>Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card c-blue">
+        <div class="stat-label"><i class="ti ti-chart-bar"></i>Average GPA (All)</div>
+        <div class="stat-value"><span id="stat-avg-gpa">—</span><span class="stat-unit">/ 4.00</span></div>
+        <div class="stat-subtitle" id="stat-avg-gpa-trend">vs. Last Semester</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label"><i class="ti ti-chart-line"></i>Highest GPA (Semester)</div>
+        <div class="stat-value" id="stat-high-gpa">—</div>
+        <div class="stat-subtitle" id="stat-high-gpa-sem">—</div>
+      </div>
+      <div class="stat-card c-violet">
+        <div class="stat-label"><i class="ti ti-chart-infographic"></i>Lowest GPA (Semester)</div>
+        <div class="stat-value" id="stat-low-gpa">—</div>
+        <div class="stat-subtitle" id="stat-low-gpa-sem">—</div>
+      </div>
+      <div class="stat-card c-orange">
+        <div class="stat-label"><i class="ti ti-book"></i>Total Courses Taken</div>
+        <div class="stat-value"><span id="stat-total-courses">—</span><span class="stat-unit">courses</span></div>
+        <div class="stat-subtitle">Total Completed</div>
+      </div>
+      <div class="stat-card c-sky">
+        <div class="stat-label"><i class="ti ti-award"></i>Total Credits Earned</div>
+        <div class="stat-value"><span id="stat-total-credits">—</span><span class="stat-unit">credits</span></div>
+        <div class="stat-subtitle">Cumulative Total</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="stat-label"><i class="ti ti-circle-check"></i>Completion Rate</div>
+        <div class="stat-value"><span id="stat-completion">—</span><span class="stat-unit">%</span></div>
+        <div class="stat-subtitle">Average Completion</div>
+      </div>
     </div>
 
     <div class="perf-grid">
       <!-- Left: chart + semester chips -->
       <div class="card chart-card">
         <div class="card-header" style="padding:0 0 14px 0">
-          <div class="card-title">GPA &amp; Credit Trend</div>
+          <div class="chart-header-row">
+            <div class="card-title">GPA &amp; Credit Trend</div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-box" style="background-color:#4E6CF0;"></span>
+                <span class="legend-label">GPA</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-box" style="background-color:#D4E3F7;"></span>
+                <span class="legend-label">Credits Earned</span>
+              </div>
+            </div>
+            <div class="view-by-section">
+              <label class="view-by-label" for="view-by-select">View By:</label>
+              <select id="view-by-select" class="view-by-select">
+                <option value="gpa">GPA</option>
+                <option value="credits">Credits</option>
+                <option value="both" selected>Both</option>
+              </select>
+            </div>
+            <div class="compare-panel">
+              <button id="toggle-compare" class="compare-toggle" type="button" aria-expanded="false">Compare</button>
+              <div id="compare-controls" class="compare-controls hidden">
+                <select id="compare-sem-1" class="compare-select"></select>
+                <span style="color: var(--text-muted);">vs</span>
+                <select id="compare-sem-2" class="compare-select"></select>
+                <button id="compare-button" class="compare-button" type="button">Go</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="chart-wrap">
           <canvas id="perfChart"></canvas>
         </div>
-        <div class="sem-list" id="sem-list"></div>
+        <div id="compare-result" class="compare-result"></div>
+        <div class="sem-switcher">
+          <button class="sem-arrow" id="sem-prev" type="button" aria-label="Scroll left">‹</button>
+          <div class="sem-list" id="sem-list"></div>
+          <button class="sem-arrow" id="sem-next" type="button" aria-label="Scroll right">›</button>
+        </div>
+
+        <!-- Semester course detail (same block as the trend chart) -->
+        <div class="detail-section">
+          <div class="card-title" id="detail-title" style="margin-bottom:12px">Select a semester to view courses</div>
+          <div style="overflow-x:auto">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Course Name</th>
+                  <th>Type</th>
+                  <th>Credits</th>
+                  <th>Grade</th>
+                  <th>GPA Points</th>
+                  <th>Instructor</th>
+                </tr>
+              </thead>
+              <tbody id="detail-body">
+                <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
+                  Click a semester chip or bar to view courses
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Right: AI Insights -->
@@ -170,33 +753,6 @@
         <div id="insight-notes"></div>
       </div>
     </div>
-
-    <!-- Semester course detail table -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title" id="detail-title">Select a semester to view courses</div>
-      </div>
-      <div class="card-body" style="padding:0">
-        <table class="detail-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Course Name</th>
-              <th>Type</th>
-              <th>Credits</th>
-              <th>Grade</th>
-              <th>GPA Points</th>
-              <th>Instructor</th>
-            </tr>
-          </thead>
-          <tbody id="detail-body">
-            <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-muted)">
-              Click a semester chip or bar to view courses
-            </td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
   </div>
 </div>
 </div>
@@ -208,6 +764,7 @@
   let semesterData = [];
   let perfChart    = null;
   let activeSemIdx = -1;
+  let viewByMode   = 'both';
 
   const TYPE_PILL  = { required:'pill-required', elective:'pill-elective', university_required:'pill-univ', general_education:'pill-general' };
   const TYPE_LABEL = { required:'Required', elective:'Elective', university_required:'Univ. Required', general_education:'Gen. Education' };
@@ -217,10 +774,37 @@
     return g >= 80 ? 'grade-hi' : g >= 60 ? 'grade-md' : 'grade-lo';
   }
 
+  function formatSemesterLabel(s) {
+    const semester = String(s.semester);
+    const yearNumber = Number(s.academic_year);
+    const yearLabel = Number.isFinite(yearNumber) && yearNumber < 1900
+      ? 1911 + yearNumber
+      : s.academic_year;
+    const seasonLabel = semester === '1' ? 'Fall' : semester === '2' ? 'Spring' : semester;
+    return `${yearLabel} ${seasonLabel} (${s.label})`;
+  }
+
+  function formatSemesterLabelStacked(s) {
+    const semester = String(s.semester);
+    const yearNumber = Number(s.academic_year);
+    const yearLabel = Number.isFinite(yearNumber) && yearNumber < 1900
+      ? 1911 + yearNumber
+      : s.academic_year;
+    const seasonLabel = semester === '1' ? 'Fall' : semester === '2' ? 'Spring' : semester;
+    return [`${yearLabel} ${seasonLabel}`, `(${s.label})`];
+  }
+
   function buildChart(semesters) {
-    const labels  = semesters.map(s => s.label);
-    const gpaData = semesters.map(s => s.gpa);
+    const labels  = semesters.map(formatSemesterLabelStacked);
+    const gpaData = semesters.map(s => (s.gpa > 0 ? s.gpa : null));
+    const gpaPointRadius = gpaData.map(v => (v === null ? 0 : 5));
     const crData  = semesters.map(s => s.credits);
+    const gradeData = semesters.map(s => {
+      const grades = s.courses
+        .map(c => (typeof c.grade === 'number' ? c.grade : null))
+        .filter(g => g !== null);
+      return grades.length ? grades.reduce((sum, g) => sum + g, 0) / grades.length : null;
+    });
     const ctx = document.getElementById('perfChart').getContext('2d');
     perfChart = new Chart(ctx, {
       data: {
@@ -228,11 +812,15 @@
         datasets: [
           {
             type: 'bar',
-            label: 'Credits',
+            label: 'Credits Earned',
             data: crData,
-            backgroundColor: semesters.map(() => 'rgba(78,108,240,0.15)'),
-            borderColor: 'rgba(78,108,240,0.4)',
-            borderWidth: 1,
+            backgroundColor: semesters.map(() => 'rgba(78,108,240,0.12)'),
+            hoverBackgroundColor: 'rgba(78,108,240,0.28)',
+            borderWidth: 0,
+            borderRadius: { topLeft: 6, topRight: 6 },
+            borderSkipped: false,
+            barPercentage: 0.5,
+            categoryPercentage: 0.7,
             yAxisID: 'y1',
             order: 2,
           },
@@ -241,72 +829,372 @@
             label: 'GPA',
             data: gpaData,
             borderColor: '#4E6CF0',
-            backgroundColor: 'rgba(78,108,240,0.06)',
-            borderWidth: 2.5,
+            backgroundColor: 'rgba(78,108,240,0.12)',
+            borderWidth: 3,
+            borderCapStyle: 'round',
+            borderJoinStyle: 'round',
             pointBackgroundColor: '#4E6CF0',
-            pointRadius: 4,
-            tension: 0.3,
-            fill: true,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: gpaPointRadius,
+            pointHoverRadius: 7,
+            pointHoverBorderWidth: 3,
+            pointHoverBackgroundColor: '#4E6CF0',
+            tension: 0.34,
+            fill: false,
             yAxisID: 'y2',
             order: 1,
+            spanGaps: false,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { top: 24, left: 4, right: 4 } },
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 12 }, boxWidth: 12 } },
+          legend: {
+            display: false,
+          },
           tooltip: {
             callbacks: {
-              label: ctx => ctx.dataset.label === 'GPA'
-                ? `GPA: ${ctx.parsed.y.toFixed(2)}`
-                : `Credits: ${ctx.parsed.y}`,
+              title: items => {
+                if (!items.length) return [];
+                const item = items[0];
+                const sem = semesters[item.dataIndex];
+                const label = sem ? formatSemesterLabel(sem) : item.label;
+                return [label];
+              },
+              label: ctx => {
+                if (ctx.dataset.label === 'GPA') {
+                  const avgGrade = gradeData[ctx.dataIndex];
+                  const lines = [`GPA: ${ctx.parsed.y.toFixed(2)}`];
+                  if (avgGrade !== null) {
+                    lines.push(`Grade: ${avgGrade.toFixed(1)}%`);
+                  }
+                  return lines;
+                }
+                const sem = semesters[ctx.dataIndex];
+                const creditLabel = sem && sem.gpa > 0 ? 'Credits Earned' : 'Credits Selected';
+                return `${creditLabel}: ${ctx.parsed.y}`;
+              },
+              afterBody: () => ['Click to view course details'],
             },
+            displayColors: false,
+            padding: 14,
+            cornerRadius: 10,
+            backgroundColor: '#ffffff',
+            borderColor: '#cbd5e1',
+            borderWidth: 1,
+            titleColor: '#0f172a',
+            bodyColor: '#334155',
+            footerColor: '#64748b',
+            titleFont: { size: 13, weight: '700' },
+            bodyFont: { size: 12 },
+            footerFont: { size: 11, weight: '500' },
+            bodySpacing: 6,
+            titleSpacing: 8,
+            footerMarginTop: 10,
           },
         },
         scales: {
           y1: {
-            type: 'linear', position: 'left',
-            title: { display: true, text: 'Credits', font: { size: 11 } },
-            grid: { color: '#f0f0f5' },
-            ticks: { font: { size: 11 } },
+            type: 'linear', position: 'right',
+            title: { display: true, text: 'Credits', color: '#94a3b8', font: { size: 11 } },
+            grid: { drawOnChartArea: false },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 }, padding: 6 },
           },
           y2: {
-            type: 'linear', position: 'right',
-            title: { display: true, text: 'GPA', font: { size: 11 } },
+            type: 'linear', position: 'left',
+            title: { display: true, text: 'GPA', color: '#94a3b8', font: { size: 11 } },
             min: 0, max: 4,
-            grid: { drawOnChartArea: false },
-            ticks: { font: { size: 11 } },
+            grid: { color: '#eef1f6', borderDash: [4, 4], tickLength: 0 },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11 }, padding: 6, stepSize: 1 },
           },
-          x: { ticks: { font: { size: 11 } }, grid: { display: false } },
+          x: {
+            ticks: { color: '#64748b', font: { size: 11 } },
+            grid: { display: false },
+            border: { display: false },
+          },
         },
         onClick: (evt, elements) => {
           if (elements.length > 0) selectSemester(elements[0].index);
         },
       },
+      plugins: [
+        {
+          id: 'creditValueLabels',
+          afterDatasetsDraw(chart) {
+            if (viewByMode === 'gpa') return;
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const currentIndex = semesters.length - 1;
+            ctx.save();
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px "DM Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            meta.data.forEach((bar, index) => {
+              const value = crData[index];
+              const labelY = bar.base - 18;
+              ctx.fillText(value, bar.x, labelY);
+              if (index === currentIndex) {
+                ctx.fillStyle = '#2563eb';
+                ctx.font = 'bold 11px "DM Mono", monospace';
+                ctx.fillText('★ Current', bar.x, bar.y - 18);
+                ctx.fillStyle = '#334155';
+                ctx.font = '12px "DM Mono", monospace';
+              }
+            });
+            ctx.restore();
+          },
+        },
+        {
+          id: 'gpaValueLabels',
+          afterDatasetsDraw(chart) {
+            if (viewByMode === 'credits') return;
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(1);
+            ctx.save();
+            ctx.fillStyle = '#4E6CF0';
+            ctx.font = 'bold 12px "DM Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            meta.data.forEach((point, index) => {
+              const value = gpaData[index];
+              if (value === null || value === undefined) return;
+              if (!point || typeof point.y !== 'number') return;
+              const y = point.y - 12;
+              ctx.fillText(value.toFixed(2), point.x, y);
+            });
+            ctx.restore();
+          },
+        },
+      ],
     });
   }
 
   function buildSemChips(semesters) {
-    document.getElementById('sem-list').innerHTML = semesters
-      .map((s, i) => `<button class="sem-chip" data-idx="${i}" onclick="selectSemester(${i})">${s.label}</button>`)
+    const list = document.getElementById('sem-list');
+    list.innerHTML = semesters
+      .map((s, i) => `<button class="sem-chip" data-idx="${i}" onclick="selectSemester(${i})">${formatSemesterLabel(s)}</button>`)
       .join('');
+    capSemListToFiveChips(list);
+  }
+
+  function capSemListToFiveChips(list) {
+    const chips = list.querySelectorAll('.sem-chip');
+    if (chips.length <= 5) { list.style.maxWidth = ''; return; }
+    const gap = parseFloat(getComputedStyle(list).gap) || 3;
+    const padding = parseFloat(getComputedStyle(list).paddingLeft) + parseFloat(getComputedStyle(list).paddingRight) || 8;
+    let w = padding;
+    for (let i = 0; i < 5; i++) w += chips[i].offsetWidth + (i < 4 ? gap : 0);
+    list.style.maxWidth = w + 'px';
+  }
+
+  function buildCompareSelectors(semesters) {
+    const options = semesters
+      .map((s, i) => `<option value="${i}">${formatSemesterLabel(s)}</option>`)
+      .join('');
+    document.getElementById('compare-sem-1').innerHTML = options;
+    document.getElementById('compare-sem-2').innerHTML = options;
+    const secondIndex = Math.max(1, semesters.length - 1);
+    document.getElementById('compare-sem-1').value = semesters.length > 1 ? semesters.length - 2 : 0;
+    document.getElementById('compare-sem-2').value = secondIndex;
+    const compareButton = document.getElementById('compare-button');
+    compareButton.addEventListener('click', compareSemesters);
+    const toggle = document.getElementById('toggle-compare');
+    toggle.addEventListener('click', toggleComparePanel);
+  }
+
+  function toggleComparePanel() {
+    const panel = document.getElementById('compare-controls');
+    const toggle = document.getElementById('toggle-compare');
+    const isHidden = panel.classList.toggle('hidden');
+    toggle.textContent = isHidden ? 'Compare' : 'Close';
+    toggle.setAttribute('aria-expanded', String(!isHidden));
+    if (isHidden) {
+      document.getElementById('compare-result').innerHTML = '';
+      if (perfChart) {
+        perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
+          i === activeSemIdx ? 'rgba(78,108,240,0.45)' : 'rgba(78,108,240,0.12)'
+        );
+        perfChart.update('none');
+      }
+    }
+  }
+
+  function handleViewByChange() {
+    const viewBy = document.getElementById('view-by-select').value;
+    viewByMode = viewBy;
+    if (!perfChart) return;
+    
+    const gpaMeta = perfChart.getDatasetMeta(1);
+    const creditsMeta = perfChart.getDatasetMeta(0);
+    
+    switch (viewBy) {
+      case 'gpa':
+        gpaMeta.hidden = false;
+        creditsMeta.hidden = true;
+        break;
+      case 'credits':
+        gpaMeta.hidden = true;
+        creditsMeta.hidden = false;
+        break;
+      case 'both':
+        gpaMeta.hidden = false;
+        creditsMeta.hidden = false;
+        break;
+    }
+    perfChart.update();
+  }
+
+  function averageGrade(sem) {
+    const grades = sem.courses
+      .map(c => (typeof c.grade === 'number' ? c.grade : null))
+      .filter(g => g !== null);
+    return grades.length ? grades.reduce((sum, g) => sum + g, 0) / grades.length : null;
+  }
+
+  function compareSemesters() {
+    const idx1 = Number(document.getElementById('compare-sem-1').value);
+    const idx2 = Number(document.getElementById('compare-sem-2').value);
+    if (idx1 === idx2) {
+      document.getElementById('compare-result').innerHTML = '<div class="compare-card">Please select two different semesters for comparison.</div>';
+      return;
+    }
+    const first = semesterData[idx1];
+    const second = semesterData[idx2];
+    const firstAvgGrade = averageGrade(first);
+    const secondAvgGrade = averageGrade(second);
+
+    function cell(aVal, bVal, fmt, higherWins = true) {
+      const aNum = typeof aVal === 'number' ? aVal : null;
+      const bNum = typeof bVal === 'number' ? bVal : null;
+      let aWin = false, bWin = false;
+      if (aNum !== null && bNum !== null && aNum !== bNum) {
+        aWin = higherWins ? aNum > bNum : aNum < bNum;
+        bWin = !aWin;
+      }
+      const aStr = aNum !== null ? fmt(aNum) : '—';
+      const bStr = bNum !== null ? fmt(bNum) : '—';
+      return [
+        `<td class="${aWin ? 'compare-win' : ''}">${aStr}</td>`,
+        `<td class="${bWin ? 'compare-win' : ''}">${bStr}</td>`,
+      ];
+    }
+
+    const gpa     = cell(first.gpa > 0 ? first.gpa : null,   second.gpa > 0 ? second.gpa : null,   v => v.toFixed(2));
+    const credits = cell(first.credits,                        second.credits,                        v => v);
+    const grade   = cell(firstAvgGrade,                        secondAvgGrade,                        v => v.toFixed(1) + '%');
+
+    document.getElementById('compare-result').innerHTML = `
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th class="metric-col"></th>
+            <th class="sem-col">${formatSemesterLabel(first)}</th>
+            <th class="sem-col">${formatSemesterLabel(second)}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="metric-name">GPA</td>${gpa.join('')}</tr>
+          <tr><td class="metric-name">Credits</td>${credits.join('')}</tr>
+          <tr><td class="metric-name">Avg Grade</td>${grade.join('')}</tr>
+        </tbody>
+      </table>
+    `;
+
+    if (perfChart) {
+      perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
+        i === idx1 || i === idx2 ? 'rgba(220,53,69,0.45)' : 'rgba(78,108,240,0.12)'
+      );
+      perfChart.update('none');
+    }
+  }
+
+  function centerActiveChip() {
+    const list = document.getElementById('sem-list');
+    const active = list && list.querySelector('.sem-chip.active');
+    if (!list || !active) return;
+    const listRect = list.getBoundingClientRect();
+    const chipRect = active.getBoundingClientRect();
+    const chipVisLeft  = chipRect.left  - listRect.left;
+    const chipVisRight = chipRect.right - listRect.left;
+    if (chipVisLeft >= 0 && chipVisRight <= listRect.width) return;
+    if (chipVisLeft < 0) {
+      list.scrollTo({ left: list.scrollLeft + chipVisLeft - 4, behavior: 'smooth' });
+    } else {
+      list.scrollTo({ left: list.scrollLeft + chipVisRight - listRect.width + 4, behavior: 'smooth' });
+    }
+  }
+
+  function updateSemArrows() {
+    const list = document.getElementById('sem-list');
+    const prev = document.getElementById('sem-prev');
+    const next = document.getElementById('sem-next');
+    if (!list || !prev || !next) return;
+    const maxScroll = list.scrollWidth - list.clientWidth - 1;
+    prev.disabled = list.scrollLeft <= 0;
+    next.disabled = list.scrollLeft >= maxScroll;
+  }
+
+  function initSemArrows() {
+    const list = document.getElementById('sem-list');
+    const prev = document.getElementById('sem-prev');
+    const next = document.getElementById('sem-next');
+    if (!list || !prev || !next) return;
+    const step = () => Math.max(160, list.clientWidth * 0.7);
+    prev.onclick = () => list.scrollBy({ left: -step(), behavior: 'smooth' });
+    next.onclick = () => list.scrollBy({ left:  step(), behavior: 'smooth' });
+    list.addEventListener('scroll', updateSemArrows, { passive: true });
+    window.addEventListener('resize', updateSemArrows);
+
+      // Drag / swipe to scroll
+    let isDown = false, dragged = false, startX = 0, startScroll = 0;
+    list.addEventListener('pointerdown', (e) => {
+      isDown = true; dragged = false;
+      startX = e.clientX; startScroll = list.scrollLeft;
+      list.classList.add('dragging');
+    });
+    list.addEventListener('pointermove', (e) => {
+      if (!isDown) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) dragged = true;
+      list.scrollLeft = startScroll - dx;
+    });
+    const endDrag = () => { isDown = false; list.classList.remove('dragging'); };
+    list.addEventListener('pointerup', endDrag);
+    list.addEventListener('pointerleave', endDrag);
+    // Swallow the click that follows a real drag so it doesn't select a chip
+    list.addEventListener('click', (e) => {
+      if (dragged) { e.preventDefault(); e.stopPropagation(); dragged = false; }
+    }, true);
+
+    updateSemArrows();
   }
 
   function selectSemester(idx) {
     activeSemIdx = idx;
     document.querySelectorAll('.sem-chip').forEach((el, i) => el.classList.toggle('active', i === idx));
+    centerActiveChip();
     if (perfChart) {
       perfChart.data.datasets[0].backgroundColor = semesterData.map((_, i) =>
-        i === idx ? 'rgba(78,108,240,0.5)' : 'rgba(78,108,240,0.15)'
+        i === idx ? 'rgba(78,108,240,0.45)' : 'rgba(78,108,240,0.12)'
       );
       perfChart.update('none');
     }
     const sem = semesterData[idx];
-    document.getElementById('detail-title').textContent =
-      `${sem.label} — ${sem.courses.length} courses · GPA ${sem.gpa.toFixed(2)} · ${sem.credits} credits`;
+    const inProgress = !(sem.gpa > 0);
+    const gpaPill = inProgress
+      ? `<span class="gpa-pill in-progress">In Progress</span>`
+      : `<span class="gpa-pill">GPA: ${sem.gpa.toFixed(2)}</span>`;
+    document.getElementById('detail-title').innerHTML =
+      `Course Details for ${sem.label}` + gpaPill +
+      `<span class="detail-meta">· ${sem.courses.length} courses · ${sem.credits} credits</span>`;
     document.getElementById('detail-body').innerHTML = sem.courses.map(c => {
       const grade = c.grade !== null ? c.grade.toFixed(0) : '—';
       return `
@@ -322,7 +1210,7 @@
     }).join('');
   }
 
-  function fillInsights(summary, insights) {
+  function fillInsights(summary, insights, semesters = []) {
     document.getElementById('ins-avg-gpa').textContent    = summary.avg_gpa.toFixed(2);
     document.getElementById('ins-best-sem').textContent   = summary.highest_gpa_semester || '—';
     document.getElementById('ins-best-gpa').textContent   = summary.highest_gpa.toFixed(2);
@@ -330,29 +1218,223 @@
     document.getElementById('ins-completion').textContent = `${summary.completion_rate}%`;
     document.getElementById('ins-digital').textContent    = insights.digital_app_courses_completed;
 
-    let html = '';
-    if (insights.decline_note) {
-      html += `<div class="insight-note">${insights.decline_note}</div>`;
-    } else if (summary.avg_gpa >= 3.5) {
-      html += `<div class="insight-note good">Strong academic performance — GPA consistently above 3.5.</div>`;
-    }
-    if (insights.strength_semester) {
-      html += `<div class="insight-note info">Best semester: <strong>${insights.strength_semester}</strong> (GPA ${summary.highest_gpa.toFixed(2)})</div>`;
-    }
-    document.getElementById('insight-notes').innerHTML = html;
+    const sections = buildInsightSections(summary, insights, semesters);
+    document.getElementById('insight-notes').innerHTML =
+      `<div class="insight-section">` + sections.map(s =>
+        `<div class="insight-block ${s.cls}">
+           <div class="ib-icon"><i class="ti ${s.icon}"></i></div>
+           <div>
+             <div class="ib-title">${s.title}</div>
+             <div class="ib-text">${s.text}</div>
+           </div>
+         </div>`
+      ).join('') + `</div>`;
   }
+
+  const DEPT_NAMES = {
+    IM: 'Information Management', CP: 'Computer Programming', CS: 'Computer Science',
+    CL: 'Chinese', LC: 'English', LE: 'General Education', EE: 'Electrical Engineering',
+    MA: 'Mathematics', PL: 'Physical Education', ST: 'Service Learning', BA: 'Business',
+  };
+  function deptOf(code) {
+    const m = (code || '').match(/^[A-Za-z]+/);
+    const p = m ? m[0].toUpperCase() : '';
+    return DEPT_NAMES[p] || p || 'your major';
+  }
+
+  // Build specific, categorized academic insights from real course data.
+  function buildInsightSections(summary, insights, semesters) {
+    const graded = [];
+    semesters.forEach(s => s.courses.forEach(c => {
+      if (typeof c.grade === 'number') graded.push({ ...c, sem: s.label });
+    }));
+
+    // GPA trend (least-squares slope over completed semesters)
+    const pts = semesters.map((s, i) => ({ x: i, y: s.gpa })).filter(p => p.y > 0);
+    let slope = 0;
+    if (pts.length >= 2) {
+      const n = pts.length;
+      const sx = pts.reduce((a, p) => a + p.x, 0);
+      const sy = pts.reduce((a, p) => a + p.y, 0);
+      const sxy = pts.reduce((a, p) => a + p.x * p.y, 0);
+      const sxx = pts.reduce((a, p) => a + p.x * p.x, 0);
+      const d = n * sxx - sx * sx;
+      if (d !== 0) slope = (n * sxy - sx * sy) / d;
+    }
+
+    const g = (c) => `${c.name_en} (${Math.round(c.grade)})`;
+    const top = [...graded].sort((a, b) => b.grade - a.grade).slice(0, 2);
+    const weak = [...graded].sort((a, b) => a.grade - b.grade).slice(0, 2);
+
+    // ---- Strengths ----
+    let strength;
+    if (top.length) {
+      const names = top.map(g).join(' and ');
+      const peak = summary.highest_gpa_semester
+        ? ` Your peak was ${summary.highest_gpa_semester} at GPA ${summary.highest_gpa.toFixed(2)}.` : '';
+      const climb = slope > 0.03 ? ' Your GPA has been climbing steadily — keep that momentum going.' : '';
+      strength = `Your strongest results were ${names}.${peak}${climb}`;
+    } else {
+      strength = `No graded courses yet — a clean slate to set the tone for the semester ahead.`;
+    }
+
+    // ---- Areas to Improve ----
+    let improve;
+    if (weak.length) {
+      const names = weak.map(g).join(' and ');
+      const trendClause = slope < -0.03
+        ? `, and your GPA has slipped about ${Math.abs(slope).toFixed(2)} per semester recently`
+        : '';
+      improve = `${names} pulled your average down${trendClause}. Give these required core courses extra weekly review time and visit office hours early rather than before exams.`;
+    } else {
+      improve = `Keep an eye on your heavier credit courses this term and start assignments early to stay ahead.`;
+    }
+
+    // ---- Study Suggestions ----
+    let suggest;
+    if (top.length) {
+      const dept = deptOf(top[0].code);
+      suggest = `You clearly excel in ${dept} (e.g. ${g(top[0])}). Consider advanced ${dept} electives next term to sharpen your edge, and pair them with lighter general-education credits to protect your GPA.`;
+      if (summary.completion_rate >= 80) {
+        suggest += ` With ${summary.completion_rate}% of your degree done, line these up with your graduation and capstone requirements.`;
+      }
+    } else {
+      suggest = `Build a steady weekly study routine now; balancing one challenging course with lighter ones each term keeps your GPA stable.`;
+    }
+
+    return [
+      { cls: 'ib-green',  icon: 'ti-trending-up',  title: 'Strengths',         text: strength },
+      { cls: 'ib-violet', icon: 'ti-chart-line',   title: 'Areas to Improve',  text: improve },
+      { cls: 'ib-amber',  icon: 'ti-bulb',         title: 'Study Suggestions', text: suggest },
+    ];
+  }
+
+  function fillStatsCards(summary, semesters) {
+    // Average GPA
+    document.getElementById('stat-avg-gpa').textContent = summary.avg_gpa.toFixed(2);
+    if (semesters.length >= 2) {
+      const prevSemesters = semesters.slice(0, semesters.length - 2).filter(s => s.gpa > 0);
+      if (prevSemesters.length > 0) {
+        const prevAvgGpa = prevSemesters.reduce((sum, s) => sum + s.gpa, 0) / prevSemesters.length;
+        const diff = summary.avg_gpa - prevAvgGpa;
+        const trendHtml = diff > 0
+          ? `vs. Last Semester <span class="stat-trend trend-up">↑ ${diff.toFixed(2)}</span>`
+          : diff < 0
+          ? `vs. Last Semester <span class="stat-trend trend-down">↓ ${Math.abs(diff).toFixed(2)}</span>`
+          : `vs. Last Semester <span class="stat-trend">= 0.00</span>`;
+        document.getElementById('stat-avg-gpa-trend').innerHTML = trendHtml;
+      }
+    }
+
+    // Highest GPA
+    document.getElementById('stat-high-gpa').textContent = summary.highest_gpa.toFixed(2);
+    const highSem = semesters.find(s => s.label === summary.highest_gpa_semester);
+    document.getElementById('stat-high-gpa-sem').textContent = highSem ? formatSemesterLabel(highSem) : summary.highest_gpa_semester || '—';
+
+    // Lowest GPA
+    document.getElementById('stat-low-gpa').textContent = summary.lowest_gpa.toFixed(2);
+    const lowSem = semesters.find(s => s.label === summary.lowest_gpa_semester);
+    document.getElementById('stat-low-gpa-sem').textContent = lowSem ? formatSemesterLabel(lowSem) : summary.lowest_gpa_semester || '—';
+
+    // Total Courses & Credits
+    document.getElementById('stat-total-courses').textContent = summary.total_courses;
+    document.getElementById('stat-total-credits').textContent = summary.total_credits;
+
+    // Completion Rate (unit "%" is rendered statically next to the value)
+    document.getElementById('stat-completion').textContent = summary.completion_rate;
+  }
+
+  // User Menu and Notification handling
+  function initUserMenu() {
+    const user = getUser();
+    if (user) {
+      // Set user avatar initials
+      const initials = user.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-name').textContent = user.name || 'User';
+    }
+
+    // User menu dropdown toggle
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      userDropdown.classList.remove('show');
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('auth_token');
+      window.location.href = 'login.html';
+    });
+
+    // Profile and Settings (placeholder)
+    document.getElementById('profile-btn').addEventListener('click', () => {
+      alert('Profile page coming soon');
+      userDropdown.classList.remove('show');
+    });
+
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      window.location.href = 'settings.html';
+    });
+  }
+
+  // Fetch and update notifications
+  async function updateNotifications() {
+    try {
+      const user = getUser();
+      const studentId = user?.student_id || '1111708';
+      // Assuming there's an API endpoint for notifications
+      const response = await fetch(`/api/notifications/${studentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const notificationCount = data.total_count || data.unread_count || 0;
+        const badge = document.getElementById('notification-badge');
+        badge.textContent = notificationCount;
+        badge.style.display = 'flex';
+      }
+    } catch (err) {
+      console.log('Notification fetch skipped (endpoint may not exist)');
+      // Show default 0 if API not available
+      const badge = document.getElementById('notification-badge');
+      badge.textContent = '0';
+      badge.style.display = 'flex';
+    }
+  }
+
+  document.getElementById('notification-btn').addEventListener('click', () => {
+    window.location.href = 'notifications.html';
+  });
 
   (async () => {
     await checkAuth();
     initLayout('performance', 'Performance Analytics');
+    initUserMenu();
+    updateNotifications();
     const user = getUser();
     const studentId = user?.student_id || '1111708';
+    
+    // Update welcome text with user name
+    const userName = user?.name || 'Student';
+    document.getElementById('welcome-text').textContent = `Hello, ${userName}! 👋`;
+    
     try {
       const data = await api.performance(studentId);
       semesterData = data.semesters;
-      fillInsights(data.summary, data.insights);
+      fillStatsCards(data.summary, semesterData);
+      fillInsights(data.summary, data.insights, semesterData);
       buildChart(semesterData);
       buildSemChips(semesterData);
+      initSemArrows();
+      buildCompareSelectors(semesterData);
+      document.getElementById('view-by-select').addEventListener('change', handleViewByChange);
       if (semesterData.length > 0) selectSemester(semesterData.length - 1);
       document.getElementById('status-dot').className     = 'status-dot ok';
       document.getElementById('status-label').textContent = 'API Connected';
