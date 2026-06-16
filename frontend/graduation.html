@@ -157,6 +157,13 @@
               </p>
             </div>
             <div class="dash-actions">
+              <button class="icon-btn" aria-label="Notifications" onclick="location.href='notifications.html'">
+                <i class="ti ti-bell"></i>
+                <span class="icon-badge">3</span>
+              </button>
+              <button class="icon-btn" aria-label="Calendar">
+                <i class="ti ti-calendar"></i>
+              </button>
               <span class="grad-dept-label" id="student-dept">&#8212;</span>
               <button
                 id="export-pdf-btn"
@@ -246,6 +253,7 @@
                     </thead>
                     <tbody id="completed-table"></tbody>
                   </table>
+                  <a class="review-link" href="course_history02.html">View all completed courses →</a>
                 </div>
                 <div class="review-col">
                   <table class="review-table">
@@ -258,6 +266,7 @@
                     </thead>
                     <tbody id="missing-side-table"></tbody>
                   </table>
+                  <a class="review-link" href="javascript:void(0)" onclick="switchTab(2)">View more missing courses →</a>
                 </div>
               </div>
             </div>
