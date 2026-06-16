@@ -26,17 +26,10 @@
         <!-- Dashboard topbar -->
         <div class="dash-topbar">
           <div class="dash-greeting">
-            <h1>Hello, <span id="dash-username">Wang, Xiao-Ming</span>! <span class="wave">👋</span></h1>
-            <p>Welcome back! Here is your current academic progress overview.</p>
+            <h1>Hello, <span id="dash-username">Student</span>! <span class="wave">👋</span></h1>
+            <p>Welcome to StuPilot. Here is an overview of the features available in this platform.</p>
           </div>
           <div class="dash-actions">
-            <button class="icon-btn" aria-label="Notifications">
-              <i class="ti ti-bell"></i>
-              <span class="icon-badge">3</span>
-            </button>
-            <button class="icon-btn" aria-label="Calendar">
-              <i class="ti ti-calendar"></i>
-            </button>
             <button class="semester-pill">
               2024 Fall Semester (113-1)
               <i class="ti ti-chevron-down"></i>
@@ -44,202 +37,66 @@
           </div>
         </div>
 
-        <!-- Academic Progress Overview -->
+        <!-- Features Overview -->
         <section class="dash-card">
           <div class="dash-card-header">
-            <i class="ti ti-book"></i>
-            <h2>Academic Progress Overview</h2>
+            <i class="ti ti-layout-dashboard"></i>
+            <h2>Features Overview</h2>
           </div>
           <div class="dash-card-body">
-            <div class="donut-grid">
+            <div class="features-grid">
 
-              <!-- Required Credits -->
-              <div class="donut-col">
-                <div class="donut-title"><i class="ti ti-book blue"></i> Required Credits</div>
-                <div class="donut donut-blue" style="--pct: 80;">
-                  <div class="donut-inner">
-                    <div class="donut-frac"><span class="num">32</span><span class="den">/ 40</span></div>
-                    <div class="donut-sub">credits</div>
-                  </div>
+              <!-- Feature 3 -->
+              <a class="feature-card" href="graduation.html">
+                <div class="feature-icon feature-icon-green">
+                  <i class="ti ti-certificate"></i>
                 </div>
-                <div class="donut-pct blue-text">80%</div>
-                <div class="donut-remain">8 credits remaining</div>
-              </div>
+                <div class="feature-tag">Feature 3</div>
+                <h3>Graduation Requirements Audit</h3>
+                <ul class="feature-list">
+                  <li>Credit calculation logic for graduation requirement analysis</li>
+                  <li>Automatic validation for compulsory and elective credits</li>
+                  <li>Progress tracking components for graduation status monitoring</li>
+                  <li>Graduation audit report export (PDF) functionality</li>
+                </ul>
+                <span class="feature-link">Open Graduation Audit <i class="ti ti-arrow-right"></i></span>
+              </a>
 
-              <!-- Overall Graduation Progress (larger, centered) -->
-              <div class="donut-col donut-col-big">
-                <div class="donut-title"><i class="ti ti-book green"></i> Overall Graduation Progress</div>
-                <div class="donut donut-green donut-large" style="--pct: 85;">
-                  <div class="donut-inner">
-                    <div class="donut-big-pct">85%</div>
-                    <div class="donut-sub">Completed 128 / 150 credits</div>
-                  </div>
+              <!-- Feature 4 -->
+              <a class="feature-card" href="course_history02.html">
+                <div class="feature-icon feature-icon-blue">
+                  <i class="ti ti-list-details"></i>
                 </div>
-                <div class="grad-pill">22 credits left to graduate!</div>
-              </div>
+                <div class="feature-tag">Feature 4</div>
+                <h3>Academic Course History Tracking</h3>
+                <ul class="feature-list">
+                  <li>Complete record of all courses taken across semesters</li>
+                  <li>Category, semester, and grade filters for quick lookup</li>
+                  <li>Pass / fail / in-progress status indicators per course</li>
+                  <li>Aggregated credit and grade summary by category</li>
+                </ul>
+                <span class="feature-link">Open Course History <i class="ti ti-arrow-right"></i></span>
+              </a>
 
-              <!-- Elective Credits -->
-              <div class="donut-col">
-                <div class="donut-title"><i class="ti ti-book purple"></i> Elective Credits</div>
-                <div class="donut donut-purple" style="--pct: 70;">
-                  <div class="donut-inner">
-                    <div class="donut-frac"><span class="num">28</span><span class="den">/ 40</span></div>
-                    <div class="donut-sub">credits</div>
-                  </div>
+              <!-- Feature 5 -->
+              <a class="feature-card" href="performance.html">
+                <div class="feature-icon feature-icon-purple">
+                  <i class="ti ti-chart-line"></i>
                 </div>
-                <div class="donut-pct purple-text">70%</div>
-                <div class="donut-remain">12 credits remaining</div>
-              </div>
-
-              <!-- General Education Credits -->
-              <div class="donut-col">
-                <div class="donut-title"><i class="ti ti-book orange"></i> General Education Credits</div>
-                <div class="donut donut-orange" style="--pct: 90;">
-                  <div class="donut-inner">
-                    <div class="donut-frac"><span class="num">18</span><span class="den">/ 20</span></div>
-                    <div class="donut-sub">credits</div>
-                  </div>
-                </div>
-                <div class="donut-pct orange-text">90%</div>
-                <div class="donut-remain">2 credits remaining</div>
-              </div>
+                <div class="feature-tag">Feature 5</div>
+                <h3>Academic Performance Management</h3>
+                <ul class="feature-list">
+                  <li>GPA and cumulative score calculation functions</li>
+                  <li>Grade trend analysis across semesters</li>
+                  <li>Course and credit overview dashboard components</li>
+                  <li>PDF export of academic performance reports</li>
+                </ul>
+                <span class="feature-link">Open Performance Analytics <i class="ti ti-arrow-right"></i></span>
+              </a>
 
             </div>
           </div>
         </section>
-
-        <!-- Course & Credit Review List -->
-        <section class="dash-card" style="margin-top: 20px;">
-          <div class="dash-card-header">
-            <i class="ti ti-clipboard-list"></i>
-            <h2>Course &amp; Credit Review List</h2>
-          </div>
-          <div class="dash-tabs" id="dash-tabs">
-            <button class="dash-tab active" data-tab="completed">
-              <i class="ti ti-circle-check"></i> Completed
-            </button>
-            <button class="dash-tab" data-tab="in-progress">
-              <i class="ti ti-hourglass"></i> In Progress
-            </button>
-            <button class="dash-tab red" data-tab="missing">
-              <i class="ti ti-alert-triangle"></i> Missing / Remaining
-            </button>
-          </div>
-
-          <div class="review-grid">
-            <!-- Completed table -->
-            <div class="review-col">
-              <table class="review-table">
-                <thead>
-                  <tr>
-                    <th>Course Title</th>
-                    <th>Category</th>
-                    <th>Credits</th>
-                    <th>Semester</th>
-                    <th>Grade</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Calculus I</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2022 Fall (111-1)</td>
-                    <td class="grade">A</td>
-                  </tr>
-                  <tr>
-                    <td>Introduction to Programming</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2022 Spring (111-2)</td>
-                    <td class="grade">B+</td>
-                  </tr>
-                  <tr>
-                    <td>Introduction to Information Management</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2022 Fall (111-1)</td>
-                    <td class="grade">A-</td>
-                  </tr>
-                  <tr>
-                    <td>Linear Algebra</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2023 Spring (112-1)</td>
-                    <td class="grade">A</td>
-                  </tr>
-                  <tr>
-                    <td>Discrete Mathematics</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2023 Fall (112-2)</td>
-                    <td class="grade">B</td>
-                  </tr>
-                  <tr>
-                    <td>Probability and Statistics</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                    <td>2023 Fall (112-2)</td>
-                    <td class="grade">A</td>
-                  </tr>
-                </tbody>
-              </table>
-              <a class="review-link" href="course_history02.html">View all completed courses →</a>
-            </div>
-
-            <!-- Missing / Remaining table -->
-            <div class="review-col">
-              <table class="review-table">
-                <thead>
-                  <tr>
-                    <th>Course Title</th>
-                    <th>Category</th>
-                    <th>Credits Needed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="red-text">Data Structures</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td class="red-text">Operating Systems</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td class="red-text">Algorithms</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td class="red-text">Database Systems I</td>
-                    <td><span class="pill pill-blue">Required</span></td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td class="red-text">Information Security</td>
-                    <td><span class="pill pill-purple">Elective</span></td>
-                    <td>3</td>
-                  </tr>
-                  <tr>
-                    <td class="red-text">Information Ethics</td>
-                    <td><span class="pill pill-orange">General Ed.</span></td>
-                    <td>3</td>
-                  </tr>
-                </tbody>
-              </table>
-              <a class="review-link" href="graduation.html">View more missing courses →</a>
-            </div>
-          </div>
-        </section>
-
-        <!-- Footer -->
-        <div class="dash-footer">
-          <span><i class="ti ti-info-circle"></i> Last updated: Nov 20, 2024 09:30 AM</span>
-          <a href="#" class="refresh-link"><i class="ti ti-refresh"></i> Refresh Data</a>
-        </div>
 
       </div>
     </div>
