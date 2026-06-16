@@ -1,9 +1,9 @@
-﻿<!doctype html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>儀表板 — 校園智慧系統</title>
+    <title>Dashboard — StuPilot</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
@@ -17,98 +17,235 @@
     <aside class="sidebar"></aside>
     <div class="main">
       <header class="topbar">
-        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+        <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
           ☰
         </button>
-        <div class="topbar-title"></div>
-        <div class="api-status">
-          <div class="status-dot" id="status-dot"></div>
-          <span class="status-label" id="status-label">連線中...</span>
-        </div>
       </header>
-      <div class="content">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">已選課程</div>
-            <div class="stat-value">3<span class="stat-unit">門</span></div>
-            <div class="stat-sub">本學期 9 學分</div>
+      <div class="content dash-content">
+
+        <!-- Dashboard topbar -->
+        <div class="dash-topbar">
+          <div class="dash-greeting">
+            <h1>Hello, <span id="dash-username">Wang, Xiao-Ming</span>! <span class="wave">👋</span></h1>
+            <p>Welcome back! Here is your current academic progress overview.</p>
           </div>
-          <div class="stat-card green">
-            <div class="stat-label">已修學分</div>
-            <div class="stat-value">87<span class="stat-unit">學分</span></div>
-            <div class="stat-sub">畢業需 128 學分</div>
-          </div>
-          <div class="stat-card amber">
-            <div class="stat-label">未讀通知</div>
-            <div class="stat-value">2<span class="stat-unit">則</span></div>
-            <div class="stat-sub">有新通知待確認</div>
-          </div>
-          <div class="stat-card red">
-            <div class="stat-label">活動報名</div>
-            <div class="stat-value">1<span class="stat-unit">個</span></div>
-            <div class="stat-sub">即將到來的活動</div>
+          <div class="dash-actions">
+            <button class="icon-btn" aria-label="Notifications">
+              <i class="ti ti-bell"></i>
+              <span class="icon-badge">3</span>
+            </button>
+            <button class="icon-btn" aria-label="Calendar">
+              <i class="ti ti-calendar"></i>
+            </button>
+            <button class="semester-pill">
+              2024 Fall Semester (113-1)
+              <i class="ti ti-chevron-down"></i>
+            </button>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">本學期課程</div>
-              <a class="card-action" href="courses.html">查看全部</a>
+        <!-- Academic Progress Overview -->
+        <section class="dash-card">
+          <div class="dash-card-header">
+            <i class="ti ti-book"></i>
+            <h2>Academic Progress Overview</h2>
+          </div>
+          <div class="dash-card-body">
+            <div class="donut-grid">
+
+              <!-- Required Credits -->
+              <div class="donut-col">
+                <div class="donut-title"><i class="ti ti-book blue"></i> Required Credits</div>
+                <div class="donut donut-blue" style="--pct: 80;">
+                  <div class="donut-inner">
+                    <div class="donut-frac"><span class="num">32</span><span class="den">/ 40</span></div>
+                    <div class="donut-sub">credits</div>
+                  </div>
+                </div>
+                <div class="donut-pct blue-text">80%</div>
+                <div class="donut-remain">8 credits remaining</div>
+              </div>
+
+              <!-- Overall Graduation Progress (larger, centered) -->
+              <div class="donut-col donut-col-big">
+                <div class="donut-title"><i class="ti ti-book green"></i> Overall Graduation Progress</div>
+                <div class="donut donut-green donut-large" style="--pct: 85;">
+                  <div class="donut-inner">
+                    <div class="donut-big-pct">85%</div>
+                    <div class="donut-sub">Completed 128 / 150 credits</div>
+                  </div>
+                </div>
+                <div class="grad-pill">22 credits left to graduate!</div>
+              </div>
+
+              <!-- Elective Credits -->
+              <div class="donut-col">
+                <div class="donut-title"><i class="ti ti-book purple"></i> Elective Credits</div>
+                <div class="donut donut-purple" style="--pct: 70;">
+                  <div class="donut-inner">
+                    <div class="donut-frac"><span class="num">28</span><span class="den">/ 40</span></div>
+                    <div class="donut-sub">credits</div>
+                  </div>
+                </div>
+                <div class="donut-pct purple-text">70%</div>
+                <div class="donut-remain">12 credits remaining</div>
+              </div>
+
+              <!-- General Education Credits -->
+              <div class="donut-col">
+                <div class="donut-title"><i class="ti ti-book orange"></i> General Education Credits</div>
+                <div class="donut donut-orange" style="--pct: 90;">
+                  <div class="donut-inner">
+                    <div class="donut-frac"><span class="num">18</span><span class="den">/ 20</span></div>
+                    <div class="donut-sub">credits</div>
+                  </div>
+                </div>
+                <div class="donut-pct orange-text">90%</div>
+                <div class="donut-remain">2 credits remaining</div>
+              </div>
+
             </div>
-            <div class="card-body">
-              <table class="table">
+          </div>
+        </section>
+
+        <!-- Course & Credit Review List -->
+        <section class="dash-card" style="margin-top: 20px;">
+          <div class="dash-card-header">
+            <i class="ti ti-clipboard-list"></i>
+            <h2>Course &amp; Credit Review List</h2>
+          </div>
+          <div class="dash-tabs" id="dash-tabs">
+            <button class="dash-tab active" data-tab="completed">
+              <i class="ti ti-circle-check"></i> Completed
+            </button>
+            <button class="dash-tab" data-tab="in-progress">
+              <i class="ti ti-hourglass"></i> In Progress
+            </button>
+            <button class="dash-tab red" data-tab="missing">
+              <i class="ti ti-alert-triangle"></i> Missing / Remaining
+            </button>
+          </div>
+
+          <div class="review-grid">
+            <!-- Completed table -->
+            <div class="review-col">
+              <table class="review-table">
                 <thead>
                   <tr>
-                    <th>課程名稱</th>
-                    <th>學分</th>
-                    <th>教授</th>
-                    <th>狀態</th>
+                    <th>Course Title</th>
+                    <th>Category</th>
+                    <th>Credits</th>
+                    <th>Semester</th>
+                    <th>Grade</th>
                   </tr>
                 </thead>
-                <tbody id="dash-courses"></tbody>
+                <tbody>
+                  <tr>
+                    <td>Calculus I</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2022 Fall (111-1)</td>
+                    <td class="grade">A</td>
+                  </tr>
+                  <tr>
+                    <td>Introduction to Programming</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2022 Spring (111-2)</td>
+                    <td class="grade">B+</td>
+                  </tr>
+                  <tr>
+                    <td>Introduction to Information Management</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2022 Fall (111-1)</td>
+                    <td class="grade">A-</td>
+                  </tr>
+                  <tr>
+                    <td>Linear Algebra</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2023 Spring (112-1)</td>
+                    <td class="grade">A</td>
+                  </tr>
+                  <tr>
+                    <td>Discrete Mathematics</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2023 Fall (112-2)</td>
+                    <td class="grade">B</td>
+                  </tr>
+                  <tr>
+                    <td>Probability and Statistics</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                    <td>2023 Fall (112-2)</td>
+                    <td class="grade">A</td>
+                  </tr>
+                </tbody>
               </table>
+              <a class="review-link" href="course_history02.html">View all completed courses →</a>
             </div>
-          </div>
 
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">最新通知</div>
-              <a class="card-action" href="notifications.html">查看全部</a>
-            </div>
-            <div class="card-body" id="dash-notifs">
-              <div class="notif-item">
-                <div class="notif-dot"></div>
-                <div>
-                  <div class="notif-title">選課成功確認</div>
-                  <div class="notif-body">資料結構 CS201 已完成選課</div>
-                </div>
-                <div class="notif-time">10分鐘前</div>
-              </div>
-              <div class="notif-item">
-                <div class="notif-dot"></div>
-                <div>
-                  <div class="notif-title">活動報名開放</div>
-                  <div class="notif-body">2025 校園徵才博覽會開放報名</div>
-                </div>
-                <div class="notif-time">1小時前</div>
-              </div>
-              <div class="notif-item">
-                <div class="notif-dot read"></div>
-                <div>
-                  <div class="notif-title">工讀職缺通知</div>
-                  <div class="notif-body">圖書館助理職缺已開放申請</div>
-                </div>
-                <div class="notif-time">昨天</div>
-              </div>
+            <!-- Missing / Remaining table -->
+            <div class="review-col">
+              <table class="review-table">
+                <thead>
+                  <tr>
+                    <th>Course Title</th>
+                    <th>Category</th>
+                    <th>Credits Needed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="red-text">Data Structures</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td class="red-text">Operating Systems</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td class="red-text">Algorithms</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td class="red-text">Database Systems I</td>
+                    <td><span class="pill pill-blue">Required</span></td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td class="red-text">Information Security</td>
+                    <td><span class="pill pill-purple">Elective</span></td>
+                    <td>3</td>
+                  </tr>
+                  <tr>
+                    <td class="red-text">Information Ethics</td>
+                    <td><span class="pill pill-orange">General Ed.</span></td>
+                    <td>3</td>
+                  </tr>
+                </tbody>
+              </table>
+              <a class="review-link" href="graduation.html">View more missing courses →</a>
             </div>
           </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="dash-footer">
+          <span><i class="ti ti-info-circle"></i> Last updated: Nov 20, 2024 09:30 AM</span>
+          <a href="#" class="refresh-link"><i class="ti ti-refresh"></i> Refresh Data</a>
         </div>
+
       </div>
     </div>
     </div>
     <script src="js/api.js"></script>
-<script src="js/auth.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/dashboard.js"></script>
   </body>
