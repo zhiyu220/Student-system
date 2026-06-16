@@ -1,9 +1,9 @@
-﻿<!doctype html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>儀表板 — 校園智慧系統</title>
+    <title>Dashboard — StuPilot</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap"
@@ -17,98 +17,92 @@
     <aside class="sidebar"></aside>
     <div class="main">
       <header class="topbar">
-        <button class="topbar-toggle" id="sidebar-toggle" aria-label="收合選單">
+        <button class="topbar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
           ☰
         </button>
-        <div class="topbar-title"></div>
-        <div class="api-status">
-          <div class="status-dot" id="status-dot"></div>
-          <span class="status-label" id="status-label">連線中...</span>
-        </div>
       </header>
-      <div class="content">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">已選課程</div>
-            <div class="stat-value">3<span class="stat-unit">門</span></div>
-            <div class="stat-sub">本學期 9 學分</div>
+      <div class="content dash-content">
+
+        <!-- Dashboard topbar -->
+        <div class="dash-topbar">
+          <div class="dash-greeting">
+            <h1>Hello, <span id="dash-username">Student</span>! <span class="wave">👋</span></h1>
+            <p>Welcome to StuPilot. Here is an overview of the features available in this platform.</p>
           </div>
-          <div class="stat-card green">
-            <div class="stat-label">已修學分</div>
-            <div class="stat-value">87<span class="stat-unit">學分</span></div>
-            <div class="stat-sub">畢業需 128 學分</div>
-          </div>
-          <div class="stat-card amber">
-            <div class="stat-label">未讀通知</div>
-            <div class="stat-value">2<span class="stat-unit">則</span></div>
-            <div class="stat-sub">有新通知待確認</div>
-          </div>
-          <div class="stat-card red">
-            <div class="stat-label">活動報名</div>
-            <div class="stat-value">1<span class="stat-unit">個</span></div>
-            <div class="stat-sub">即將到來的活動</div>
+          <div class="dash-actions">
+            <button class="semester-pill">
+              2024 Fall Semester (113-1)
+              <i class="ti ti-chevron-down"></i>
+            </button>
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">本學期課程</div>
-              <a class="card-action" href="courses.html">查看全部</a>
-            </div>
-            <div class="card-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>課程名稱</th>
-                    <th>學分</th>
-                    <th>教授</th>
-                    <th>狀態</th>
-                  </tr>
-                </thead>
-                <tbody id="dash-courses"></tbody>
-              </table>
-            </div>
+        <!-- Features Overview -->
+        <section class="dash-card">
+          <div class="dash-card-header">
+            <i class="ti ti-layout-dashboard"></i>
+            <h2>Features Overview</h2>
           </div>
+          <div class="dash-card-body">
+            <div class="features-grid">
 
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">最新通知</div>
-              <a class="card-action" href="notifications.html">查看全部</a>
-            </div>
-            <div class="card-body" id="dash-notifs">
-              <div class="notif-item">
-                <div class="notif-dot"></div>
-                <div>
-                  <div class="notif-title">選課成功確認</div>
-                  <div class="notif-body">資料結構 CS201 已完成選課</div>
+              <!-- Feature 3 -->
+              <a class="feature-card" href="graduation.html">
+                <div class="feature-icon feature-icon-green">
+                  <i class="ti ti-certificate"></i>
                 </div>
-                <div class="notif-time">10分鐘前</div>
-              </div>
-              <div class="notif-item">
-                <div class="notif-dot"></div>
-                <div>
-                  <div class="notif-title">活動報名開放</div>
-                  <div class="notif-body">2025 校園徵才博覽會開放報名</div>
+                <div class="feature-tag">Feature 3</div>
+                <h3>Graduation Requirements Audit</h3>
+                <ul class="feature-list">
+                  <li>Credit calculation logic for graduation requirement analysis</li>
+                  <li>Automatic validation for compulsory and elective credits</li>
+                  <li>Progress tracking components for graduation status monitoring</li>
+                  <li>Graduation audit report export (PDF) functionality</li>
+                </ul>
+                <span class="feature-link">Open Graduation Audit <i class="ti ti-arrow-right"></i></span>
+              </a>
+
+              <!-- Feature 4 -->
+              <a class="feature-card" href="course_history02.html">
+                <div class="feature-icon feature-icon-blue">
+                  <i class="ti ti-list-details"></i>
                 </div>
-                <div class="notif-time">1小時前</div>
-              </div>
-              <div class="notif-item">
-                <div class="notif-dot read"></div>
-                <div>
-                  <div class="notif-title">工讀職缺通知</div>
-                  <div class="notif-body">圖書館助理職缺已開放申請</div>
+                <div class="feature-tag">Feature 4</div>
+                <h3>Academic Course History Tracking</h3>
+                <ul class="feature-list">
+                  <li>Complete record of all courses taken across semesters</li>
+                  <li>Category, semester, and grade filters for quick lookup</li>
+                  <li>Pass / fail / in-progress status indicators per course</li>
+                  <li>Aggregated credit and grade summary by category</li>
+                </ul>
+                <span class="feature-link">Open Course History <i class="ti ti-arrow-right"></i></span>
+              </a>
+
+              <!-- Feature 5 -->
+              <a class="feature-card" href="performance.html">
+                <div class="feature-icon feature-icon-purple">
+                  <i class="ti ti-chart-line"></i>
                 </div>
-                <div class="notif-time">昨天</div>
-              </div>
+                <div class="feature-tag">Feature 5</div>
+                <h3>Academic Performance Management</h3>
+                <ul class="feature-list">
+                  <li>GPA and cumulative score calculation functions</li>
+                  <li>Grade trend analysis across semesters</li>
+                  <li>Course and credit overview dashboard components</li>
+                  <li>PDF export of academic performance reports</li>
+                </ul>
+                <span class="feature-link">Open Performance Analytics <i class="ti ti-arrow-right"></i></span>
+              </a>
+
             </div>
           </div>
-        </div>
+        </section>
+
       </div>
     </div>
     </div>
     <script src="js/api.js"></script>
-<script src="js/auth.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/dashboard.js"></script>
   </body>

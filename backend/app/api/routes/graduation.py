@@ -13,11 +13,11 @@ TRACK_B = {"IM359", "IM445"}
 
 DIGITAL_APP_CODES = {"IM120", "IM226", "IM303", "IM240", "IM345"}
 
-# ── University Compulsory (校必修) 子項規則 ────────────────────────────────────
-# 每個子項都必須「各自」達標，不能用總學分互相灌水。
-#   required_credits → 該子項需修得的學分
-#   required_passes  → 該子項需「通過」的課堂數（學期數）。0 學分課（體育）靠這個判定。
-# 子項由 courses.sub_category 標記（見 migrations/2026_06_13_add_courses_sub_category.sql）。
+# ── University Compulsory sub-requirement rules ───────────────────────────────
+# Each sub-requirement must be satisfied independently; credits cannot be pooled.
+#   required_credits → credits required for this sub-requirement
+#   required_passes  → number of passing semesters required (used for 0-credit courses like PE)
+# Sub-categories are tagged via courses.sub_category.
 UNIVERSITY_COMPULSORY = {
     "chinese":          {"label": "Chinese Language",    "required_credits": 4, "required_passes": 2},
     "english":          {"label": "English Skills",      "required_credits": 8, "required_passes": 4},
@@ -27,14 +27,14 @@ UNIVERSITY_COMPULSORY = {
     "pe":               {"label": "Physical Education",  "required_credits": 0, "required_passes": 4},
     "classic_books":    {"label": "Classic Books",       "required_credits": 2, "required_passes": 1},
 }
-# 校必修總學分 = 各子項學分加總（目前 20；如貴系為 21，請於上方調整對應子項）。
+# Total university compulsory credits = sum of each sub-requirement (currently 20).
 UNIVERSITY_COMPULSORY_CREDITS = sum(r["required_credits"] for r in UNIVERSITY_COMPULSORY.values())
 
-# ── 通識 (General Education) 規則：總學分 + 跨領域數雙重門檻 ────────────────────
-# 5 大領域：人文(ge_humanities)/社會(ge_social)/自然(ge_science)/藝術(ge_arts)/
-# 跨領域(ge_interdisciplinary)，各 2 學分 × 1 學期，合計 10 學分。
+# ── General Education rules: dual threshold of total credits + domain spread ──
+# 5 domains: humanities / social / science / arts / interdisciplinary,
+# 2 credits × 1 semester each, 10 credits total required.
 GE_REQUIRED_CREDITS   = 10
-GE_MIN_CATEGORIES     = 5   # 須橫跨 5 大領域（以不同 sub_category 計）
+GE_MIN_CATEGORIES     = 5   # must span all 5 domains (distinct sub_category values)
 
 
 @router.get("/{student_id}")
@@ -204,9 +204,9 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
             ug_blocking: list  = []
             sub_requirements: list = []
 
-            # ── 校必修：逐子項判定 ───────────────────────────────────────────
-            # required_credits == 0 的子項（例：體育）視為「非學分必修」，
-            # 不論課程資料的 credits 填多少，一律只看通過次數、不計入學分。
+            # ── University compulsory: evaluate each sub-requirement individually ──
+            # Sub-requirements with required_credits == 0 (e.g. PE) are pass-count-only;
+            # their credits are never added to the credit total regardless of course data.
             uni_earned = 0
             for key, rule in UNIVERSITY_COMPULSORY.items():
                 attempts       = passed_by_sub.get(key, [])
@@ -215,7 +215,7 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
                 earned_credits = sum(a["credits"] or 0 for a in attempts) if credit_bearing else 0
                 ok = (pass_count >= rule["required_passes"]
                       and earned_credits >= rule["required_credits"])
-                uni_earned += earned_credits  # 非學分課貢獻 0，不會灌水總學分
+                uni_earned += earned_credits  # zero-credit courses contribute 0, no inflation
                 row = {
                     "key":             key,
                     "label":           rule["label"],
@@ -230,7 +230,7 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
                 if not ok:
                     ug_blocking.append(f"University Compulsory — {rule['label']} not yet completed")
 
-            # ── 通識：總學分 + 跨領域數雙重門檻 ──────────────────────────────
+            # ── General Education: dual threshold of total credits + domain spread ──
             ge_attempts   = [
                 e for e in enroll_by_code.values()
                 if e["pass_flag"] and e["is_counted"] and e["type"] == "general_education"
@@ -261,7 +261,7 @@ async def get_graduation_status(student_id: str, db: AsyncSession = Depends(get_
                 "earned_credits":   earned,
                 "missing_courses":  [],
                 "sub_requirements": sub_requirements,
-                # 關鍵：不再只看總學分，而是「每個子項都達標」才算通過。
+                # Passed only when every sub-requirement is individually satisfied, not just the credit total.
                 "passed":           not ug_blocking,
                 "_blocking":        ug_blocking,
             })
