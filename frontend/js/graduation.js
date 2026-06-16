@@ -385,10 +385,14 @@ function renderMissingSide() {
 
   const link = document.getElementById('missing-side-toggle');
   if (link) {
+    link.style.display = '';
     if (rows.length <= MISSING_PREVIEW) {
-      link.style.display = 'none';
+      link.textContent = `All ${rows.length} missing course(s) shown`;
+      link.style.pointerEvents = 'none';
+      link.style.color = '#94a3b8';
     } else {
-      link.style.display = '';
+      link.style.pointerEvents = '';
+      link.style.color = '';
       link.textContent = _missingExpanded
         ? 'Show fewer ↑'
         : `View more missing courses (${rows.length - MISSING_PREVIEW}) →`;
@@ -419,10 +423,14 @@ function renderCompletedSide() {
 
   const link = document.getElementById('completed-side-toggle');
   if (link) {
+    link.style.display = '';
     if (_completedRows.length <= COMPLETED_PREVIEW) {
-      link.style.display = 'none';
+      link.textContent = `All ${_completedRows.length} completed course(s) shown`;
+      link.style.pointerEvents = 'none';
+      link.style.color = '#94a3b8';
     } else {
-      link.style.display = '';
+      link.style.pointerEvents = '';
+      link.style.color = '';
       link.textContent = _completedExpanded
         ? 'Show fewer ↑'
         : `View all completed courses (${_completedRows.length}) →`;
